@@ -45,55 +45,71 @@ def pol2kar_y(norm, phi):
     return(y)
 
 def getInputs_kart(DataF):
-    dset_PF1 = writeInputs.create_dataset("PF_1",  dtype='f',
-        data=pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']))
-    dset_PF2 = writeInputs.create_dataset("PF_2",  dtype='f',
-        data=pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']))
-    dset_PF3 = writeInputs.create_dataset("PF_3",  dtype='f',
-        data=DataF['recoilslimmedMETs_sumEt'])
-    dset_Track1 = writeInputs.create_dataset("Track_1",  dtype='f',
-        data=pol2kar_x(DataF['recoilpatpfTrackMET_Pt'], DataF['recoilpatpfTrackMET_Phi']))
-    dset_Track2 = writeInputs.create_dataset("Track_2",  dtype='f',
-        data=pol2kar_y(DataF['recoilpatpfTrackMET_Pt'], DataF['recoilpatpfTrackMET_Phi']))
-    dset_Track3 = writeInputs.create_dataset("Track_3",  dtype='f',
-        data=DataF['recoilpatpfTrackMET_sumEt'])
-    dset_NoPU1 = writeInputs.create_dataset("NoPU_1",  dtype='f',
-        data=pol2kar_x(DataF['recoilpatpfNoPUMET_Pt'], DataF['recoilpatpfNoPUMET_Phi']))
-    dset_NoPU2 = writeInputs.create_dataset("NoPU_2",  dtype='f',
-        data=pol2kar_y(DataF['recoilpatpfNoPUMET_Pt'], DataF['recoilpatpfNoPUMET_Phi']))
-    dset_NoPU3 = writeInputs.create_dataset("NoPU_3",  dtype='f',
-        data=DataF['recoilpatpfNoPUMET_sumEt'])
-    dset_PUCorrected1 = writeInputs.create_dataset("PUCorrected_1",  dtype='f',
-        data=pol2kar_x(DataF['recoilpatpfPUCorrectedMET_Pt'], DataF['recoilpatpfPUCorrectedMET_Phi']))
-    dset_PUCorrected2 = writeInputs.create_dataset("PUCorrected_2",  dtype='f',
-        data=pol2kar_y(DataF['recoilpatpfPUCorrectedMET_Pt'], DataF['recoilpatpfPUCorrectedMET_Phi']))
-    dset_PUCorrected3 = writeInputs.create_dataset("PUCorrected_3",  dtype='f',
-        data=DataF['recoilpatpfPUCorrectedMET_sumEt'])
-    dset_PU1 = writeInputs.create_dataset("PU_1",  dtype='f',
-        data=pol2kar_x(DataF['recoilpatpfPUMET_Pt'], DataF['recoilpatpfPUMET_Phi']))
-    dset_PU2 = writeInputs.create_dataset("PU_2",  dtype='f',
-        data=pol2kar_y(DataF['recoilpatpfPUMET_Pt'], DataF['recoilpatpfPUMET_Phi']))
-    dset_PU3 = writeInputs.create_dataset("PU_3",  dtype='f',
-        data=DataF['recoilpatpfPUMET_sumEt'])
-    dset_Puppi1 = writeInputs.create_dataset("Puppi_1",  dtype='f',
-        data=pol2kar_x(DataF['recoilslimmedMETsPuppi_Pt'], DataF['recoilslimmedMETsPuppi_Phi']))
-    dset_Puppi2 = writeInputs.create_dataset("Puppi_2",  dtype='f',
-        data=pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'], DataF['recoilslimmedMETsPuppi_Phi']))
-    dset_Puppi3 = writeInputs.create_dataset("Puppi_3",  dtype='f',
-        data=DataF['recoilslimmedMETsPuppi_sumEt'])
+    dset_PF = writeInputs.create_dataset("PF",  dtype='f',
+        data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']), 
+        pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']), 
+        DataF['recoilslimmedMETs_sumEt'] ])
+    dset_Track = writeInputs.create_dataset("Track",  dtype='f',
+        data=[ pol2kar_x(DataF['recoilpatpfTrackMET_Pt'], DataF['recoilpatpfTrackMET_Phi']),
+        pol2kar_y(DataF['recoilpatpfTrackMET_Pt'], DataF['recoilpatpfTrackMET_Phi']),
+        DataF['recoilpatpfTrackMET_sumEt']])
+    dset_NoPU = writeInputs.create_dataset("NoPU",  dtype='f',
+        data=[pol2kar_x(DataF['recoilpatpfNoPUMET_Pt'], DataF['recoilpatpfNoPUMET_Phi']),
+        pol2kar_y(DataF['recoilpatpfNoPUMET_Pt'], DataF['recoilpatpfNoPUMET_Phi']),
+        DataF['recoilpatpfNoPUMET_sumEt']])
+    dset_PUCorrected = writeInputs.create_dataset("PUCorrected",  dtype='f',
+        data=[pol2kar_x(DataF['recoilpatpfPUCorrectedMET_Pt'], DataF['recoilpatpfPUCorrectedMET_Phi']),
+        pol2kar_y(DataF['recoilpatpfPUCorrectedMET_Pt'], DataF['recoilpatpfPUCorrectedMET_Phi']),
+        DataF['recoilpatpfPUCorrectedMET_sumEt']])
+    dset_PU = writeInputs.create_dataset("PU",  dtype='f',
+        data=[pol2kar_x(DataF['recoilpatpfPUMET_Pt'], DataF['recoilpatpfPUMET_Phi']),
+        pol2kar_y(DataF['recoilpatpfPUMET_Pt'], DataF['recoilpatpfPUMET_Phi']),
+        DataF['recoilpatpfPUMET_sumEt']])
+    dset_Puppi = writeInputs.create_dataset("Puppi",  dtype='f',
+        data=[pol2kar_x(DataF['recoilslimmedMETsPuppi_Pt'], DataF['recoilslimmedMETsPuppi_Phi']),
+        pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'], DataF['recoilslimmedMETsPuppi_Phi']),
+        DataF['recoilslimmedMETsPuppi_sumEt']])
 
 
-    dset_Target1 = writeInputs.create_dataset("Target_1",  dtype='f',
-        data=pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']))
-    dset_Target2 =   writeInputs.create_dataset("Target_2",  dtype='f',
-        data=pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi']))
+    dset_Target = writeInputs.create_dataset("Target",  dtype='f',
+        data=[pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),
+        pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi'])])
     writeInputs.close()
 
 def getInputs_absCorr(DataF):
     return()
 
 def getInputs_proj(DataF):
-    return()
+    dset_PF = writeInputs.create_dataset("PF",  dtype='f',
+        data=[DataF['recoilslimmedMETs_LongZ'], 
+        DataF['recoilslimmedMETs_PerpZ'], 
+        DataF['recoilslimmedMETs_sumEt'] ])
+    dset_Track = writeInputs.create_dataset("Track",  dtype='f',
+        data=[ DataF['recoilpatpfTrackMET_LongZ'], 
+        DataF['recoilpatpfTrackMET_PerpZ'],
+        DataF['recoilpatpfTrackMET_sumEt']])
+    dset_NoPU = writeInputs.create_dataset("NoPU",  dtype='f',
+        data=[DataF['recoilpatpfNoPUMET_LongZ'], 
+        DataF['recoilpatpfNoPUMET_PerpZ'],
+        DataF['recoilpatpfNoPUMET_sumEt']])
+    dset_PUCorrected = writeInputs.create_dataset("PUCorrected",  dtype='f',
+        data=[DataF['recoilpatpfPUCorrectedMET_LongZ'], 
+        DataF['recoilpatpfPUCorrectedMET_PerpZ'],
+        DataF['recoilpatpfPUCorrectedMET_sumEt']])
+    dset_PU = writeInputs.create_dataset("PU",  dtype='f',
+        data=[DataF['recoilpatpfPUMET_LongZ'], 
+        DataF['recoilpatpfPUMET_PerpZ'],
+        DataF['recoilpatpfPUMET_sumEt']])
+    dset_Puppi = writeInputs.create_dataset("Puppi",  dtype='f',
+        data=[DataF['recoilslimmedMETsPuppi_LongZ'], 
+        DataF['recoilslimmedMETsPuppi_PerpZ'],
+        DataF['recoilslimmedMETsPuppi_sumEt']])
+
+
+    dset_Target = writeInputs.create_dataset("Target",  dtype='f',
+        data=[-pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),
+        -pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi'])])
+    writeInputs.close()
 
 
 def getInputs(fName):
