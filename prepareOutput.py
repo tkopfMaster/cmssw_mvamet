@@ -8,6 +8,9 @@ import sys
 import numpy as np
 from os import environ
 import root_numpy
+from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
+from rootpy.io import root_open
+import ROOT
 
 NN_Mode='kart'
 
@@ -53,26 +56,50 @@ def loadData(fName):
 def prepareOutput(outputD, inputD):
     NN_Output = h5py.File("%sNN_Output.h5"%outputD, "r+")
     mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
-    a_x, a_y = NN_Output['MET_Predictions'][:,0], NN_Output['MET_Predictions'][:,1]
+    a_x, a_y = -NN_Output['MET_Predictions'][:,0], -NN_Output['MET_Predictions'][:,1]
     a_ =  np.sqrt(np.add(np.multiply(a_x,a_x),np.multiply(a_y,a_y)))
     #MET_x, MET_y
     a_r,a_phi = kar2pol(a_x,a_y)
+    print("a_r,a_phi", a_r,a_phi)
     mZ_r,mZ_phi = kar2pol(mZ_x, mZ_y)
+    print("mZ_r,mZ_phi", mZ_r,mZ_phi)
     NN_LongZ, NN_PerpZ= pol2kar(a_r,a_phi-mZ_phi)
+    #NN_LongZ, NN_PerpZ = NN_LongZ_l.tolist(), NN_PerpZ_l.tolist()
+    #print("NN_LongZ, NN_PerpZ", NN_LongZ, NN_PerpZ)
     #NN_LongZ = div0(np.multiply(a_x, mZ_x)+np.multiply(a_y, mZ_y) , list(map(np.sqrt,np.add(np.multiply(mZ_x,mZ_x),np.multiply(mZ_y,mZ_y)))))
     #NN_PerpZ = np.sqrt(np.subtract(np.multiply(a_,a_), np.multiply(NN_LongZ,NN_LongZ)))
-    dset = NN_MVA.create_dataset("NN_LongZ", dtype='f', data=NN_LongZ)
-    dset = NN_MVA.create_dataset("NN_PerpZ", dtype='f', data=NN_PerpZ)
+    dset = NN_MVA.create_dataset("NN_LongZ", dtype='d', data=NN_LongZ)
+    dset = NN_MVA.create_dataset("NN_PerpZ", dtype='d', data=NN_PerpZ)
     NN_MVA.close()
 
     #branch_Long = np.array(NN_LongZ , dtype=[('NN_LongZ', 'f8')])
-    branch_Long_Perp = np.array([NN_LongZ,NN_PerpZ] , dtype=[('NN_LongZ', 'f8'),(('NN_PerpZ', 'f8'))])
-    root_numpy.array2root(branch_Long_Perp, inputD, tree='MAPAnalyzer/t' )
-    #branch_Perp = np.array(NN_PerpZ , dtype=[('NN_PerpZ', 'f8')])
-    #root_numpy.array2root(branch_Perp, inputD)
+    branch_Long_Perp = np.array( zip(NN_LongZ,NN_PerpZ), dtype=[('NN_LongZ', 'f8'), ('NN_PerpZ', 'f8')])
+    branch_Long = np.array(NN_LongZ , dtype=[('NN_LongZ', 'f8')])
+    print("NN_LongZ, NN_PerpZ, numpy arrays", NN_LongZ[0:10], NN_PerpZ[0:10])
+    print("branch_Long_Perp, numpy ndarrays", branch_Long_Perp[0:10])
+    root_numpy.array2root(branch_Long, inputD, treename='t' , mode='update')
+    #root_numpy.array2root(branch_Long_Perp, inputD, treename='t' , mode='update')
+    branch_Perp = np.array(NN_PerpZ , dtype=[('NN_PerpZ', 'f8')])
+    root_numpy.array2root(branch_Perp, inputD, treename='t' , mode='update')
+    print("length branch_Long", len(branch_Long))
+    print("length branch_Perp", len(branch_Perp))
 
+    '''
+    rfile = ROOT.TFile.Open(inputD)
+    tree = rfile.Get('t')
+    print([b.GetName() for b in tree.GetListOfBranches()])  # prints ['n_int', 'f_float', 'd_double']
 
+    # remove the branch named 'd_double'
+    #tree.SetBranchStatus('NN_LongZ', 0)
+    #tree.SetBranchStatus('NN_PerpZ', 0)
+    root_numpy.array2tree(branch_Long_Perp, tree=tree)
 
+    # copy the tree into a new file
+    rfile_out = ROOT.TFile.Open(outputDir+'Summer17_NN_Output.root', 'recreate')
+    newtree = tree.CloneTree()
+    newtree.Write()
+    print([b.GetName() for b in newtree.GetListOfBranches()])
+    '''
 
 
 

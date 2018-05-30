@@ -3,7 +3,7 @@ source /storage/b/tkopf/jdl_maerz/setup_maerz.sh
 echo "Trainingsname eingeben"
 #read Trainingsname
 inputFile=/storage/b/tkopf/mvamet/skim/out.root
-
+GBRTFile=/storage/b/tkopf/mvamet/Gridoutput/data1.root
 
 src_di=$PWD
 files_di=/storage/b/tkopf/mvamet/files/
@@ -25,8 +25,8 @@ if [ ! -d "$files_di/$trainingname" ]; then
 fi
 #spaeter mal: config mit Art des Trainings festlegen
 #python $src_di/prepareInput.py $inputFile $files_di
-#python $src_di/getNNModel.py $files_di 
+#python $src_di/getNNModel.py $files_di
 #python $src_di/applyNN.py $inputFile $files_di
-python $src_di/prepareOutput.py $inputFile $files_di
+#python $src_di/prepareOutput.py $GBRTFile $files_di
 #python $src_di/getPlotsInput.py $inputFile $plots_di
-python $src_di/getPlotsOutput.py $inputFile $files_di $plots_di
+python $src_di/getPlotsOutput.py $GBRTFile $files_di $plots_di
