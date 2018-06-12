@@ -255,6 +255,97 @@ def getInputs_nr(DataF):
         -div0(pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi']),DataF['Boson_Pt']),
         DataF['Boson_Pt']
         ])
+
+    LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+    nbinsHist = 150
+    plt.hist(dset_PF[0,:], bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[0,:]), histtype='step', ec=colors[0])
+    plt.hist(dset_Track[0,:], bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[0,:]), histtype='step', ec=colors[0])
+    plt.hist(dset_NoPU[0,:], bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[0,:]), histtype='step', ec=colors[2])
+    plt.hist(dset_PUCorrected[0,:], bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[0,:]), histtype='step', ec=colors[3])
+    plt.hist(dset_PU[0,:], bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[0,:]), histtype='step', ec=colors[4])
+    plt.hist(dset_Puppi[0,:], bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[0,:]), histtype='step', ec=colors[5])
+
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$p_{T,x}$ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title(' Histogram $p_{T,x}$')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%sInput1_Hist.png"%(outputD))
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plt.hist(dset_PF[1,:], bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[1,:]), histtype='step', ec=colors[0])
+    plt.hist(dset_Track[1,:], bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[1,:]), histtype='step', ec=colors[1])
+    plt.hist(dset_NoPU[1,:], bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[1,:]), histtype='step', ec=colors[2])
+    plt.hist(dset_PUCorrected[1,:], bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[1,:]), histtype='step', ec=colors[3])
+    plt.hist(dset_PU[1,:], bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[1,:]), histtype='step', ec=colors[4])
+    plt.hist(dset_Puppi[1,:], bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[1,:]), histtype='step', ec=colors[5])
+
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$p_{T,y}$ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title(' Histogram $p_{T,y}$')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%sInput2_Hist.png"%(outputD))
+
+
+
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plt.hist(dset_PF[2,:], bins=nbinsHist, range=[0, 1500], label='PF', histtype='step', ec=colors[0])
+    plt.hist(dset_Track[2,:], bins=nbinsHist, range=[0, 1500], label='Track', histtype='step', ec=colors[1])
+    plt.hist(dset_NoPU[2,:], bins=nbinsHist, range=[0, 1500], label='NoPU', histtype='step', ec=colors[2])
+    plt.hist(dset_PUCorrected[2,:], bins=nbinsHist, range=[0, 1500], label='PUCorrected', histtype='step', ec=colors[3])
+    plt.hist(dset_PU[2,:], bins=nbinsHist, range=[0, 1500], label='PU', histtype='step', ec=colors[4])
+    plt.hist(dset_Puppi[2,:], bins=nbinsHist, range=[0, 1500], label='Puppi', histtype='step', ec=colors[5])
+
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$\\Sigma E_{T}$ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title(' Histogram $\\Sigma E_{T}$')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%sInput3_Hist.png"%(outputD))
+
     writeInputs.close()
 
 def getInputs_xyr(DataF):

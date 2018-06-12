@@ -4,7 +4,9 @@ import h5py
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
+import root_numpy as rnp
 import sys
+import pandas as pd
 import numpy as np
 from os import environ
 import root_numpy
@@ -54,7 +56,7 @@ def prepareOutput(outputD, inputD, NN_mode):
         mZ_x, mZ_y, mZ_r = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1], NN_Output['MET_GroundTruth'][:,2]
         a_x, a_y, a_r = -NN_Output['MET_Predictions'][:,0], -NN_Output['MET_Predictions'][:,1], NN_Output['MET_Predictions'][:,2]
     elif NN_mode == 'xyd':
-        PF_Z_pT = loadData(inputD)
+        PF_Z_pT = loadData(inputD, NN_mode)
         mZ_x, mZ_y, mZ_r = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1], PF_Z_pT['Boson_Pt']
         a_x, a_y, a_r = -NN_Output['MET_Predictions'][:,0], -NN_Output['MET_Predictions'][:,1], NN_Output['MET_Predictions'][:,2]+PF_Z_pT['recoilslimmedMETs_Pt']
     else:

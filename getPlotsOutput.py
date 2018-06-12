@@ -189,7 +189,7 @@ def Histogram_Response_Bin(branchString, labelName, bin):
     #std = np.sqrt(sy2/n - mean*mean)
     #plt.errorbar((_[:-1]+(_[1:]-_[:-1])/5*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
     #plt.plot((_[1:] + _[:-1])/2, std, marker='.', label=labelName, linestyle="None", color=MVAcolors[errbars_shift])
-    plt.hist((-(DFName[branchString])-DFName.Boson_Pt.values), bins=nbinsHistBin, range=(_[bin], _[bin+1]], label=labelName, histtype='step', ec=colors2[bin])
+    plt.hist((-(DFName[branchString])-DFName.Boson_Pt.values), bins=nbinsHistBin, range=(_[bin], _[bin+1]), label=labelName, histtype='step', ec=colors2[bin])
 
 
 def Histogram_Response_PV(branchString, labelName, errbars_shift):

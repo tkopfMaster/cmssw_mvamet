@@ -6,7 +6,7 @@ echo "trainingname eingeben"
 #trainingname=nrTargets
 optimizer="adam"
 loss="mean_squared_error"
-NN_mode="xyd"
+NN_mode="nr"
 trainingname="woutPP_nPV_${NN_mode}_${optimizer}_${loss}"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
@@ -45,9 +45,9 @@ if [ ! -d "trainings/$trainingname" ]; then
 	echo "files_di"
 fi
 #spaeter mal: config mit Art des Trainings festlegen
-#python $src_di/prepareInput.py $inputFile $files_di $NN_mode $plots_di
-#python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
+python $src_di/prepareInput.py $inputFile $files_di $NN_mode $plots_di
+python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
 python $src_di/applyNN.py $inputFile $files_di $optimizer $loss $NN_mode
-#python $src_di/prepareOutput.py $GBRTFile2 $files_di $NN_mode
+python $src_di/prepareOutput.py $GBRTFile2 $files_di $NN_mode
 #python $src_di/getPlotsInput.py $inputFile $plots_di
-#python $src_di/getPlotsOutput.py $GBRTFile2 $files_di $plots_di
+python $src_di/getPlotsOutput.py $GBRTFile2 $files_di $plots_di
