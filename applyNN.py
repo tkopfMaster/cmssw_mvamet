@@ -40,6 +40,7 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     Targets=loadTargets(outputD)
     # Set up preprocessing
     from keras.utils import np_utils
+    '''
     print('Zeile 40')
     from sklearn.preprocessing import StandardScaler
     preprocessing_input = StandardScaler()
@@ -52,6 +53,8 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
                 preprocessing_input.transform(
                 Inputs
     )))
+    '''
+    predictions = model.predict(Inputs)
     print("predictions in apply NN ", predictions	)
     dset = NN_Output.create_dataset("MET_Predictions", dtype='f', data=predictions)
     dset2 = NN_Output.create_dataset("MET_GroundTruth", dtype='f', data=Targets)
