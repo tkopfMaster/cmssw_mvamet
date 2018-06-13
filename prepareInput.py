@@ -56,11 +56,9 @@ def loadData_proj(fName):
 #Data settings
 
 def pol2kar_x(norm, phi):
-    x = []
     x = np.sin(phi[:])*norm[:]
     return(x)
 def pol2kar_y(norm, phi):
-    y = []
     y = np.cos(phi[:])*norm[:]
     return(y)
 
@@ -163,7 +161,7 @@ def getInputs_xyd(DataF, outputD):
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
-
+    nbinsHist = 150
     plt.hist(dset_PF[1,:], bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[1,:]), histtype='step', ec=colors[0])
     plt.hist(dset_Track[1,:], bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[1,:]), histtype='step', ec=colors[1])
     plt.hist(dset_NoPU[1,:], bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[1,:]), histtype='step', ec=colors[2])
@@ -382,6 +380,96 @@ def getInputs_xyr(DataF):
         DataF['Boson_Pt']])
     writeInputs.close()
 
+def getInputs_rphi(DataF):
+    dset_PF = writeInputs.create_dataset("PF",  dtype='f',
+        data=[DataF['recoilslimmedMETs_Pt'],
+              DataF['recoilslimmedMETs_Phi'],
+              DataF['NVertex'] ])
+    dset_Track = writeInputs.create_dataset("Track",  dtype='f',
+        data=[ DataF['recoilpatpfTrackMET_Pt'],
+              DataF['recoilpatpfTrackMET_Phi'],
+              DataF['recoilpatpfTrackMET_sumEt']])
+    dset_NoPU = writeInputs.create_dataset("NoPU",  dtype='f',
+        data=[DataF['recoilpatpfNoPUMET_Pt'],
+              DataF['recoilpatpfNoPUMET_Phi'],
+              DataF['recoilpatpfNoPUMET_sumEt']])
+    dset_PUCorrected = writeInputs.create_dataset("PUCorrected",  dtype='f',
+        data=[DataF['recoilpatpfPUCorrectedMET_Pt'],
+              DataF['recoilpatpfPUCorrectedMET_Phi'],
+              DataF['recoilpatpfPUCorrectedMET_sumEt']])
+    dset_PU = writeInputs.create_dataset("PU",  dtype='f',
+        data=[DataF['recoilpatpfPUMET_Pt'],
+              DataF['recoilpatpfPUMET_Phi'],
+              DataF['recoilpatpfPUMET_sumEt']])
+    dset_Puppi = writeInputs.create_dataset("Puppi",  dtype='f',
+        data=[DataF['recoilslimmedMETsPuppi_Pt'],
+              DataF['recoilslimmedMETsPuppi_Phi'],
+              DataF['recoilslimmedMETsPuppi_sumEt']])
+
+
+    dset_Target = writeInputs.create_dataset("Target",  dtype='f',
+        data=[DataF['Boson_Pt'],
+              DataF['Boson_Phi']])
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+    nbinsHist = 150
+    plt.hist(div0(dset_PF[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[1,:]-dset_Target[1,:]), histtype='step', ec=colors[0])
+    plt.hist(div0(dset_Track[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[1,:]-dset_Target[1,:]), histtype='step', ec=colors[1])
+    plt.hist(div0(dset_NoPU[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[1,:]-dset_Target[1,:]), histtype='step', ec=colors[2])
+    plt.hist(div0(dset_PUCorrected[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[1,:]-dset_Target[1,:]), histtype='step', ec=colors[3])
+    plt.hist(div0(dset_PU[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[1,:]-dset_Target[1,:]), histtype='step', ec=colors[4])
+    plt.hist(div0(dset_Puppi[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[1,:]-dset_Target[1,:]), histtype='step', ec=colors[5])
+
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$\\frac{p_T^a-p_T^Z}{p_T^Z}$ in %')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title(' relative angular deviation Input vs. Target')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%srelative_Angular_Deviation_InputvsTarget.png"%(outputD))
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plt.hist(div0(dset_PF[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[0,:]-dset_Target[0,:]), histtype='step', ec=colors[0])
+    plt.hist(div0(dset_Track[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[0,:]-dset_Target[0,:]), histtype='step', ec=colors[1])
+    plt.hist(div0(dset_NoPU[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[0,:]-dset_Target[0,:]), histtype='step', ec=colors[2])
+    plt.hist(div0(dset_PUCorrected[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[0,:]-dset_Target[0,:]), histtype='step', ec=colors[3])
+    plt.hist(div0(dset_PU[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[0,:]-dset_Target[0,:]), histtype='step', ec=colors[4])
+    plt.hist(div0(dset_Puppi[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[0,:]-dset_Target[0,:]), histtype='step', ec=colors[5])
+
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$\\frac{p_T^a-p_T^Z}{p_T^Z}$ in %')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title(' relative angular deviation Input vs. Target')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%srelative_transvere_Deviation_InputvsTarget.png"%(outputD))
+
+    writeInputs.close()
+
 def getInputs_xyra(DataF):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
@@ -474,6 +562,9 @@ def getInputs(fName, NN_mode, outputD):
     elif NN_mode == 'absCorr':
         Data = loadData(fName)
         Inputs = getInputs_absCorr(Data)
+    elif NN_mode == 'rphi':
+        Data = loadData(fName)
+        Inputs = getInputs_rphi(Data)
     else:
         Data = loadData_proj(fName)
         Inputs =  getInputs_proj(Data)

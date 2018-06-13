@@ -50,8 +50,8 @@ def loadData(fName, NN_mode):
     DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
     return(DFName)
 
-def prepareOutput(outputD, inputD, NN_mode):
-    NN_Output = h5py.File("%sNN_Output_%s.h5"%(outputD,NN_mode), "r+")
+def prepareOutput(outputD, inputD, NN_mode, plotsD):
+    NN_Output = h5py.File("%sNN_Output_applied_%s.h5"%(outputD,NN_mode), "r+")
     if NN_mode == 'xyr' or NN_mode == 'nr':
         mZ_x, mZ_y, mZ_r = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1], NN_Output['MET_GroundTruth'][:,2]
         a_x, a_y, a_r = -NN_Output['MET_Predictions'][:,0], -NN_Output['MET_Predictions'][:,1], NN_Output['MET_Predictions'][:,2]
@@ -59,9 +59,18 @@ def prepareOutput(outputD, inputD, NN_mode):
         PF_Z_pT = loadData(inputD, NN_mode)
         mZ_x, mZ_y, mZ_r = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1], PF_Z_pT['Boson_Pt']
         a_x, a_y, a_r = -NN_Output['MET_Predictions'][:,0], -NN_Output['MET_Predictions'][:,1], NN_Output['MET_Predictions'][:,2]+PF_Z_pT['recoilslimmedMETs_Pt']
+    elif NN_mode == 'rphi':
+        mZ_r, mZ_phi = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
+        a_r, a_phi = NN_Output['MET_Predictions'][:,0], (NN_Output['MET_Predictions'][:,1]+np.pi)
+        a_x, a_y = kar2pol(a_r, a_phi)
+        mZ_r, mZ_phi =  pol2kar(mZ_r, mZ_phi)
+    elif NN_mode == 'xy':
+        mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
+        a_x, a_y = -(NN_Output['MET_Predictions'][:,0]), -(NN_Output['MET_Predictions'][:,1])
+        mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
     else:
         mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
-        a_x, a_y = -NN_Output['MET_Predictions'][:,0], -NN_Output['MET_Predictions'][:,1]
+        a_x, a_y = -NN_Output['MET_Predictions'][:,0], -(NN_Output['MET_Predictions'][:,1])
         mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
 
     a_ =  np.sqrt(np.add(np.multiply(a_x,a_x),np.multiply(a_y,a_y)))
@@ -81,7 +90,7 @@ def prepareOutput(outputD, inputD, NN_mode):
 
     print("a_r,a_phi", a_r,a_phi)
 
-    NN_LongZ, NN_PerpZ= pol2kar(a_r,(a_phi+np.pi)-mZ_phi)
+    NN_LongZ, NN_PerpZ= pol2kar(a_r,a_phi-mZ_phi)
     #NN_LongZ, NN_PerpZ = NN_LongZ_l.tolist(), NN_PerpZ_l.tolist()
     #print("NN_LongZ, NN_PerpZ", NN_LongZ, NN_PerpZ)
     #NN_LongZ = div0(np.multiply(a_x, mZ_x)+np.multiply(a_y, mZ_y) , list(map(np.sqrt,np.add(np.multiply(mZ_x,mZ_x),np.multiply(mZ_y,mZ_y)))))
@@ -119,9 +128,27 @@ def prepareOutput(outputD, inputD, NN_mode):
     newtree.Write()
     print([b.GetName() for b in newtree.GetListOfBranches()])
     '''
+    plt.clf()
+    plt.figure()
+    plt.suptitle('y nach y-Korrektur Prediction vs. Target ')
+    plt.xlabel("$p_{T,y}^Z$")
+    plt.hist(-a_y, bins=50, range=[np.percentile(-a_y,5), np.percentile( -a_y,95)], histtype='step' )
+    plt.hist(mZ_y, bins=50, range=[np.percentile(mZ_y,5), np.percentile( mZ_y,95)], histtype='step' )
+    plt.legend(["y-Korrektur prediction","Target"], loc='upper left')
+    plt.savefig("%sHist_Pred_Tar_y_mit_yKorrektur.png"%(plotsD))
 
-
-
+    plt.clf()
+    plt.figure()
+    plt.suptitle('x nach y-Korrektur Prediction vs. Target ')
+    plt.xlabel("$p_{T,x}^Z$")
+    plt.hist(-a_x, bins=50, range=[np.percentile(-a_x,5), np.percentile( -a_x,95)], histtype='step' )
+    plt.hist(mZ_x, bins=50, range=[np.percentile(mZ_x,5), np.percentile( mZ_x,95)], histtype='step' )
+    plt.legend(["y-Korrektur prediction","Target"], loc='upper left')
+    plt.savefig("%sHist_Pred_Tar_x_mit_yKorrektur.png"%(plotsD))
+    print('Summe a_x enspricht prediction 0', np.sum(-a_x))
+    print('Summe a_y enspricht prediction 0', np.sum(-a_y))
+    print('Summe prediction 0', np.sum(NN_Output['MET_Predictions'][:,0]))
+    print('Summe prediction 1', np.sum(NN_Output['MET_Predictions'][:,1]))
 
 
 
@@ -129,6 +156,7 @@ if __name__ == "__main__":
     inputDir = sys.argv[1]
     outputDir = sys.argv[2]
     NN_mode = sys.argv[3]
+    plotsD = sys.argv[4]
     print(outputDir)
     NN_MVA = h5py.File("%s/NN_MVA_%s.h5"%(outputDir,NN_mode), "w")
-    prepareOutput(outputDir, inputDir, NN_mode)
+    prepareOutput(outputDir, inputDir, NN_mode, plotsD)
