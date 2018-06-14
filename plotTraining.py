@@ -6,17 +6,20 @@ import sys
 import numpy as np
 
 
+
+
+
 def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
     NN_Output_applied = h5py.File("%sNN_Output_applied_%s.h5"%(outputD,NN_mode), "r")
     predictions = NN_Output_applied["MET_Predictions"]
     Targets = NN_Output_applied["MET_GroundTruth"]
-    NN_Output_applied.close()
-    print("Shape predictions", predictions.shape)
-    print("Shape Targets", Targets.shape)
+    print("Shape predictions", predictions)
+    print("Shape Targets", Targets)
+    
     NN_Output = h5py.File("%sNN_Output_%s.h5"%(outputD,NN_mode), "r")
-    loss = NN_Output["MET_Loss"]
-    val_loss = NN_Output["MET_Val_Loss"]
-    NN_Output.close()
+    loss = NN_Output["loss"]
+    val_loss = NN_Output["val_loss"]
+
 
 
     plt.clf()
@@ -147,6 +150,9 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
     plt.legend(["Loss","Validation Loss"], loc='upper left')
     plt.yscale('log')
     plt.savefig("%sLoss_CR.png"%(plotsD))
+
+    NN_Output.close()
+    NN_Output_applied.close()
 
 if __name__ == "__main__":
     outputDir = sys.argv[1]

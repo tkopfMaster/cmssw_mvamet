@@ -1,6 +1,7 @@
 import numpy as np
 import root_numpy as rnp
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import pandas as pd
@@ -13,7 +14,7 @@ import matplotlib.ticker as mtick
 import h5py
 import sys
 
-colors = cm.brg(np.linspace(0, 1, 6))
+colors = cm.brg(np.linspace(0, 1, 7))
 
 def div0( a, b ):
     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
@@ -21,6 +22,14 @@ def div0( a, b ):
         c = np.true_divide( a, b )
         c[ ~ np.isfinite( c )] = 0  # -inf inf NaN
     return c
+
+def angularrange(Winkel):
+    if isinstance(Winkel, (list, tuple, np.ndarray)):
+        for i in range(0, len(Winkel) ):
+            Winkel[i]=((Winkel[i]+np.pi)%(2*np.pi)-(np.pi))
+    else:
+        Winkel=((Winkel+np.pi)%(2*np.pi)-(np.pi))
+    return(Winkel)
 
 def loadData(fName):
     tfile = ROOT.TFile(fName)
@@ -62,7 +71,7 @@ def pol2kar_y(norm, phi):
     y = np.cos(phi[:])*norm[:]
     return(y)
 
-def getInputs_xy(DataF):
+def getInputs_xy(DataF, outputD):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
         pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
@@ -93,6 +102,96 @@ def getInputs_xy(DataF):
     dset_Target = writeInputs.create_dataset("Target",  dtype='f',
         data=[-pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),
         -pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi'])])
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+    nbinsHist = 150
+    plt.hist(dset_PF[0,:], bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[0,:]), histtype='step', ec=colors[0])
+    plt.hist(dset_Track[0,:], bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[0,:]), histtype='step', ec=colors[0])
+    plt.hist(dset_NoPU[0,:], bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[0,:]), histtype='step', ec=colors[2])
+    plt.hist(dset_PUCorrected[0,:], bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[0,:]), histtype='step', ec=colors[3])
+    plt.hist(dset_PU[0,:], bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[0,:]), histtype='step', ec=colors[4])
+    plt.hist(dset_Puppi[0,:], bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[0,:]), histtype='step', ec=colors[5])
+
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$p_{T,x}$ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title(' Histogram $p_{T,x}$')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%sInput1_Hist.png"%(outputD))
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+    nbinsHist = 150
+    plt.hist(dset_PF[1,:], bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[1,:]), histtype='step', ec=colors[0])
+    plt.hist(dset_Track[1,:], bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[1,:]), histtype='step', ec=colors[1])
+    plt.hist(dset_NoPU[1,:], bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[1,:]), histtype='step', ec=colors[2])
+    plt.hist(dset_PUCorrected[1,:], bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[1,:]), histtype='step', ec=colors[3])
+    plt.hist(dset_PU[1,:], bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[1,:]), histtype='step', ec=colors[4])
+    plt.hist(dset_Puppi[1,:], bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[1,:]), histtype='step', ec=colors[5])
+
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$p_{T,y}$ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title(' Histogram $p_{T,y}$')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%sInput2_Hist.png"%(outputD))
+
+
+
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plt.hist(dset_PF[2,:], bins=nbinsHist, range=[0, 1500], label='PF', histtype='step', ec=colors[0])
+    plt.hist(dset_Track[2,:], bins=nbinsHist, range=[0, 1500], label='Track', histtype='step', ec=colors[1])
+    plt.hist(dset_NoPU[2,:], bins=nbinsHist, range=[0, 1500], label='NoPU', histtype='step', ec=colors[2])
+    plt.hist(dset_PUCorrected[2,:], bins=nbinsHist, range=[0, 1500], label='PUCorrected', histtype='step', ec=colors[3])
+    plt.hist(dset_PU[2,:], bins=nbinsHist, range=[0, 1500], label='PU', histtype='step', ec=colors[4])
+    plt.hist(dset_Puppi[2,:], bins=nbinsHist, range=[0, 1500], label='Puppi', histtype='step', ec=colors[5])
+
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$\\Sigma E_{T}$ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title(' Histogram $\\Sigma E_{T}$')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%sInput3_Hist.png"%(outputD))
+
     writeInputs.close()
 
 def getInputs_xyd(DataF, outputD):
@@ -380,7 +479,7 @@ def getInputs_xyr(DataF):
         DataF['Boson_Pt']])
     writeInputs.close()
 
-def getInputs_rphi(DataF):
+def getInputs_rphi(DataF, outputD):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[DataF['recoilslimmedMETs_Pt'],
               DataF['recoilslimmedMETs_Phi'],
@@ -416,12 +515,14 @@ def getInputs_rphi(DataF):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
     nbinsHist = 150
-    plt.hist(div0(dset_PF[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[1,:]-dset_Target[1,:]), histtype='step', ec=colors[0])
-    plt.hist(div0(dset_Track[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[1,:]-dset_Target[1,:]), histtype='step', ec=colors[1])
-    plt.hist(div0(dset_NoPU[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[1,:]-dset_Target[1,:]), histtype='step', ec=colors[2])
-    plt.hist(div0(dset_PUCorrected[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[1,:]-dset_Target[1,:]), histtype='step', ec=colors[3])
-    plt.hist(div0(dset_PU[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[1,:]-dset_Target[1,:]), histtype='step', ec=colors[4])
-    plt.hist(div0(dset_Puppi[1,:]-dset_Target[1,:],dset_Target[1,:]), bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[1,:]-dset_Target[1,:]), histtype='step', ec=colors[5])
+    LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
+    plt.hist(angularrange(dset_PF[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PF, mean=%.2f'%np.mean(angularrange(dset_PF[1,:]+np.pi)), histtype='step', ec=colors[0])
+    plt.hist(angularrange(dset_Track[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Track, mean=%.2f'%np.mean(angularrange(dset_Track[1,:]+np.pi)), histtype='step', ec=colors[1])
+    plt.hist(angularrange(dset_NoPU[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='NoPU, mean=%.2f'%np.mean(angularrange(dset_NoPU[1,:]+np.pi)), histtype='step', ec=colors[2])
+    plt.hist(angularrange(dset_PUCorrected[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PUCorrected, mean=%.2f'%np.mean(angularrange(dset_PUCorrected[1,:]+np.pi)), histtype='step', ec=colors[3])
+    plt.hist(angularrange(dset_PU[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PU, mean=%.2f'%np.mean(angularrange(dset_PU[1,:]+np.pi)), histtype='step', ec=colors[4])
+    plt.hist(angularrange(dset_Puppi[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Puppi, mean=%.2f'%np.mean(angularrange(dset_Puppi[1,:]+np.pi)), histtype='step', ec=colors[5])
+    plt.hist(dset_Target[1,:], bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Target, mean=%.2f'%np.mean(dset_Target[1,:]), histtype='step', ec=colors[6])
 
 
     box = ax.get_position()
@@ -430,26 +531,27 @@ def getInputs_rphi(DataF):
     #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.ylabel('Counts')
-    plt.xlabel('$\\frac{p_T^a-p_T^Z}{p_T^Z}$ in %')
+    plt.xlabel('$\\alpha$ in rad')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    plt.title(' relative angular deviation Input vs. Target')
+    plt.title('  Input vs. Target: angular ')
     #plt.text('$p_T$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%srelative_Angular_Deviation_InputvsTarget.png"%(outputD))
+    plt.savefig("%sInputs_vs_Target_angular.png"%(outputD))
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plt.hist(div0(dset_PF[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[0,:]-dset_Target[0,:]), histtype='step', ec=colors[0])
-    plt.hist(div0(dset_Track[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[0,:]-dset_Target[0,:]), histtype='step', ec=colors[1])
-    plt.hist(div0(dset_NoPU[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[0,:]-dset_Target[0,:]), histtype='step', ec=colors[2])
-    plt.hist(div0(dset_PUCorrected[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[0,:]-dset_Target[0,:]), histtype='step', ec=colors[3])
-    plt.hist(div0(dset_PU[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[0,:]-dset_Target[0,:]), histtype='step', ec=colors[4])
-    plt.hist(div0(dset_Puppi[0,:]-dset_Target[0,:],dset_Target[0,:]), bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[0,:]-dset_Target[0,:]), histtype='step', ec=colors[5])
+    plt.hist(dset_PF[0,:], bins=nbinsHist, range=[0, 100], label='PF, mean=%.2f'%np.mean(dset_PF[0,:]), histtype='step', ec=colors[0])
+    plt.hist(dset_Track[0,:], bins=nbinsHist, range=[0, 100], label='Track, mean=%.2f'%np.mean(dset_Track[0,:]), histtype='step', ec=colors[1])
+    plt.hist(dset_NoPU[0,:], bins=nbinsHist, range=[0, 100], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[0,:]), histtype='step', ec=colors[2])
+    plt.hist(dset_PUCorrected[0,:], bins=nbinsHist, range=[0, 100], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[0,:]), histtype='step', ec=colors[3])
+    plt.hist(dset_PU[0,:], bins=nbinsHist, range=[0, 100], label='PU, mean=%.2f'%np.mean(dset_PU[0,:]), histtype='step', ec=colors[4])
+    plt.hist(dset_Puppi[0,:], bins=nbinsHist, range=[0, 100], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[0,:]), histtype='step', ec=colors[5])
+    plt.hist(dset_Target[0,:], bins=nbinsHist, range=[0, 100], label='Target, mean=%.2f'%np.mean(dset_Target[0,:]), histtype='step', ec=colors[6])
 
 
     box = ax.get_position()
@@ -458,15 +560,15 @@ def getInputs_rphi(DataF):
     #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.ylabel('Counts')
-    plt.xlabel('$\\frac{p_T^a-p_T^Z}{p_T^Z}$ in %')
+    plt.xlabel('$p_T$ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    plt.title(' relative angular deviation Input vs. Target')
+    plt.title('  Input vs. Target: norm')
     #plt.text('$p_T$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%srelative_transvere_Deviation_InputvsTarget.png"%(outputD))
+    plt.savefig("%sInputs_vs_Target_norm.png"%(outputD))
 
     writeInputs.close()
 
@@ -546,7 +648,7 @@ def getInputs(fName, NN_mode, outputD):
 
     if NN_mode == 'xy':
         Data = loadData(fName)
-        Inputs = getInputs_xy(Data)
+        Inputs = getInputs_xy(Data, OutputD)
     elif NN_mode =='xyr':
         Data = loadData(fName)
         Inputs = getInputs_xyr(Data)
@@ -564,7 +666,7 @@ def getInputs(fName, NN_mode, outputD):
         Inputs = getInputs_absCorr(Data)
     elif NN_mode == 'rphi':
         Data = loadData(fName)
-        Inputs = getInputs_rphi(Data)
+        Inputs = getInputs_rphi(Data, outputD)
     else:
         Data = loadData_proj(fName)
         Inputs =  getInputs_proj(Data)

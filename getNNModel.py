@@ -104,6 +104,9 @@ def getModel(outputD, optimiz, loss_, NN_mode, plotsD):
         ])
 
 
+    dset = NN_Output.create_dataset("loss", dtype='f', data=history.history['loss'])
+    dset2 = NN_Output.create_dataset("val_loss", dtype='f', data=history.history['val_loss'])
+    NN_Output.close()
 
 if __name__ == "__main__":
     outputDir = sys.argv[1]
@@ -112,4 +115,5 @@ if __name__ == "__main__":
     NN_mode = sys.argv[4]
     plotsD = sys.argv[5]
     print(outputDir)
+    NN_Output = h5py.File("%sNN_Output_%s.h5"%(outputDir,NN_mode), "w")
     getModel(outputDir, optim, loss_fct, NN_mode, plotsD)

@@ -60,10 +60,10 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
 
     predictions = model.predict(Inputs[:])
     print("predictions in apply NN ", predictions	)
-    dset = NN_Output.create_dataset("MET_Predictions", dtype='f', data=predictions)
-    dset2 = NN_Output.create_dataset("MET_GroundTruth", dtype='f', data=Targets)
+    dset = NN_Output_applied.create_dataset("MET_Predictions", dtype='f', data=predictions)
+    dset2 = NN_Output_applied.create_dataset("MET_GroundTruth", dtype='f', data=Targets)
 
-    NN_Output.close()
+    NN_Output_applied.close()
 
 
 if __name__ == "__main__":
@@ -73,5 +73,5 @@ if __name__ == "__main__":
     loss_fct = str(sys.argv[4])
     NN_mode = sys.argv[5]
     print(outputDir)
-    NN_Output = h5py.File("%sNN_Output_applied_%s.h5"%(outputDir,NN_mode), "w")
+    NN_Output_applied = h5py.File("%sNN_Output_applied_%s.h5"%(outputDir,NN_mode), "w")
     applyModel(outputDir, inputDir, NN_mode,  optim, loss_fct)
