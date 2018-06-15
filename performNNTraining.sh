@@ -8,7 +8,7 @@ echo "trainingname eingeben"
 optimizer="Adam"
 loss="mean_squared_error_r"
 NN_mode="xy"
-trainingname="Penalty10_woutSumET_woutPP_${NN_mode}_${optimizer}_${loss}"
+trainingname="Stefan_woutSumET_woutPP_${NN_mode}_${optimizer}_${loss}"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
@@ -52,6 +52,6 @@ python $src_di/applyNN.py $inputFile $files_di $optimizer $loss $NN_mode
 python $src_di/plotTraining.py $files_di $optimizer $loss $NN_mode $plots_di
 python $src_di/prepareOutput.py $GBRTFile2 $files_di $NN_mode $plots_di
 #python $src_di/getPlotsInput.py $inputFile $plots_di
-python $src_di/getPlotsOutput.py $GBRTFile2 $files_di $plots_di
+python $src_di/getPlotsOutputclean.py $GBRTFile2 $files_di $plots_di
 cp -r $plots_di /usr/users/tkopf/www/METplots/
 cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/

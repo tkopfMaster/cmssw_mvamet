@@ -68,8 +68,9 @@ def getModel(outputD, optimiz, loss_, NN_mode, plotsD):
         model.summary()
 
     # Set loss, optimizer and evaluation metrics
-    from own_loss_functions import mean_squared_error_r
+    from own_loss_functions import mean_squared_error_r, perp_long_error
     if "mean_squared_error_r" in loss_: loss_function = mean_squared_error_r
+    elif "perp_long_error" in loss_: loss_function = perp_long_error
     else: loss_function = loss_
     model.compile(
                     loss=loss_function,

@@ -47,10 +47,14 @@ def loadTargets(inputD):
 
 def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     from keras.models import load_model
-    from own_loss_functions import mean_squared_error_r
+    from own_loss_functions import mean_squared_error_r, perp_long_error
     if "mean_squared_error_r" in loss_:
         import keras.losses
         keras.losses.mean_squared_error_r = mean_squared_error_r
+        model = load_model("%sMET_model_%s_%s_%s.h5"%(outputD,NN_mode, optim, loss_))
+    elif "perp_long_error" in loss_:
+        import keras.losses
+        keras.losses.mean_squared_error_r = perp_long_error
         model = load_model("%sMET_model_%s_%s_%s.h5"%(outputD,NN_mode, optim, loss_))
     else:
         loss_function = loss_
