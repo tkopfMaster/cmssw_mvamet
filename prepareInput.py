@@ -74,123 +74,48 @@ def pol2kar_y(norm, phi):
 def getInputs_xy(DataF, outputD):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
-        pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
+        pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']) ])
+    ''' ,
         DataF['recoilslimmedMETs_sumEt'],
-        DataF['NVertex'] ])
+        DataF['NVertex']])
+    '''
+
     dset_Track = writeInputs.create_dataset("Track",  dtype='f',
         data=[ pol2kar_x(DataF['recoilpatpfTrackMET_Pt'], DataF['recoilpatpfTrackMET_Phi']),
-        pol2kar_y(DataF['recoilpatpfTrackMET_Pt'], DataF['recoilpatpfTrackMET_Phi']),
+        pol2kar_y(DataF['recoilpatpfTrackMET_Pt'], DataF['recoilpatpfTrackMET_Phi'])])
+    ''',
         DataF['recoilpatpfTrackMET_sumEt']])
+    '''
+
     dset_NoPU = writeInputs.create_dataset("NoPU",  dtype='f',
         data=[pol2kar_x(DataF['recoilpatpfNoPUMET_Pt'], DataF['recoilpatpfNoPUMET_Phi']),
-        pol2kar_y(DataF['recoilpatpfNoPUMET_Pt'], DataF['recoilpatpfNoPUMET_Phi']),
-        DataF['recoilpatpfNoPUMET_sumEt']])
+        pol2kar_y(DataF['recoilpatpfNoPUMET_Pt'], DataF['recoilpatpfNoPUMET_Phi'])])
+    ''',
+        DataF['recoilpatpfNoPUMET_sumEt']])'''
+
     dset_PUCorrected = writeInputs.create_dataset("PUCorrected",  dtype='f',
         data=[pol2kar_x(DataF['recoilpatpfPUCorrectedMET_Pt'], DataF['recoilpatpfPUCorrectedMET_Phi']),
-        pol2kar_y(DataF['recoilpatpfPUCorrectedMET_Pt'], DataF['recoilpatpfPUCorrectedMET_Phi']),
-        DataF['recoilpatpfPUCorrectedMET_sumEt']])
+        pol2kar_y(DataF['recoilpatpfPUCorrectedMET_Pt'], DataF['recoilpatpfPUCorrectedMET_Phi'])])
+    ''',
+        DataF['recoilpatpfPUCorrectedMET_sumEt']])'''
+
     dset_PU = writeInputs.create_dataset("PU",  dtype='f',
         data=[pol2kar_x(DataF['recoilpatpfPUMET_Pt'], DataF['recoilpatpfPUMET_Phi']),
-        pol2kar_y(DataF['recoilpatpfPUMET_Pt'], DataF['recoilpatpfPUMET_Phi']),
-        DataF['recoilpatpfPUMET_sumEt']])
+        pol2kar_y(DataF['recoilpatpfPUMET_Pt'], DataF['recoilpatpfPUMET_Phi'])])
+    ''',
+        DataF['recoilpatpfPUMET_sumEt']])'''
+
     dset_Puppi = writeInputs.create_dataset("Puppi",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETsPuppi_Pt'], DataF['recoilslimmedMETsPuppi_Phi']),
-        pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'], DataF['recoilslimmedMETsPuppi_Phi']),
-        DataF['recoilslimmedMETsPuppi_sumEt']])
+        pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'], DataF['recoilslimmedMETsPuppi_Phi'])])
+    ''',
+        DataF['recoilslimmedMETsPuppi_sumEt']])'''
+
 
 
     dset_Target = writeInputs.create_dataset("Target",  dtype='f',
         data=[-pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),
         -pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi'])])
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-    nbinsHist = 150
-    plt.hist(dset_PF[0,:], bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[0,:]), histtype='step', ec=colors[0])
-    plt.hist(dset_Track[0,:], bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[0,:]), histtype='step', ec=colors[0])
-    plt.hist(dset_NoPU[0,:], bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[0,:]), histtype='step', ec=colors[2])
-    plt.hist(dset_PUCorrected[0,:], bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[0,:]), histtype='step', ec=colors[3])
-    plt.hist(dset_PU[0,:], bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[0,:]), histtype='step', ec=colors[4])
-    plt.hist(dset_Puppi[0,:], bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[0,:]), histtype='step', ec=colors[5])
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.ylabel('Counts')
-    plt.xlabel('$p_{T,x}$ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    plt.title(' Histogram $p_{T,x}$')
-    #plt.text('$p_T$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sInput1_Hist.png"%(outputD))
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-    nbinsHist = 150
-    plt.hist(dset_PF[1,:], bins=nbinsHist, range=[-200, 200], label='PF, mean=%.2f'%np.mean(dset_PF[1,:]), histtype='step', ec=colors[0])
-    plt.hist(dset_Track[1,:], bins=nbinsHist, range=[-200, 200], label='Track, mean=%.2f'%np.mean(dset_Track[1,:]), histtype='step', ec=colors[1])
-    plt.hist(dset_NoPU[1,:], bins=nbinsHist, range=[-200, 200], label='NoPU, mean=%.2f'%np.mean(dset_NoPU[1,:]), histtype='step', ec=colors[2])
-    plt.hist(dset_PUCorrected[1,:], bins=nbinsHist, range=[-200, 200], label='PUCorrected, mean=%.2f'%np.mean(dset_PUCorrected[1,:]), histtype='step', ec=colors[3])
-    plt.hist(dset_PU[1,:], bins=nbinsHist, range=[-200, 200], label='PU, mean=%.2f'%np.mean(dset_PU[1,:]), histtype='step', ec=colors[4])
-    plt.hist(dset_Puppi[1,:], bins=nbinsHist, range=[-200, 200], label='Puppi, mean=%.2f'%np.mean(dset_Puppi[1,:]), histtype='step', ec=colors[5])
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.ylabel('Counts')
-    plt.xlabel('$p_{T,y}$ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    plt.title(' Histogram $p_{T,y}$')
-    #plt.text('$p_T$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sInput2_Hist.png"%(outputD))
-
-
-
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    plt.hist(dset_PF[2,:], bins=nbinsHist, range=[0, 1500], label='PF', histtype='step', ec=colors[0])
-    plt.hist(dset_Track[2,:], bins=nbinsHist, range=[0, 1500], label='Track', histtype='step', ec=colors[1])
-    plt.hist(dset_NoPU[2,:], bins=nbinsHist, range=[0, 1500], label='NoPU', histtype='step', ec=colors[2])
-    plt.hist(dset_PUCorrected[2,:], bins=nbinsHist, range=[0, 1500], label='PUCorrected', histtype='step', ec=colors[3])
-    plt.hist(dset_PU[2,:], bins=nbinsHist, range=[0, 1500], label='PU', histtype='step', ec=colors[4])
-    plt.hist(dset_Puppi[2,:], bins=nbinsHist, range=[0, 1500], label='Puppi', histtype='step', ec=colors[5])
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    #handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.ylabel('Counts')
-    plt.xlabel('$\\Sigma E_{T}$ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    plt.title(' Histogram $\\Sigma E_{T}$')
-    #plt.text('$p_T$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sInput3_Hist.png"%(outputD))
 
     writeInputs.close()
 
@@ -648,7 +573,7 @@ def getInputs(fName, NN_mode, outputD):
 
     if NN_mode == 'xy':
         Data = loadData(fName)
-        Inputs = getInputs_xy(Data, OutputD)
+        Inputs = getInputs_xy(Data, outputD)
     elif NN_mode =='xyr':
         Data = loadData(fName)
         Inputs = getInputs_xyr(Data)

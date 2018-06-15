@@ -14,7 +14,7 @@ from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 from rootpy.io import root_open
 import ROOT
 
-NN_mode='xyr'
+#NN_mode='xyr'
 
 def pol2kar_x(norm, phi):
     x = []
@@ -54,7 +54,7 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     NN_Output = h5py.File("%sNN_Output_applied_%s.h5"%(outputD,NN_mode), "r+")
     if NN_mode == 'xyr' or NN_mode == 'nr':
         mZ_x, mZ_y, mZ_r = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1], NN_Output['MET_GroundTruth'][:,2]
-        a_x, a_y, a_r = -NN_Output['MET_Predictions'][:,0], -NN_Output['MET_Predictions'][:,1], NN_Output['MET_Predictions'][:,2]
+        a_x, a_y, a_r = NN_Output['MET_Predictions'][:,0], NN_Output['MET_Predictions'][:,1], NN_Output['MET_Predictions'][:,2]
     elif NN_mode == 'xyd':
         PF_Z_pT = loadData(inputD, NN_mode)
         mZ_x, mZ_y, mZ_r = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1], PF_Z_pT['Boson_Pt']
@@ -65,12 +65,12 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
         a_x, a_y = kar2pol(a_r, a_phi)
         mZ_r, mZ_phi =  pol2kar(mZ_r, mZ_phi)
     elif NN_mode == 'xy':
-        mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
-        a_x, a_y = -(NN_Output['MET_Predictions'][:,0]), -(NN_Output['MET_Predictions'][:,1])
+        mZ_x, mZ_y = -(NN_Output['MET_GroundTruth'][:,0]), -(NN_Output['MET_GroundTruth'][:,1])
+        a_x, a_y = (NN_Output['MET_Predictions'][:,0]), (NN_Output['MET_Predictions'][:,1])
         mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
     else:
         mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
-        a_x, a_y = -NN_Output['MET_Predictions'][:,0], -(NN_Output['MET_Predictions'][:,1])
+        a_x, a_y = NN_Output['MET_Predictions'][:,0], (NN_Output['MET_Predictions'][:,1])
         mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
 
     a_ =  np.sqrt(np.add(np.multiply(a_x,a_x),np.multiply(a_y,a_y)))
@@ -132,8 +132,8 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     plt.figure()
     plt.suptitle('y nach y-Korrektur Prediction vs. Target ')
     plt.xlabel("$p_{T,y}^Z$")
-    plt.hist(-a_y, bins=50, range=[np.percentile(-a_y,5), np.percentile( -a_y,95)], histtype='step' )
-    plt.hist(mZ_y, bins=50, range=[np.percentile(mZ_y,5), np.percentile( mZ_y,95)], histtype='step' )
+    plt.hist(a_y, bins=50, range=[np.percentile(a_y,5), np.percentile( a_y,95)], histtype='step' )
+    plt.hist(-mZ_y, bins=50, range=[np.percentile(-mZ_y,5), np.percentile( -mZ_y,95)], histtype='step' )
     plt.legend(["y-Korrektur prediction","Target"], loc='upper left')
     plt.savefig("%sHist_Pred_Tar_y_mit_yKorrektur.png"%(plotsD))
 
@@ -141,8 +141,8 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     plt.figure()
     plt.suptitle('x nach y-Korrektur Prediction vs. Target ')
     plt.xlabel("$p_{T,x}^Z$")
-    plt.hist(-a_x, bins=50, range=[np.percentile(-a_x,5), np.percentile( -a_x,95)], histtype='step' )
-    plt.hist(mZ_x, bins=50, range=[np.percentile(mZ_x,5), np.percentile( mZ_x,95)], histtype='step' )
+    plt.hist(a_x, bins=50, range=[np.percentile(a_x,5), np.percentile( a_x,95)], histtype='step' )
+    plt.hist(-mZ_x, bins=50, range=[np.percentile(-mZ_x,5), np.percentile( -mZ_x,95)], histtype='step' )
     plt.legend(["y-Korrektur prediction","Target"], loc='upper left')
     plt.savefig("%sHist_Pred_Tar_x_mit_yKorrektur.png"%(plotsD))
     print('Summe a_x enspricht prediction 0', np.sum(-a_x))
