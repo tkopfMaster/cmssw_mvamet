@@ -40,14 +40,15 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
         fig.patch.set_facecolor('white')
         ax = plt.subplot(111)
         nbinsHist = 150
-        plt.hist(InputsTargets['PF'][0,:], bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f'%np.mean(InputsTargets['PF'][:,0]), histtype='step', ec=colors_InOut[0])
+
         plt.hist(InputsTargets['Track'][0,:], bins=nbinsHist, range=[-50, 50], label='Track, mean=%.2f'%np.mean(InputsTargets['Track'][:,0]), histtype='step', ec=colors_InOut[0])
         plt.hist(InputsTargets['NoPU'][0,:], bins=nbinsHist, range=[-50, 50], label='NoPU, mean=%.2f'%np.mean(InputsTargets['NoPU'][:,0]), histtype='step', ec=colors_InOut[2])
         plt.hist(InputsTargets['PUCorrected'][0,:], bins=nbinsHist, range=[-50, 50], label='PUCorrected, mean=%.2f'%np.mean(InputsTargets['PUCorrected'][:,0]), histtype='step', ec=colors_InOut[3])
         plt.hist(InputsTargets['PU'][0,:], bins=nbinsHist, range=[-50, 50], label='PU, mean=%.2f'%np.mean(InputsTargets['PU'][:,0]), histtype='step', ec=colors_InOut[4])
         plt.hist(InputsTargets['Puppi'][0,:], bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f'%np.mean(InputsTargets['Puppi'][:,0]), histtype='step', ec=colors_InOut[5])
-        plt.hist(Targets[:,0], bins=nbinsHist, range=[-50, 50], label='Target, mean=%.2f'%np.mean(Targets[:,0]), histtype='step', ec=colors_InOut[6])
-        plt.hist(predictions[:,0], bins=nbinsHist, range=[-50, 50], label='Prediction, mean=%.2f'%np.mean(predictions[:,0]), histtype='step', ec=colors_InOut[7])
+        plt.hist(InputsTargets['PF'][0,:], bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f'%np.mean(InputsTargets['PF'][:,0]), histtype='step', ec=colors_InOut[1], linewidth=1.5)
+        plt.hist(Targets[:,0], bins=nbinsHist, range=[-50, 50], label='Target, mean=%.2f'%np.mean(Targets[:,0]), histtype='step', ec=colors_InOut[6], linewidth=1.5)
+        plt.hist(predictions[:,0], bins=nbinsHist, range=[-50, 50], label='Prediction, mean=%.2f'%np.mean(predictions[:,0]), histtype='step', ec=colors_InOut[7], linewidth=1.5)
 
 
         box = ax.get_position()
@@ -57,8 +58,9 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
         plt.ylabel('Counts')
         plt.xlabel('$p_{T,x}$ in GeV')
+        plt.xlim(-50,50)
         #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-        plt.title(' Histogram $p_{T,x}$')
+        #plt.title(' Histogram $p_{T,x}$')
         #plt.text('$p_T$ range restriction')
 
         ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -70,14 +72,15 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
         fig.patch.set_facecolor('white')
         ax = plt.subplot(111)
         nbinsHist = 150
-        plt.hist(InputsTargets['PF'][1,:], bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f'%np.mean(InputsTargets['PF'][:,1]), histtype='step', ec=colors_InOut[0])
+
         plt.hist(InputsTargets['Track'][1,:], bins=nbinsHist, range=[-50, 50], label='Track, mean=%.2f'%np.mean(InputsTargets['Track'][:,1]), histtype='step', ec=colors_InOut[0])
         plt.hist(InputsTargets['NoPU'][1,:], bins=nbinsHist, range=[-50, 50], label='NoPU, mean=%.2f'%np.mean(InputsTargets['NoPU'][:,1]), histtype='step', ec=colors_InOut[2])
         plt.hist(InputsTargets['PUCorrected'][1,:], bins=nbinsHist, range=[-50, 50], label='PUCorrected, mean=%.2f'%np.mean(InputsTargets['PUCorrected'][:,1]), histtype='step', ec=colors_InOut[3])
         plt.hist(InputsTargets['PU'][1,:], bins=nbinsHist, range=[-50, 50], label='PU, mean=%.2f'%np.mean(InputsTargets['PU'][:,1]), histtype='step', ec=colors_InOut[4])
         plt.hist(InputsTargets['Puppi'][1,:], bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f'%np.mean(InputsTargets['Puppi'][:,1]), histtype='step', ec=colors_InOut[5])
-        plt.hist(Targets[:,1], bins=nbinsHist, range=[-50, 50], label='Target, mean=%.2f'%np.mean(Targets[:,1]), histtype='step', ec=colors_InOut[6])
-        plt.hist(predictions[:,1], bins=nbinsHist, range=[-50, 50], label='Prediction, mean=%.2f'%np.mean(predictions[:,1]), histtype='step', ec=colors_InOut[7])
+        plt.hist(InputsTargets['PF'][1,:], bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f'%np.mean(InputsTargets['PF'][:,1]), histtype='step', ec=colors_InOut[1], linewidth=1.5)
+        plt.hist(Targets[:,1], bins=nbinsHist, range=[-50, 50], label='Target, mean=%.2f'%np.mean(Targets[:,1]), histtype='step', ec=colors_InOut[6], linewidth=1.5)
+        plt.hist(predictions[:,1], bins=nbinsHist, range=[-50, 50], label='Prediction, mean=%.2f'%np.mean(predictions[:,1]), histtype='step', ec=colors_InOut[7], linewidth=1.5)
 
 
         box = ax.get_position()
@@ -88,7 +91,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
         plt.ylabel('Counts')
         plt.xlabel('$ p_{T,y}$ in GeV')
         #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-        plt.title(' Histogram $ p_{T,y}$')
+        #plt.title(' Histogram $ p_{T,y}$')
         #plt.text('$p_T$ range restriction')
 
         ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -102,13 +105,14 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
         fig.patch.set_facecolor('white')
         ax = plt.subplot(111)
         nbinsHist = 150
-        plt.hist(np.subtract(InputsTargets['PF'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f'%np.mean(np.subtract(InputsTargets['PF'][0,:], Targets[:,0])), histtype='step', ec=colors_InOut[0])
+
         plt.hist(np.subtract(InputsTargets['Track'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='Track, mean=%.2f'%np.mean(np.subtract(InputsTargets['Track'][0,:], Targets[:,0])), histtype='step', ec=colors_InOut[0])
         plt.hist(np.subtract(InputsTargets['NoPU'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='NoPU, mean=%.2f'%np.mean(np.subtract(InputsTargets['NoPU'][0,:], Targets[:,0])), histtype='step', ec=colors_InOut[2])
         plt.hist(np.subtract(InputsTargets['PUCorrected'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='PUCorrected, mean=%.2f'%np.mean(np.subtract(InputsTargets['PUCorrected'][0,:], Targets[:,0])), histtype='step', ec=colors_InOut[3])
         plt.hist(np.subtract(InputsTargets['PU'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='PU, mean=%.2f'%np.mean(np.subtract(InputsTargets['PU'][0,:], Targets[:,0])), histtype='step', ec=colors_InOut[4])
         plt.hist(np.subtract(InputsTargets['Puppi'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f'%np.mean(np.subtract(InputsTargets['Puppi'][0,:], Targets[:,0])), histtype='step', ec=colors_InOut[5])
-        plt.hist(NN_Diff_x, bins=nbinsHist, range=[-50, 50], label='Prediction, mean=%.2f'%np.mean(np.subtract(predictions[:,0], Targets[:,0])), histtype='step', ec=colors_InOut[7])
+        plt.hist(np.subtract(InputsTargets['PF'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f'%np.mean(np.subtract(InputsTargets['PF'][0,:], Targets[:,0])), histtype='step', ec=colors_InOut[1], linewidth=1.5)
+        plt.hist(NN_Diff_x, bins=nbinsHist, range=[-50, 50], label='NN, mean=%.2f'%np.mean(np.subtract(predictions[:,0], Targets[:,0])), histtype='step', ec=colors_InOut[7], linewidth=1.5)
 
 
         box = ax.get_position()
@@ -118,26 +122,28 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
         plt.ylabel('Counts')
         plt.xlabel('$\\Delta p_{T,x}$ in GeV')
+        plt.xlim(-50,50)
         #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-        plt.title(' Histogram Deviation to Target  $\\Delta p_{T,x}$')
+        #plt.title(' Histogram Deviation to Target  $\\Delta p_{T,x}$')
         #plt.text('$p_T$ range restriction')
 
         ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
-        plt.savefig("%sHist_Input_Dev_x_Hist.png"%(plotsD))
+        plt.savefig("%sHist_Input_Dev_x.png"%(plotsD), bbox_inches="tight")
 
         fig=plt.figure(figsize=(10,6))
         fig.patch.set_facecolor('white')
         ax = plt.subplot(111)
         nbinsHist = 150
-        plt.hist(np.subtract(InputsTargets['PF'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f'%np.mean(np.subtract(InputsTargets['PF'][1,:], Targets[:,1])), histtype='step', ec=colors_InOut[0])
+
         plt.hist(np.subtract(InputsTargets['Track'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='Track, mean=%.2f'%np.mean(np.subtract(InputsTargets['Track'][1,:], Targets[:,1])), histtype='step', ec=colors_InOut[0])
         plt.hist(np.subtract(InputsTargets['NoPU'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='NoPU, mean=%.2f'%np.mean(np.subtract(InputsTargets['NoPU'][1,:], Targets[:,1])), histtype='step', ec=colors_InOut[2])
         plt.hist(np.subtract(InputsTargets['PUCorrected'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='PUCorrected, mean=%.2f'%np.mean(np.subtract(InputsTargets['PUCorrected'][1,:], Targets[:,1])), histtype='step', ec=colors_InOut[3])
         plt.hist(np.subtract(InputsTargets['PU'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='PU, mean=%.2f'%np.mean(np.subtract(InputsTargets['PU'][1,:], Targets[:,1])), histtype='step', ec=colors_InOut[4])
         plt.hist(np.subtract(InputsTargets['Puppi'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f'%np.mean(np.subtract(InputsTargets['Puppi'][1,:], Targets[:,1])), histtype='step', ec=colors_InOut[5])
-        plt.hist(NN_Diff_y, bins=nbinsHist, range=[-50, 50], label='Prediction, mean=%.2f'%np.mean(np.subtract(predictions[:,1], Targets[:,1])), histtype='step', ec=colors_InOut[7])
+        plt.hist(np.subtract(InputsTargets['PF'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f'%np.mean(np.subtract(InputsTargets['PF'][1,:], Targets[:,1])), histtype='step', ec=colors_InOut[1], linewidth=1.5)
+        plt.hist(NN_Diff_y, bins=nbinsHist, range=[-50, 50], label='NN, mean=%.2f'%np.mean(np.subtract(predictions[:,1], Targets[:,1])), histtype='step', ec=colors_InOut[7], linewidth=1.5)
 
 
         box = ax.get_position()
@@ -147,19 +153,20 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
         plt.ylabel('Counts')
         plt.xlabel('$\Delta p_{T,y}$ in GeV')
+        plt.xlim(-50,50)
         #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-        plt.title(' Histogram Deviation to Target  $\Delta p_{T,y}$')
+        #plt.title(' Histogram Deviation to Target  $\Delta p_{T,y}$')
         #plt.text('$p_T$ range restriction')
 
         ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
-        plt.savefig("%sHist_Input_Dev_y_Hist.png"%(plotsD))
+        plt.savefig("%sHist_Input_Dev_y.png"%(plotsD), bbox_inches="tight")
 
 
     plt.clf()
     plt.figure()
-    plt.suptitle('x-Korrektur PF-Target ')
+    #plt.suptitle('x-Korrektur PF-Target ')
     plt.xlabel("$ p_{T,x}^Z$")
     plt.ylabel("PF-Target")
     heatmap, xedges, yedges = np.histogram2d(   Targets[:,0], np.subtract(InputsTargets['PF'][0,:],  Targets[:,0]), bins=50,
@@ -176,7 +183,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
     plt.clf()
     plt.figure()
-    plt.suptitle('y-Korrektur: PF-Target ')
+    #plt.suptitle('y-Korrektur: PF-Target ')
     plt.xlabel("$ p_{T,y}^Z$")
     plt.ylabel("PF-Target")
     heatmap, xedges, yedges = np.histogram2d(  Targets[:,1], np.subtract(InputsTargets['PF'][1,:],  Targets[:,1]), bins=50,
@@ -191,7 +198,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
     plt.clf()
     plt.figure()
-    plt.suptitle('x-Korrektur Prediction-Target ')
+    #plt.suptitle('x-Korrektur Prediction-Target ')
     plt.xlabel("$ p_{T,x}^Z$")
     plt.ylabel("Prediction-Target")
     heatmap, xedges, yedges = np.histogram2d(  Targets[:,0], NN_Diff_x,  bins=50,
@@ -208,7 +215,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
     plt.clf()
     plt.figure()
-    plt.suptitle('y-Korrektur: Prediction-Target ')
+    #plt.suptitle('y-Korrektur: Prediction-Target ')
     plt.xlabel("$ p_{T,y}^Z$")
     plt.ylabel("Prediction-Target")
     heatmap, xedges, yedges = np.histogram2d( Targets[:,1], NN_Diff_y, bins=50,
@@ -223,7 +230,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
     plt.clf()
     plt.figure()
-    plt.suptitle('Targets: x-y-correlation ')
+    #plt.suptitle('Targets: x-y-correlation ')
     plt.ylabel("$p_{T,y}^Z$")
     plt.xlabel("$p_{T,x}^Z$")
     heatmap, xedges, yedges = np.histogram2d(  Targets[:,1] , Targets[:,0], bins=50, range=[[np.percentile(Targets[:,0],5),np.percentile(Targets[:,0],95)],[np.percentile( Targets[:,1],5), np.percentile(Targets[:,1],95)]])
@@ -235,7 +242,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
     plt.clf()
     plt.figure()
-    plt.suptitle('predictions: x-y-correlation ')
+    #plt.suptitle('predictions: x-y-correlation ')
     plt.ylabel("$p_{T,y}^Z$")
     plt.xlabel("$p_{T,x}^Z$")
     heatmap, xedges, yedges = np.histogram2d(  predictions[:,1] , predictions[:,0], bins=50, range=[[np.percentile(predictions[:,0],5),np.percentile(predictions[:,0],95)],[np.percentile( predictions[:,1],5), np.percentile(predictions[:,1],95)]])
@@ -247,7 +254,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
     plt.clf()
     plt.figure()
-    plt.suptitle('x-Korrektur Prediction-Target ')
+    #plt.suptitle('x-Korrektur Prediction-Target ')
     plt.xlabel("$p_{T,x}^Z$")
     plt.hist(map(np.subtract, predictions[:,0],  Targets[:,0]), bins=50, range=[np.percentile(map(np.subtract, predictions[:,0],  Targets[:,0]),5), np.percentile(map(np.subtract, predictions[:,0],  Targets[:,0]),95)])
     plt.legend()
@@ -255,7 +262,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
     plt.clf()
     plt.figure()
-    plt.suptitle('y-Korrektur Prediction-Target ')
+    #plt.suptitle('y-Korrektur Prediction-Target ')
     plt.xlabel("$p_{T,y}^Z$")
     plt.hist(map(np.subtract, predictions[:,1],  Targets[:,1]), bins=50, range=[np.percentile(map(np.subtract, predictions[:,1],  Targets[:,1]),5), np.percentile(map(np.subtract, predictions[:,1],  Targets[:,1]),95)])
     plt.legend()
@@ -265,10 +272,10 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
     plt.clf()
     plt.figure()
-    plt.suptitle('y-Korrektur Prediction vs. Target ')
+    #plt.suptitle('y-Korrektur Prediction vs. Target ')
     plt.xlabel("$p_{T,y}^Z$")
-    plt.hist(predictions[:,1], bins=50, range=[np.percentile(predictions[:,1],5), np.percentile( predictions[:,1],95)], histtype='step' )
-    plt.hist(Targets[:,1], bins=50, range=[np.percentile(Targets[:,1],5), np.percentile( Targets[:,1],95)], histtype='step' )
+    plt.hist(predictions[:,1], bins=50, range=[np.percentile(predictions[:,1],5), np.percentile( predictions[:,1],95)], histtype='step', label='Predictions' )
+    plt.hist(Targets[:,1], bins=50, range=[np.percentile(Targets[:,1],5), np.percentile( Targets[:,1],95)], histtype='step', label='Targets' )
     plt.legend()
     plt.savefig("%sHist_Pred_Tar_y.png"%(plotsD))
 
@@ -276,9 +283,9 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
 
     plt.clf()
     plt.figure()
-    plt.suptitle('y-Korrektur Prediction vs. Target ')
+    #plt.suptitle('y-Korrektur Prediction vs. Target ')
     plt.xlabel("$p_{T,x}^Z$")
-    plt.hist(predictions[:,0], bins=50, range=[np.percentile(predictions[:,0],5), np.percentile( predictions[:,0],95)], histtype='step' , label='prediction')
+    plt.hist(predictions[:,0], bins=50, range=[np.percentile(predictions[:,0],5), np.percentile( predictions[:,0],95)], histtype='step' , label='Predictions')
     plt.hist(Targets[:,0], bins=50, range=[np.percentile(Targets[:,0],5), np.percentile( Targets[:,0],95)], histtype='step',  label='Target')
     plt.legend()
     plt.savefig("%sHist_Pred_Tar_x.png"%(plotsD))
@@ -291,7 +298,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD):
     if NN_mode =='xyr' or NN_mode =='xyd' or NN_mode =='nr' or NN_mode =='xyd':
         plt.clf()
         plt.figure()
-        plt.suptitle('y-Korrektur: Prediction-Target ')
+        #plt.suptitle('y-Korrektur: Prediction-Target ')
         plt.xlabel("${p_T^Z}$")
         plt.ylabel("Prediction-Target")
         heatmap, xedges, yedges = np.histogram2d(  map(np.subtract, predictions[:,2],  Targets[:,2]) , Targets[:,2], bins=50)
