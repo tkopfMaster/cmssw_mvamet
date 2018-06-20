@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 import sys
 import numpy as np
 import matplotlib.cm as cm
+import matplotlib.mlab as mlab
 from matplotlib.colors import LogNorm
 from getPlotsOutputclean import loadData
-from prepareInput import pol2kar_x, pol2kar_y
+from prepareInput import pol2kar_x, pol2kar_y, angularrange
+from prepareOutput import kar2pol, pol2kar
 from scipy.stats import rayleigh
 import scipy
 
@@ -16,6 +18,17 @@ nbinsHist = 400
 LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
 colors_InOut = cm.brg(np.linspace(0, 1, 8))
 diff_p_min, diff_p_max = 0, 50
+
+def Histogram_Angle(phi_, labelName, errbars_shift):
+    if labelName=='Targets':
+        phi_ = angularrange(phi_+np.pi)
+    Mean = np.mean(phi_)
+    Std = np.std(phi_)
+    if labelName in ['NN MET', 'PF MET', 'Targets']:
+        plt.hist(phi_, bins=nbinsHist, range=[-np.pi, np.pi], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
+    else:
+        plt.hist(phi_, bins=nbinsHist, range=[-np.pi, np.pi], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+
 
 def Hist_Diff_norm(r,phi,pr,pphi, labelName, col):
     if labelName=='NN':
@@ -30,9 +43,9 @@ def Hist_Diff_norm(r,phi,pr,pphi, labelName, col):
     delta_y_sq = np.square(np.subtract(y,py))
     norm = np.sqrt(delta_x_sq+delta_y_sq)
     if labelName in ['NN', 'PF'] :
-        plt.hist(norm, bins=nbinsHist, range=[diff_p_min, diff_p_max], label=labelName+', mean=%.2f$\pm$%.2f'%(np.mean(norm), np.std(norm)), histtype='step', ec=colors_InOut[col], linewidth=1.5)
+        plt.hist(norm, bins=nbinsHist, range=[diff_p_min, diff_p_max], label=labelName+', mean=%.2f$\pm$%.2f'%(np.mean(norm), np.std(norm)), histtype='step', ec=colors_InOut[col], linewidth=1.5, normed=True)
     else:
-        plt.hist(norm, bins=nbinsHist, range=[diff_p_min, diff_p_max], label=labelName+', mean=%.2f$\pm$%.2f'%(np.mean(norm), np.std(norm)), histtype='step', ec=colors_InOut[col])
+        plt.hist(norm, bins=nbinsHist, range=[diff_p_min, diff_p_max], label=labelName+', mean=%.2f$\pm$%.2f'%(np.mean(norm), np.std(norm)), histtype='step', ec=colors_InOut[col], normed=True)
 
 def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     NN_Output_applied = h5py.File("%sNN_Output_applied_%s.h5"%(outputD,NN_mode), "r")
@@ -59,6 +72,8 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         InputsTargets = h5py.File("%sNN_Input_%s.h5" % (outputD,NN_mode), "r")
 
         Outputs = loadData(rootOutput)
+        #Outputs = Outputs[Outputs['Boson_Pt']<=200]
+        #Outputs = Outputs[Outputs['NVertex']<=50]
 
         fig=plt.figure(figsize=(10,6))
         fig.patch.set_facecolor('white')
@@ -91,10 +106,55 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         #plt.ylim(ylimResMVAMin, ylimResMax)
         plt.savefig("%sHist_Diff_norm.png"%(plotsD), bbox_inches="tight")
 
+
+
+
+        fig=plt.figure(figsize=(10,6))
+        fig.patch.set_facecolor('white')
+        ax = plt.subplot(111)
+
+
+
+        Histogram_Angle(Outputs['recoilpatpfNoPUMET_Phi'], 'No PU MET',0)
+        Histogram_Angle(Outputs['recoilpatpfPUCorrectedMET_Phi'],'PU corrected MET',1)
+        Histogram_Angle(Outputs['recoilpatpfPUMET_Phi'], 'PU MET',2)
+        Histogram_Angle(Outputs['recoilpatpfTrackMET_Phi'], 'Track MET',3)
+        Histogram_Angle(Outputs['recoilslimmedMETsPuppi_Phi'], 'Puppi MET',4)
+        Histogram_Angle(Outputs['LongZCorrectedRecoil_Phi'], 'GBRT MET', 5)
+        Histogram_Angle(Outputs['recoilslimmedMETs_Phi'], 'PF MET', 1)
+        NN_r, NN_phi = kar2pol(predictions[:,0], predictions[:,1])
+        #Histogram_Angle(NN_phi, 'NN MET', 6)
+        Histogram_Angle(Outputs['Boson_Phi'], 'Targets', 7)
+
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+        handles, labels = ax.get_legend_handles_labels()
+        #handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
+
+        plt.ylabel('Counts')
+        plt.xlabel('$  \\alpha $ in rad')
+        plt.xlim(-np.pi,np.pi)
+        #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+        #plt.title('Deviation Histogram perp')
+        #plt.text('$p_T$ and $\# pT$ range restriction')
+
+        ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+        plt.grid()
+        ##plt.ylim(ylimResMVAMin, ylimResMax)
+        plt.savefig("%sHist_phi.png"%(plotsD), bbox_inches="tight")
+        plt.close()
+
+
+
+
+
+
+
+
         print('shape predictions[:,0]', predictions[:,0].shape)
 
 
-
+        '''
         fig=plt.figure(figsize=(10,6))
         fig.patch.set_facecolor('white')
         ax = plt.subplot(111)
@@ -107,16 +167,30 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         Hist_Diff_norm(Outputs['recoilslimmedMETsPuppi_Pt'], Outputs['recoilslimmedMETsPuppi_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'Puppi', 5)
         Hist_Diff_norm(Outputs['LongZCorrectedRecoil_Pt'], Outputs['LongZCorrectedRecoil_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'GBRT', 7)
         Hist_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1)
-        Hist_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6)
-
+        print("Zeile 110")
+        #Hist_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6)
+        print("Zeile 112")
 
         norm_ = np.sqrt(np.square(predictions[:,0]-pol2kar_x(Outputs['Boson_Pt'], Outputs['Boson_Phi']))+np.square(predictions[:,1]-pol2kar_y(Outputs['Boson_Pt'], Outputs['Boson_Phi'])))
-        size = len(norm_)
-        x = scipy.arange(size)
+        print("Zeile 115")
         param = rayleigh.fit(norm_)
-        pdf_fitted = rayleigh.pdf(x, *param[:-2], loc=param[-2], scale=param[-1]) * size
-        plt.plot(pdf_fitted, 'k--', label='Rayleigh-Fit')
+        bins = np.linspace(0,50, 50/nbinsHist)
+        bins = range(0, 50 + 1, 1)
+        #pdf_fitted = rayleigh.pdf(bins, loc=param[-2], scale=len(norm_))
 
+        pdf_fitted2 = rayleigh.pdf(bins, param[:-2], loc=0, scale=1) * len(norm_)
+        plt.plot(pdf_fitted2, label='Rayleigh-Fit 2')
+        pdf_fitted = rayleigh.pdf(bins, param[:-2], loc=0, scale=1)
+        plt.plot(pdf_fitted, label='Rayleigh-Fit ')
+        #pdf_fitted3 = rayleigh.pdf(bins, param[:-2], loc=0, scale=len(norm_))
+        #plt.plot(pdf_fitted3, label='Rayleigh-Fit 3')
+        #pdf_fitted4 = rayleigh.pdf(bins,  loc=0, scale=len(norm_))
+        #plt.plot(pdf_fitted4, label='Rayleigh-Fit 4')
+        #mean_, std_ = np.mean(norm_), np.std(norm_)
+        #ray = (bins/mean_)*np.exp(-np.multiply(bins,bins)/(2*std_*std_))
+        #plt.plot(ray, label='Rayleigh-Fit 4')
+
+        print("plot rayleigh")
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
         handles, labels = ax.get_legend_handles_labels()
@@ -132,7 +206,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
         plt.savefig("%sHist_Diff_norm_Rayleighfit.png"%(plotsD), bbox_inches="tight")
-
+        '''
 
 
 
@@ -294,10 +368,10 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         #plt.hist(np.subtract(pol2pol2kar_x(Outputs['LongZCorrectedRecoil_Pt'],Outputs['LongZCorrectedRecoil_Phi']), Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Puppi'][0,:], Targets[:,0])), np.std(np.subtract(InputsTargets['Puppi'][0,:]  , Targets[:,0]))), histtype='step', ec=colors_InOut[5])
 
         plt.hist(np.subtract(InputsTargets['PF'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PF'][0,:], Targets[:,0])), np.std(np.subtract(InputsTargets['PF'][0,:]  , Targets[:,0]))), histtype='step', ec=colors_InOut[1], linewidth=1.5, normed=True)
-        plt.hist(NN_Diff_x, bins=nbinsHist, range=[-50, 50], label='NN, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(predictions[:,0], Targets[:,0])), np.std(np.subtract(predictions[:,0]  , Targets[:,0]))), histtype='step', ec=colors_InOut[7], linewidth=1.5, normed=True)
+        plt.hist(NN_Diff_x, bins=nbinsHist, range=[-50, 50], label='NN, mean=%.2f$\pm$%.2f'%(np.mean(NN_Diff_x), np.std(NN_Diff_x)), histtype='step', ec=colors_InOut[7], linewidth=1.5, normed=True)
 
         x = np.linspace(-50,50, nbinsHist)
-        plt.plot(x, mlab.normpdf(x, np.mean(NN_Diff_x), np.std(NN_Diff_x)), 'k--',  label="Gaussian Fit")
+        plt.plot(x, mlab.normpdf(x, np.mean(NN_Diff_x), np.std(NN_Diff_x)), 'k--',  label='Gaussian Fit, mean=%.2f$\pm$%.2f'%(np.mean(NN_Diff_x), np.std(NN_Diff_x)))
 
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -332,7 +406,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.hist(NN_Diff_y, bins=nbinsHist, range=[-50, 50], label='NN, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(predictions[:,1], Targets[:,1])), np.std(np.subtract(predictions[:,1]  , Targets[:,1]))), histtype='step', ec=colors_InOut[7], linewidth=1.5, normed=True)
 
         x = np.linspace(-50,50, nbinsHist)
-        plt.plot(x, mlab.normpdf(x, np.mean(NN_Diff_y), np.std(NN_Diff_y)), 'k--', label="Gaussian Fit")
+        plt.plot(x, mlab.normpdf(x, np.mean(NN_Diff_y), np.std(NN_Diff_y)), 'k--', label='Gaussian, mean=%.2f$\pm$%.2f'%(np.mean(NN_Diff_y), np.std(NN_Diff_y)))
 
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -427,7 +501,35 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     HM = plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm() )
     plt.colorbar(HM)
     plt.legend()
-    plt.savefig("%sHM_Targets_Correlation.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sHM_Targets_Correlation_Kar.png"%(plotsD), bbox_inches="tight")
+
+
+    PF_x, PF_y = pol2kar(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'])
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('Targets: x-y-correlation ')
+    plt.ylabel("$p_{T,y}$")
+    plt.xlabel("$p_{T,x}$")
+    heatmap, xedges, yedges = np.histogram2d(  PF_y , PF_x, bins=50, range=[[-40,40],[-40, 40]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    HM = plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm() )
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_PF_Correlation_Kar.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('Targets: x-y-correlation ')
+    plt.xlabel("$\\phi_Z$")
+    plt.ylabel("$p_T^Z$")
+    heatmap, xedges, yedges = np.histogram2d(  Outputs['Boson_Phi'] , Outputs['Boson_Pt'], bins=[20,100], range=[[-np.pi, np.pi],[0,30]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    HM = plt.imshow(heatmap.T, extent=extent, origin='lower' , norm=LogNorm())
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Targets_Correlation_Pol.png"%(plotsD), bbox_inches="tight")
+
 
     plt.clf()
     plt.figure()

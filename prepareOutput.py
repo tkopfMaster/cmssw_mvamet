@@ -13,6 +13,7 @@ import root_numpy
 from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 from rootpy.io import root_open
 import ROOT
+from prepareInput import angularrange
 
 #NN_mode='xyr'
 
@@ -24,6 +25,13 @@ def pol2kar_y(norm, phi):
     y = []
     y = np.cos(phi[:])*norm[:]
     return(y)
+
+def pol2kar(norm, phi):
+    x = []
+    x = np.sin(phi[:])*norm[:]
+    y = []
+    y = np.cos(phi[:])*norm[:]
+    return(x, y)
 
 def kar2pol(x, y):
     rho = np.sqrt(np.multiply(x,x) + np.multiply(y,y))
@@ -90,7 +98,11 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
 
     print("a_r,a_phi", a_r,a_phi)
 
-    NN_LongZ, NN_PerpZ= pol2kar(a_r,a_phi-mZ_phi)
+    NN_LongZ, NN_PerpZ = np.cos(angularrange(a_phi-mZ_phi))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
+    NN_x = NN_LongZ*mZ_x+NN_PerpZ*mZ_x
+    NN_y = NN_LongZ*mZ_y+NN_PerpZ*mZ_y
+    print("Diff zwischen NN_x und NN_y", np.mean(NN_x-a_x), np.mean(NN_y-a_y))        
+    #NN_LongZ, NN_PerpZ= pol2kar(a_r,angularrange(a_phi-mZ_phi))
     #NN_LongZ, NN_PerpZ = NN_LongZ_l.tolist(), NN_PerpZ_l.tolist()
     #print("NN_LongZ, NN_PerpZ", NN_LongZ, NN_PerpZ)
     #NN_LongZ = div0(np.multiply(a_x, mZ_x)+np.multiply(a_y, mZ_y) , list(map(np.sqrt,np.add(np.multiply(mZ_x,mZ_x),np.multiply(mZ_y,mZ_y)))))

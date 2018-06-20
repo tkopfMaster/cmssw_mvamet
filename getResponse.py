@@ -27,6 +27,9 @@ colors = cm.brg(np.linspace(0, 1, 3))
 colors_InOut = cm.brg(np.linspace(0, 1, 8))
 colors2 = cm.brg(np.linspace(0, 1, nbins))
 HistLimMin, HistLimMax = -50, 50
+
+pTTresh = 10
+
 #Data settings
 
 def div0( a, b ):
@@ -79,7 +82,20 @@ def plotMVAResponseOverpTZ_woutError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(DFName[branchString]/DFName.Boson_Pt)**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
+    meanc = np.mean((-(DFName[branchString])/DFName.Boson_Pt))
+    stdc = np.std((-(DFName[branchString])/DFName.Boson_Pt))
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
+
+def plotMVAResponseOverpTZ_woutError_Tresh(branchString, labelName, errbars_shift):
+    DFName_Tresh = DFName[DFName['Boson_Pt']>pTTresh]
+    binwidth = (DFName_Tresh.Boson_Pt.values.max() - DFName_Tresh.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
+    n, _ = np.histogram(DFName_Tresh.Boson_Pt, bins=nbins)
+    sy, _ = np.histogram(DFName_Tresh.Boson_Pt, bins=nbins, weights=(-(DFName_Tresh[branchString])/DFName_Tresh.Boson_Pt))
+    sy2, _ = np.histogram(DFName_Tresh.Boson_Pt, bins=nbins, weights=(DFName_Tresh[branchString]/DFName_Tresh.Boson_Pt)**2)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+
 
 def plotMVAResponseOverNVertex_woutError(branchString, labelName, errbars_shift):
     binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
@@ -88,7 +104,20 @@ def plotMVAResponseOverNVertex_woutError(branchString, labelName, errbars_shift)
     sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString]/DFName_nVertex.Boson_Pt)**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
+    meanc=np.mean(-(DFName_nVertex[branchString])/DFName_nVertex.Boson_Pt)
+    stdc=np.std(-(DFName_nVertex[branchString])/DFName_nVertex.Boson_Pt)
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
+
+def plotMVAResponseOverNVertex_woutError_Tresh(branchString, labelName, errbars_shift):
+    DFName_nVertex_Tresh = DFName_nVertex[DFName_nVertex['Boson_Pt']>pTTresh]
+    binwidth = (DFName_nVertex_Tresh.NVertex.values.max() - DFName_nVertex_Tresh.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
+    n, _ = np.histogram(DFName_nVertex_Tresh.NVertex, bins=nbinsVertex)
+    sy, _ = np.histogram(DFName_nVertex_Tresh.NVertex, bins=nbinsVertex, weights=-(DFName_nVertex_Tresh[branchString])/DFName_nVertex_Tresh.Boson_Pt)
+    sy2, _ = np.histogram(DFName_nVertex_Tresh.NVertex, bins=nbinsVertex, weights=(DFName_nVertex_Tresh[branchString]/DFName_nVertex_Tresh.Boson_Pt)**2)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+
 
 def plotMVAResponseOverpTZ_wError(branchString, labelName, errbars_shift):
     binwidth = (DFName.Boson_Pt.values.max() - DFName.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
@@ -480,6 +509,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     NPlotsLines = 6
     MVA_NPlotsLines = 3
     pTRangeString = '$0\ \mathrm{GeV} < p_{T}^Z \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString_Tresh = '$1\ \mathrm{GeV} < p_{T}^Z \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     pTRangeStringNVertex = '$0\ \mathrm{GeV} < p_{T}^Z \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     colors = ['blue','green','red','cyan','magenta','yellow']
@@ -525,6 +555,37 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     #plt.ylim(ResponseMin, ResponseMax)
     plt.savefig("%sResponse_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
+
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plotMVAResponseOverpTZ_woutError_Tresh('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    plotMVAResponseOverpTZ_woutError_Tresh('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverpTZ_woutError_Tresh('recoilslimmedMETs_LongZ', 'PF', 1)
+    plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_Tresh))
+
+    plt.xlabel('$p_{T}^Z $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ResponseMin, ResponseMax)
+    plt.savefig("%sResponse_pT_>1.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
+
+
+
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -574,6 +635,32 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     #plt.ylim(0, ResponseMax)
     plt.savefig("%sResponse_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plotMVAResponseOverNVertex_woutError_Tresh('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    plotMVAResponseOverNVertex_woutError_Tresh('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverNVertex_woutError_Tresh('recoilslimmedMETs_LongZ', 'PF', 1)
+    plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_Tresh))
+
+    plt.xlabel('#$ \mathrm{PV}$ ')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(0, ResponseMax)
+    plt.savefig("%sResponse_PV_Tresh.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
 
 
     fig=plt.figure(figsize=(10,6))
@@ -1212,10 +1299,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.savefig("%sDelta_perp_Std_perp_PV.png"%(plotsD), bbox_inches="tight")
 
 
-
-
-
-
+    print('PF: Wie viele negative Responses', np.sum(DFName['recoilpatpfPUMET_LongZ']<0))
+    print('GBRT: Wie viele negative Responses', np.sum(DFName['LongZCorrectedRecoil_LongZ']<0))
+    print('NN: Wie viele negative Responses', np.sum(DFName['NN_LongZ']<0))
+    print('BosonPt: Wie viele negative Responses', np.sum(DFName['Boson_Pt']<0))
 
 if __name__ == "__main__":
     inputDir = sys.argv[1]

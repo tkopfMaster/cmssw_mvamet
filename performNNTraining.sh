@@ -18,7 +18,7 @@ else
 fi
 inputFile=/storage/b/tkopf/mvamet/skim/out.root
 GBRTFile=/storage/b/tkopf/mvamet/Gridoutput/data1.root
-#cp $GBRTFile /storage/b/tkopf/mvamet/Gridoutput/rootfiles/data_${trainingname}.root
+cp $GBRTFile /storage/b/tkopf/mvamet/Gridoutput/rootfiles/data_${trainingname}.root
 GBRTFile2=/storage/b/tkopf/mvamet/Gridoutput/rootfiles/data_${trainingname}.root
 echo "GBRTFile2 $GBRTFile2"
 src_di=$PWD
@@ -49,9 +49,10 @@ fi
 #python $src_di/prepareInput.py $inputFile $files_di $NN_mode $plots_di
 #python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/applyNN.py $inputFile $files_di $optimizer $loss $NN_mode
-python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $GBRTFile2
-#python $src_di/prepareOutput.py $GBRTFile2 $files_di $NN_mode $plots_di
+#python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $GBRTFile2
+python $src_di/prepareOutput.py $GBRTFile2 $files_di $NN_mode $plots_di
 #python $src_di/getPlotsInput.py $inputFile $plots_di
 #python $src_di/getPlotsOutputclean.py $GBRTFile2 $files_di $plots_di
+python $src_di/getResponse.py $GBRTFile2 $files_di $plots_di
 cp -r $plots_di /usr/users/tkopf/www/METplots/
 cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/
