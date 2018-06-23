@@ -1,10 +1,20 @@
 from keras import backend as K
 import numpy as np
 import tensorflow as tf
+from prepareInput import angularrange
 
 
 def mean_squared_error_r(y_true, y_pred):
     return K.mean(K.square(y_pred- y_true)+10*K.abs(K.square(y_pred)-K.square(y_true)), axis=-1)
+
+def Response(y_true, y_pred):
+    a_, a_phi = y_pred[:,0], y_pred[:,1]
+    mZ_phi = y_true[:,1]
+    NN_LongZ, NN_PerpZ = -np.cos(angularrange(np.add(a_phi,-mZ_phi)))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
+    Response = K.abs(y_pred/y_true-1)
+    Resolution = NN_PerpZ
+    MSE = K.square(Response)+K.square(Resolution)
+    return Response[~np.isnan(Response)]
 
 def perp_long_error(y_true, y_pred):
     a_=K.sqrt(K.square(y_pred[:,0])+K.square(y_pred[:,1]))

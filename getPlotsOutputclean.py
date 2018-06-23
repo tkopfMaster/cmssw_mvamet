@@ -12,6 +12,7 @@ import matplotlib.cm as cm
 import matplotlib.patches as mpatches
 import scipy.stats
 import matplotlib.ticker as mtick
+from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
 import h5py
 import sys
 
@@ -36,18 +37,8 @@ def div0( a, b ):
         c[ ~ np.isfinite( c )] = 0  # -inf inf NaN
     return c
 
-def kar2pol(x, y):
-    rho = np.sqrt(np.multiply(x,x) + np.multiply(y,y))
-    phi = np.arctan2(y, x)
-    return(rho, phi)
 
-def angularrange(Winkel):
-    if isinstance(Winkel, (list, tuple, np.ndarray)):
-        for i in range(0, len(Winkel) ):
-            Winkel[i]=((Winkel[i]+np.pi)%(2*np.pi)-(np.pi))
-    else:
-        Winkel=((Winkel+np.pi)%(2*np.pi)-(np.pi))
-    return(Winkel)
+
 
 def loadData(inputD):
 

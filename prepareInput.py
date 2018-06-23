@@ -23,6 +23,24 @@ def div0( a, b ):
         c[ ~ np.isfinite( c )] = 0  # -inf inf NaN
     return c
 
+def pol2kar_x(norm, phi):
+    x = np.cos(phi)*norm
+    return(x)
+def pol2kar_y(norm, phi):
+    y = np.sin(phi)*norm
+    return(y)
+
+def pol2kar(norm, phi):
+    x = np.cos(phi)*norm
+    y = np.sin(phi)*norm
+    return(x, y)
+
+def kar2pol(x, y):
+    rho = np.sqrt(np.multiply(x,x) + np.multiply(y,y))
+    phi = np.arctan2(y, x)
+    return(rho, phi)
+
+
 def angularrange(Winkel):
     if isinstance(Winkel, (list, tuple, np.ndarray)):
         for i in range(0, len(Winkel) ):
@@ -30,6 +48,8 @@ def angularrange(Winkel):
     else:
         Winkel=((Winkel+np.pi)%(2*np.pi)-(np.pi))
     return(Winkel)
+
+
 
 def loadData(fName):
     tfile = ROOT.TFile(fName)
@@ -407,33 +427,27 @@ def getInputs_xyr(DataF):
 def getInputs_rphi(DataF, outputD):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[DataF['recoilslimmedMETs_Pt'],
-              DataF['recoilslimmedMETs_Phi'],
-              DataF['NVertex'] ])
+              DataF['recoilslimmedMETs_Phi']])
     dset_Track = writeInputs.create_dataset("Track",  dtype='f',
         data=[ DataF['recoilpatpfTrackMET_Pt'],
-              DataF['recoilpatpfTrackMET_Phi'],
-              DataF['recoilpatpfTrackMET_sumEt']])
+              DataF['recoilpatpfTrackMET_Phi']])
     dset_NoPU = writeInputs.create_dataset("NoPU",  dtype='f',
         data=[DataF['recoilpatpfNoPUMET_Pt'],
-              DataF['recoilpatpfNoPUMET_Phi'],
-              DataF['recoilpatpfNoPUMET_sumEt']])
+              DataF['recoilpatpfNoPUMET_Phi']])
     dset_PUCorrected = writeInputs.create_dataset("PUCorrected",  dtype='f',
         data=[DataF['recoilpatpfPUCorrectedMET_Pt'],
-              DataF['recoilpatpfPUCorrectedMET_Phi'],
-              DataF['recoilpatpfPUCorrectedMET_sumEt']])
+              DataF['recoilpatpfPUCorrectedMET_Phi']])
     dset_PU = writeInputs.create_dataset("PU",  dtype='f',
         data=[DataF['recoilpatpfPUMET_Pt'],
-              DataF['recoilpatpfPUMET_Phi'],
-              DataF['recoilpatpfPUMET_sumEt']])
+              DataF['recoilpatpfPUMET_Phi']])
     dset_Puppi = writeInputs.create_dataset("Puppi",  dtype='f',
         data=[DataF['recoilslimmedMETsPuppi_Pt'],
-              DataF['recoilslimmedMETsPuppi_Phi'],
-              DataF['recoilslimmedMETsPuppi_sumEt']])
+              DataF['recoilslimmedMETsPuppi_Phi']])
 
 
     dset_Target = writeInputs.create_dataset("Target",  dtype='f',
         data=[DataF['Boson_Pt'],
-              DataF['Boson_Phi']])
+              angularrange(DataF['Boson_Phi']+np.pi)])
 
 
     fig=plt.figure(figsize=(10,6))

@@ -216,7 +216,22 @@ def Histogram_Deviation_perp_pT(branchString, labelName, errbars_shift):
     else:
         plt.hist(((DFName[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
+def Hist_Response(branchString, labelName, errbars_shift):
+    Mean = np.mean(-(DFName[branchString])/DFName['Boson_Pt'])
+    Std = np.std(-(DFName[branchString])/DFName['Boson_Pt'])
 
+    plt.hist((-(DFName[branchString])/DFName['Boson_Pt']), bins=nbinsHist, range=[ResponseMin, ResponseMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+
+def Hist_Resolution_para(branchString, labelName, errbars_shift):
+    Mean = np.mean(-(DFName[branchString])/DFName['Boson_Pt'])
+    Std = np.std(-(DFName[branchString])/DFName['Boson_Pt'])
+    plt.hist(np.abs(-(DFName[branchString])/DFName['Boson_Pt']-Mean), bins=nbinsHist, range=[ResolutionMin, ResolutionMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+
+
+def Hist_Resolution_para(branchString, labelName, errbars_shift):
+    Mean = np.mean(DFName[branchString])
+    Std = np.std(DFName[branchString])
+    plt.hist(DFName[branchString], bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 
 def Histogram_Deviation_para_Bin(branchString, labelName, bin):
@@ -224,6 +239,15 @@ def Histogram_Deviation_para_Bin(branchString, labelName, bin):
     Std = np.std(-(DFName[branchString])-DFName.Boson_Pt.values)
     n, _ = np.histogram(-(DFName[branchString])-DFName.Boson_Pt.values, bins=nbinsHistBin)
     plt.hist((-(DFName[branchString])-DFName.Boson_Pt.values), bins=nbinsHistBin, range=(_[bin], _[bin+1]), label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors2[bin])
+
+
+def Histogram_Response(branchString, labelName, bin):
+    Mean = np.mean(np.divide(-(DFName[branchString]),DFName.Boson_Pt.values))
+    Std = np.std(np.divide(-(DFName[branchString]),DFName.Boson_Pt.values))
+    n, _ = np.histogram(-(DFName[branchString])-DFName.Boson_Pt.values, bins=nbinsHistBin)
+    plt.hist(np.divide(-(DFName[branchString]),DFName.Boson_Pt.values), bins=nbinsHistBin,  label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors2[bin])
+
+
 
 def Histogram_Norm_Comparison(branchStringLong, branchStringPerp, labelName, errbars_shift):
     Norm_ = np.sqrt(np.square(DFName[branchStringLong])+np.square(DFName[branchStringPerp]))
@@ -1128,6 +1152,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
 
 
+
+
+
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -1222,6 +1249,36 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.grid()
     ##plt.ylim(HistLimMin, HistLimMax)
     plt.savefig("%sDelta_para_Std_para_pT.png"%(plotsD), bbox_inches="tight")
+
+
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    Histogram_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    Histogram_Response('NN_LongZ', 'NN', 2)
+    Histogram_Response('recoilslimmedMETs_LongZ', 'PF', 1)
+
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
+
+    plt.ylabel('$  \\frac{U_{\parallel}}{p_T^Z}} $')
+    plt.xlabel('Counts')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    #plt.title('parallel deviation over $p_T^Z$')
+    #plt.text('$p_T$ and $\# PV$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    ##plt.ylim(HistLimMin, HistLimMax)
+    plt.savefig("%sHist_Response.png"%(plotsD), bbox_inches="tight")
+
+
 
 
     fig=plt.figure(figsize=(10,6))

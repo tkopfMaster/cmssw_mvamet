@@ -13,6 +13,7 @@ import matplotlib.ticker as mtick
 import h5py
 import sys
 
+
 NN_Mode='kart'
 
 
@@ -36,13 +37,28 @@ def loadData_proj(fName):
 #Data settings
 
 def pol2kar_x(norm, phi):
-    x = []
-    x = np.sin(phi[:])*norm[:]
+    x = np.cos(phi[:])*norm[:]
     return(x)
 def pol2kar_y(norm, phi):
-    y = []
-    y = np.cos(phi[:])*norm[:]
+    y = np.sin(phi[:])*norm[:]
     return(y)
+def pol2kar(norm, phi):
+    return (pol2kar_x(norm, phi), pol2kar_y(norm, phi))
+
+
+def kar2pol(x, y):
+    rho = np.sqrt(np.multiply(x,x) + np.multiply(y,y))
+    phi = np.arctan2(y, x)
+    return(rho, phi)
+
+def angularrange(Winkel):
+    if isinstance(Winkel, (list, tuple, np.ndarray)):
+        for i in range(0, len(Winkel) ):
+            Winkel[i]=((Winkel[i]+np.pi)%(2*np.pi)-(np.pi))
+    else:
+        Winkel=((Winkel+np.pi)%(2*np.pi)-(np.pi))
+    return(Winkel)
+
 
 def getInputs_kart(DataF):
     dset_PF1 = writeInputs.create_dataset("PF_1",  dtype='f',

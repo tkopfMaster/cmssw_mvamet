@@ -12,37 +12,10 @@ from os import environ
 import root_numpy
 from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 from rootpy.io import root_open
+from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
 import ROOT
-from prepareInput import angularrange
-
-#NN_mode='xyr'
-
-def pol2kar_x(norm, phi):
-    x = []
-    x = np.sin(phi[:])*norm[:]
-    return(x)
-def pol2kar_y(norm, phi):
-    y = []
-    y = np.cos(phi[:])*norm[:]
-    return(y)
-
-def pol2kar(norm, phi):
-    x = []
-    x = np.sin(phi[:])*norm[:]
-    y = []
-    y = np.cos(phi[:])*norm[:]
-    return(x, y)
-
-def kar2pol(x, y):
-    rho = np.sqrt(np.multiply(x,x) + np.multiply(y,y))
-    phi = np.arctan2(y, x)
-    return(rho, phi)
 
 
-def pol2kar(rho, phi):
-    x = rho * np.cos(phi)
-    y = rho * np.sin(phi)
-    return(x, y)
 
 def div0( a, b ):
     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
@@ -69,11 +42,11 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
         a_x, a_y, a_r = -NN_Output['MET_Predictions'][:,0], -NN_Output['MET_Predictions'][:,1], NN_Output['MET_Predictions'][:,2]+PF_Z_pT['recoilslimmedMETs_Pt']
     elif NN_mode == 'rphi':
         mZ_r, mZ_phi = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
-        a_r, a_phi = NN_Output['MET_Predictions'][:,0], (NN_Output['MET_Predictions'][:,1]+np.pi)
+        a_r, a_phi = NN_Output['MET_Predictions'][:,0], (NN_Output['MET_Predictions'][:,1])
         a_x, a_y = kar2pol(a_r, a_phi)
         mZ_r, mZ_phi =  pol2kar(mZ_r, mZ_phi)
     elif NN_mode == 'xy':
-        mZ_x, mZ_y = -(NN_Output['MET_GroundTruth'][:,0]), -(NN_Output['MET_GroundTruth'][:,1])
+        mZ_x, mZ_y = (NN_Output['MET_GroundTruth'][:,0]), (NN_Output['MET_GroundTruth'][:,1])
         a_x, a_y = (NN_Output['MET_Predictions'][:,0]), (NN_Output['MET_Predictions'][:,1])
         mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
     else:
@@ -95,14 +68,14 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     mZ_r2,mZ_phi = kar2pol(mZ_x, mZ_y)
     print("mZ_r,mZ_phi", mZ_r,mZ_phi)
     a_r,a_phi = kar2pol(a_x,a_y)
-
+    a_x2, a_y2 = pol2kar(a_r, a_phi)
+    print('Diff Test a_x, a_y', a_x2-a_x, a_y2-a_y)
     print("a_r,a_phi", a_r,a_phi)
 
-    NN_LongZ, NN_PerpZ = np.cos(angularrange(a_phi-mZ_phi))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
-    NN_x = NN_LongZ*mZ_x+NN_PerpZ*mZ_x
-    NN_y = NN_LongZ*mZ_y+NN_PerpZ*mZ_y
-    print("Diff zwischen NN_x und NN_y", np.mean(NN_x-a_x), np.mean(NN_y-a_y))        
+    NN_LongZ, NN_PerpZ = -np.cos(angularrange(np.add(a_phi,-mZ_phi)))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
     #NN_LongZ, NN_PerpZ= pol2kar(a_r,angularrange(a_phi-mZ_phi))
+
+    #
     #NN_LongZ, NN_PerpZ = NN_LongZ_l.tolist(), NN_PerpZ_l.tolist()
     #print("NN_LongZ, NN_PerpZ", NN_LongZ, NN_PerpZ)
     #NN_LongZ = div0(np.multiply(a_x, mZ_x)+np.multiply(a_y, mZ_y) , list(map(np.sqrt,np.add(np.multiply(mZ_x,mZ_x),np.multiply(mZ_y,mZ_y)))))
@@ -123,7 +96,7 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     print("length branch_Long", len(branch_Long))
     print("length branch_Perp", len(branch_Perp))
     print('richtig, wenn auf a trainiert: -LongZ-pTZ', -NN_LongZ-mZ_r)
-    print('richtig, wenn auf Z trainiert: LongZ-pTZ', NN_LongZ-mZ_r)
+    print('richtig, wenn auf Z trainiert: LongZ-pTZ', np.add(NN_LongZ,-mZ_r))
     '''
     rfile = ROOT.TFile.Open(inputD)
     tree = rfile.Get('t')
@@ -145,7 +118,7 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     plt.suptitle('y: Prediction vs. Target ')
     plt.xlabel("$p_{T,y}^Z$")
     plt.hist(a_y, bins=50, range=[np.percentile(a_y,5), np.percentile( a_y,95)], histtype='step' )
-    plt.hist(-mZ_y, bins=50, range=[np.percentile(-mZ_y,5), np.percentile( -mZ_y,95)], histtype='step' )
+    plt.hist(mZ_y, bins=50, range=[np.percentile(mZ_y,5), np.percentile( mZ_y,95)], histtype='step' )
     plt.legend(["Prediction","Target"], loc='upper left')
     plt.savefig("%sHist_Pred_Tar_y.png"%(plotsD))
 
@@ -154,7 +127,7 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     plt.suptitle('x: Prediction vs. Target ')
     plt.xlabel("$p_{T,x}^Z$")
     plt.hist(a_x, bins=50, range=[np.percentile(a_x,5), np.percentile( a_x,95)], histtype='step' )
-    plt.hist(-mZ_x, bins=50, range=[np.percentile(-mZ_x,5), np.percentile( -mZ_x,95)], histtype='step' )
+    plt.hist(mZ_x, bins=50, range=[np.percentile(mZ_x,5), np.percentile( mZ_x,95)], histtype='step' )
     plt.legend(["Prediction","Target"], loc='upper left')
     plt.savefig("%sHist_Pred_Tar_x.png"%(plotsD))
     print('Summe a_x enspricht prediction 0', np.sum(-a_x))

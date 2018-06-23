@@ -8,8 +8,7 @@ import matplotlib.cm as cm
 import matplotlib.mlab as mlab
 from matplotlib.colors import LogNorm
 from getPlotsOutputclean import loadData
-from prepareInput import pol2kar_x, pol2kar_y, angularrange
-from prepareOutput import kar2pol, pol2kar
+from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
 from scipy.stats import rayleigh
 import scipy
 
