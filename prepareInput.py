@@ -9,7 +9,6 @@ import matplotlib.mlab as mlab
 import ROOT
 import matplotlib.cm as cm
 import matplotlib.patches as mpatches
-import scipy.stats
 import matplotlib.ticker as mtick
 import h5py
 import sys

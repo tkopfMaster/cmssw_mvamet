@@ -9,8 +9,7 @@ import matplotlib.mlab as mlab
 from matplotlib.colors import LogNorm
 from getPlotsOutputclean import loadData
 from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
-from scipy.stats import rayleigh
-import scipy
+
 
 
 nbinsHist = 400
@@ -473,7 +472,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     plt.colorbar(HM)
 
     plt.legend()
-    plt.savefig("%sHM_Pred-Tar_Tar_x.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sHM_Delta_x_Tar_x.png"%(plotsD), bbox_inches="tight")
 
     plt.clf()
     plt.figure()

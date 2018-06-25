@@ -22,11 +22,14 @@ nbinsVertex = 5
 nbinsHist = 250
 nbinsHistBin =300
 nbins_relR = 10
-colors = cm.brg(np.linspace(0, 1, 3))
+colors = cm.brg(np.linspace(0, 1, 8))
 
 colors_InOut = cm.brg(np.linspace(0, 1, 8))
 colors2 = cm.brg(np.linspace(0, 1, nbins))
 HistLimMin, HistLimMax = -50, 50
+ResponseMin, ResponseMax = -1,3
+ResolutionParaMin, ResolutionParaMax = -40, 40
+ResolutionPerpMin, ResolutionPerpMax = -40, 40
 
 pTTresh = 10
 
@@ -217,35 +220,38 @@ def Histogram_Deviation_perp_pT(branchString, labelName, errbars_shift):
         plt.hist(((DFName[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 def Hist_Response(branchString, labelName, errbars_shift):
-    Mean = np.mean(-(DFName[branchString])/DFName['Boson_Pt'])
-    Std = np.std(-(DFName[branchString])/DFName['Boson_Pt'])
+    Response = np.divide(-(DFName[branchString]), DFName['Boson_Pt'])
+    Response = Response[~np.isnan(Response)]
+    Mean = np.mean(Response)
+    Std = np.std(Response)
 
-    plt.hist((-(DFName[branchString])/DFName['Boson_Pt']), bins=nbinsHist, range=[ResponseMin, ResponseMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
-def Hist_Resolution_para(branchString, labelName, errbars_shift):
-    Mean = np.mean(-(DFName[branchString])/DFName['Boson_Pt'])
-    Std = np.std(-(DFName[branchString])/DFName['Boson_Pt'])
-    plt.hist(np.abs(-(DFName[branchString])/DFName['Boson_Pt']-Mean), bins=nbinsHist, range=[ResolutionMin, ResolutionMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
+    plt.hist(Response, bins=nbinsHist, range=[ResponseMin, ResponseMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 def Hist_Resolution_para(branchString, labelName, errbars_shift):
+    Mean = np.mean((-(DFName[branchString])-DFName['Boson_Pt']))
+    Std = np.std((-(DFName[branchString])-DFName['Boson_Pt']))
+    plt.hist((-(DFName[branchString])-DFName['Boson_Pt']), bins=nbinsHist, range=[ResolutionParaMin, ResolutionParaMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+
+
+def Hist_Resolution_perp(branchString, labelName, errbars_shift):
     Mean = np.mean(DFName[branchString])
     Std = np.std(DFName[branchString])
-    plt.hist(DFName[branchString], bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+    plt.hist(DFName[branchString]-Mean, bins=nbinsHist, range=[ResolutionPerpMin, ResolutionPerpMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 
 def Histogram_Deviation_para_Bin(branchString, labelName, bin):
     Mean = np.mean(-(DFName[branchString])-DFName.Boson_Pt.values)
     Std = np.std(-(DFName[branchString])-DFName.Boson_Pt.values)
-    n, _ = np.histogram(-(DFName[branchString])-DFName.Boson_Pt.values, bins=nbinsHistBin)
+    #n, _ = np.histogram(-(DFName[branchString])-DFName.Boson_Pt.values, bins=nbinsHistBin)
     plt.hist((-(DFName[branchString])-DFName.Boson_Pt.values), bins=nbinsHistBin, range=(_[bin], _[bin+1]), label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors2[bin])
 
 
 def Histogram_Response(branchString, labelName, bin):
     Mean = np.mean(np.divide(-(DFName[branchString]),DFName.Boson_Pt.values))
     Std = np.std(np.divide(-(DFName[branchString]),DFName.Boson_Pt.values))
-    n, _ = np.histogram(-(DFName[branchString])-DFName.Boson_Pt.values, bins=nbinsHistBin)
-    plt.hist(np.divide(-(DFName[branchString]),DFName.Boson_Pt.values), bins=nbinsHistBin,  label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors2[bin])
+    Reso = np.divide(-(DFName[branchString]),DFName.Boson_Pt.values)
+    #n, _ = np.histogram(-(DFName[branchString])-DFName.Boson_Pt.values, bins=nbinsHistBin)
+    plt.hist(Reso[~np.isnan(Reso)], bins=nbinsHistBin,  label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors2[bin])
 
 
 
@@ -261,12 +267,12 @@ def Histogram_Norm_Comparison(branchStringLong, branchStringPerp, labelName, err
 def Histogram_Angle_Dev(branchStringLong, branchStringPerp, labelName, errbars_shift):
     if branchStringLong == 'NN_LongZ':
         r_, phi_ = kar2pol(DFName[branchStringLong], DFName[branchStringPerp])
-        phi_ = angularrange(phi_ +DFName['Boson_Phi'])
+        phi_ = angularrange(phi_+np.pi)
         Mean = np.mean(phi_)
         Std = np.std(phi_)
     else:
         r_, phi_ = kar2pol(DFName[branchStringLong], DFName[branchStringPerp])
-        phi_ = angularrange(phi_ -np.pi)
+        phi_ = angularrange(phi_ +np.pi)
         Mean = np.mean(phi_)
         Std = np.std(phi_)
     if branchStringLong in ['NN_LongZ', 'recoilslimmedMETs_Pt']:
@@ -536,19 +542,22 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     pTRangeString_Tresh = '$1\ \mathrm{GeV} < p_{T}^Z \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     pTRangeStringNVertex = '$0\ \mathrm{GeV} < p_{T}^Z \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
-    colors = ['blue','green','red','cyan','magenta','yellow']
+    NPlotsLines=7
+    colors = cm.brg(np.linspace(0, 1, NPlotsLines))
+    colors_InOut = cm.brg(np.linspace(0, 1, 8))
+    colors = colors_InOut
     MVAcolors =  colors
     ylimResMin, ylimResMax = 7.5 , 50
     ylimResMVAMin, ylimResMax = 5 , 35
     ylimResMVAMin_RC, ylimResMax_RC = 0 , 50
-    ResponseMin, ResponseMax = 0.0, 2.0
+    ResponseMin, ResponseMax = -1, 3
     ResponseMinErr, ResponseMaxErr = -0.5, 2.5
 
 
 
 
-    NPlotsLines=3
-    colors = cm.brg(np.linspace(0, 1, NPlotsLines))
+
+
 
 
     #NN_mode='kart'
@@ -556,12 +565,13 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     ################################MVA Output ################################
     nbinsVertex = 10
     #########Response u_para/pTZ ###########
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverpTZ_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    plotMVAResponseOverpTZ_woutError('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverpTZ_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    plotMVAResponseOverpTZ_woutError('NN_LongZ', 'NN', 6)
     plotMVAResponseOverpTZ_woutError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -579,15 +589,41 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     #plt.ylim(ResponseMin, ResponseMax)
     plt.savefig("%sResponse_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
-
+    '''
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverpTZ_woutError_Tresh('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    plotMVAResponseOverpTZ_woutError_Tresh('NN_LongZ', 'NN', 2)
+    Hist_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    Hist_Response('NN_LongZ', 'NN', 6)
+    Hist_Response('recoilslimmedMETs_LongZ', 'PF', 1)
+    plt.plot([1, 1], [0, 90000], color='k', linestyle='--', linewidth=1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$\\frac{U_{\parallel}}{\mathrm{MET}}$')
+    plt.ylabel('Counts')
+    plt.xlim(ResponseMin, ResponseMax)
+    plt.ylim(0, 90000)
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.xlim(ResponseMin, ResponseMax)
+    plt.savefig("%sResponse.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+    '''
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plotMVAResponseOverpTZ_woutError_Tresh('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    plotMVAResponseOverpTZ_woutError_Tresh('NN_LongZ', 'NN', 6)
     plotMVAResponseOverpTZ_woutError_Tresh('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -605,18 +641,18 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     #plt.ylim(ResponseMin, ResponseMax)
     plt.savefig("%sResponse_pT_>1.png"%(plotsD), bbox_inches="tight")
     plt.close()
+    '''
 
 
 
 
-
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverpTZ_wError('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    plotMVAResponseOverpTZ_wError('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverpTZ_wError('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    plotMVAResponseOverpTZ_wError('NN_LongZ', 'NN', 6)
     plotMVAResponseOverpTZ_wError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -640,8 +676,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverNVertex_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverNVertex_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 6)
     plotMVAResponseOverNVertex_woutError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -665,8 +701,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverNVertex_woutError_Tresh('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    plotMVAResponseOverNVertex_woutError_Tresh('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverNVertex_woutError_Tresh('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    plotMVAResponseOverNVertex_woutError_Tresh('NN_LongZ', 'NN', 6)
     plotMVAResponseOverNVertex_woutError_Tresh('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -691,8 +727,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverNVertex_wError('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    plotMVAResponseOverNVertex_wError('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverNVertex_wError('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    plotMVAResponseOverNVertex_wError('NN_LongZ', 'NN', 6)
     plotMVAResponseOverNVertex_wError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -717,8 +753,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResolutionOverpTZ_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    plotMVAResolutionOverpTZ_woutError_para('NN_LongZ', 'NN', 2)
+    plotMVAResolutionOverpTZ_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    plotMVAResolutionOverpTZ_woutError_para('NN_LongZ', 'NN', 6)
     plotMVAResolutionOverpTZ_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1)
 
     box = ax.get_position()
@@ -736,8 +772,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     #plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sResolution_para_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
-
+    '''
 
 
 
@@ -745,8 +780,58 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    MeanDeviation_Pt('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    MeanDeviation_Pt('NN_LongZ', 'NN', 2)
+    Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    Hist_Resolution_para('NN_LongZ', 'NN', 6)
+    Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$U_{\parallel}-\mathrm{MET}$')
+    plt.ylabel('Counts')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{p_{T}^Z} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.xlim(ResolutionParaMin, ResolutionParaMax )
+    plt.savefig("%sHist_Resolution_para.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    Hist_Resolution_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    Hist_Resolution_perp('NN_PerpZ', 'NN', 6)
+    Hist_Resolution_perp('recoilslimmedMETs_PerpZ', 'PF', 1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$U_{\perp}$ in GeV')
+    plt.ylabel('Counts')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{p_{T}^Z} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.xlim(ResolutionPerpMin, ResolutionPerpMax )
+    plt.savefig("%sHist_Resolution_perp.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+    '''
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    MeanDeviation_Pt('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    MeanDeviation_Pt('NN_LongZ', 'NN', 6)
     MeanDeviation_Pt('recoilslimmedMETs_LongZ', 'PF', 1)
 
     box = ax.get_position()
@@ -769,8 +854,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResolutionOverNVertex_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 2)
+    plotMVAResolutionOverNVertex_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 6)
     plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1)
 
     box = ax.get_position()
@@ -797,8 +882,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    MeanDeviation_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    MeanDeviation_PV('NN_LongZ', 'NN', 2)
+    MeanDeviation_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    MeanDeviation_PV('NN_LongZ', 'NN', 6)
     MeanDeviation_PV('recoilslimmedMETs_LongZ', 'PF', 1)
 
     box = ax.get_position()
@@ -822,8 +907,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResolutionOverpTZ_woutError_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 0)
-    plotMVAResolutionOverpTZ_woutError_perp('NN_PerpZ', 'NN', 2)
+    plotMVAResolutionOverpTZ_woutError_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    plotMVAResolutionOverpTZ_woutError_perp('NN_PerpZ', 'NN', 6)
     plotMVAResolutionOverpTZ_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1)
 
     box = ax.get_position()
@@ -851,8 +936,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResolutionOverNVertex_woutError_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 0)
-    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 2)
+    plotMVAResolutionOverNVertex_woutError_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 6)
     plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1)
 
     box = ax.get_position()
@@ -912,7 +997,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     ##plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sHist_Delta_para.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1224,13 +1309,13 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.savefig("%sHist_phi.png"%(plotsD), bbox_inches="tight")
     plt.close()
     '''
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    Mean_Std_Deviation_pTZ_para('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    Mean_Std_Deviation_pTZ_para('NN_LongZ', 'NN', 2)
+    Mean_Std_Deviation_pTZ_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    Mean_Std_Deviation_pTZ_para('NN_LongZ', 'NN', 6)
     Mean_Std_Deviation_pTZ_para('recoilslimmedMETs_LongZ', 'PF', 1)
 
 
@@ -1249,7 +1334,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.grid()
     ##plt.ylim(HistLimMin, HistLimMax)
     plt.savefig("%sDelta_para_Std_para_pT.png"%(plotsD), bbox_inches="tight")
-
+    '''
 
 
 
@@ -1257,8 +1342,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    Histogram_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    Histogram_Response('NN_LongZ', 'NN', 2)
+    Histogram_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    Histogram_Response('NN_LongZ', 'NN', 6)
     Histogram_Response('recoilslimmedMETs_LongZ', 'PF', 1)
 
 
@@ -1285,8 +1370,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    Mean_Std_Deviation_pTZ_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 0)
-    Mean_Std_Deviation_pTZ_perp('NN_PerpZ', 'NN', 2)
+    Mean_Std_Deviation_pTZ_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    Mean_Std_Deviation_pTZ_perp('NN_PerpZ', 'NN', 6)
     Mean_Std_Deviation_pTZ_perp('recoilslimmedMETs_PerpZ', 'PF', 1)
 
 
@@ -1311,8 +1396,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    Mean_Std_Deviation_PV_para('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
-    Mean_Std_Deviation_PV_para('NN_LongZ', 'NN', 2)
+    Mean_Std_Deviation_PV_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    Mean_Std_Deviation_PV_para('NN_LongZ', 'NN', 6)
     Mean_Std_Deviation_PV_para('recoilslimmedMETs_LongZ', 'PF', 1)
 
 
@@ -1336,8 +1421,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    Mean_Std_Deviation_PV_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 0)
-    Mean_Std_Deviation_PV_perp('NN_PerpZ', 'NN', 2)
+    Mean_Std_Deviation_PV_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    Mean_Std_Deviation_PV_perp('NN_PerpZ', 'NN', 6)
     Mean_Std_Deviation_PV_perp('recoilslimmedMETs_PerpZ', 'PF', 1)
 
 

@@ -71,9 +71,19 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     a_x2, a_y2 = pol2kar(a_r, a_phi)
     print('Diff Test a_x, a_y', a_x2-a_x, a_y2-a_y)
     print("a_r,a_phi", a_r,a_phi)
+    print('a_-a_r', a_-a_r)
 
-    NN_LongZ, NN_PerpZ = -np.cos(angularrange(np.add(a_phi,-mZ_phi)))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
+    Diff_phi = np.arccos(np.divide(np.add(np.multiply(a_x, mZ_x), np.multiply(a_y, mZ_y)), np.multiply(a_, mZ_r)))
+    #NN_LongZ = np.divide(np.add(np.multiply(a_x, mZ_x), np.multiply(a_y, mZ_y)), mZ_r)
+    #NN_PerpZ = np.sin(Diff_phi)*a_
+
+    NN_LongZ = div0(np.add(np.multiply(a_x, mZ_x) , np.multiply(a_y, mZ_y)), mZ_r)
+    ParaVx, ParaVy = div0(NN_LongZ*mZ_x, mZ_r), div0(NN_LongZ*mZ_y, mZ_r)
+    NN_PerpZ = np.sqrt( np.multiply(a_x-ParaVx, a_x-ParaVx) + np.multiply(a_y-ParaVy, a_y-ParaVy) )
+    #NN_LongZ, NN_PerpZ = -np.cos(angularrange(np.add(a_phi,-mZ_phi)))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
     #NN_LongZ, NN_PerpZ= pol2kar(a_r,angularrange(a_phi-mZ_phi))
+    NN_PerpZ[angularrange(a_phi-mZ_phi)<0]= -NN_PerpZ[angularrange(a_phi-mZ_phi)<0]
+    NN_LongZ = -NN_LongZ
 
     #
     #NN_LongZ, NN_PerpZ = NN_LongZ_l.tolist(), NN_PerpZ_l.tolist()
