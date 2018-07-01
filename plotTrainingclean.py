@@ -45,6 +45,21 @@ def Hist_Diff_norm(r,phi,pr,pphi, labelName, col):
     else:
         plt.hist(norm, bins=nbinsHist, range=[diff_p_min, diff_p_max], label=labelName+', mean=%.2f$\pm$%.2f'%(np.mean(norm), np.std(norm)), histtype='step', ec=colors_InOut[col], normed=True)
 
+def HM_Diff_norm(r,phi,pr,pphi, labelName, col):
+    if labelName=='NN':
+        x = r
+        y = phi
+    else:
+        x = pol2kar_x(r,phi)
+        y = pol2kar_y(r,phi)
+    px = -pol2kar_x(pr,pphi)
+    py = -pol2kar_y(pr,pphi)
+    delta_x_sq = np.square(np.subtract(x,px))
+    delta_y_sq = np.square(np.subtract(y,py))
+    norm = np.sqrt(delta_x_sq+delta_y_sq)
+    return norm
+
+
 def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     NN_Output_applied = h5py.File("%sNN_Output_applied_%s.h5"%(outputD,NN_mode), "r")
     predictions = NN_Output_applied["MET_Predictions"]
@@ -103,6 +118,153 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
         plt.savefig("%sHist_Diff_norm.png"%(plotsD), bbox_inches="tight")
+
+
+
+
+        plt.clf()
+        plt.figure()
+        #plt.suptitle('x-Korrektur Prediction-Target ')
+        plt.ylabel("$ |\\vec{U}- \\vec{\mathrm{MET}}| $")
+        plt.xlabel("Response")
+        Norm_Diff = HM_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6)
+        Response = np.divide(-Outputs['NN_LongZ'], Outputs['Boson_Pt'] )
+        heatmap, xedges, yedges = np.histogram2d(  Norm_Diff, Response,  bins=50,
+                                                 range=[[0,20],
+                                                        [0.75,1.25]])
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        #plt.clf()
+        HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+        plt.colorbar(HM)
+        plt.legend()
+        plt.savefig("%sHM_NN_Response_Normdiff.png"%(plotsD), bbox_inches="tight")
+
+        plt.clf()
+        plt.figure()
+        #plt.suptitle('x-Korrektur Prediction-Target ')
+        plt.ylabel("$ \\frac{|\\vec{U}- \\vec{\mathrm{MET}}|}{|\\vec{\mathrm{MET}}|} $")
+        plt.xlabel("Response")
+        rel_Norm_Diff = np.divide(HM_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6), Outputs['Boson_Pt'])
+        Response = np.divide(-Outputs['NN_LongZ'], Outputs['Boson_Pt'] )
+        heatmap, xedges, yedges = np.histogram2d(  Response, rel_Norm_Diff,  bins=50,
+                                                 range=[[0,2],
+                                                        [0,2]])
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        #plt.clf()
+        HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+        plt.colorbar(HM)
+        plt.legend()
+        plt.savefig("%sHM_NN_Response_relDiffnorm.png"%(plotsD), bbox_inches="tight")
+
+
+        plt.clf()
+        plt.figure()
+        #plt.suptitle('x-Korrektur Prediction-Target ')
+        plt.ylabel("$ \\frac{|\\vec{U}- \\vec{\mathrm{MET}}|}{|\\vec{\mathrm{MET}}|} $")
+        plt.xlabel("Response")
+        rel_Norm_Diff = np.divide(HM_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1), Outputs['Boson_Pt'])
+        Response = np.divide(-Outputs['recoilslimmedMETs_LongZ'], Outputs['Boson_Pt'] )
+        heatmap, xedges, yedges = np.histogram2d(  Response, rel_Norm_Diff,  bins=50,
+                                                 range=[[0,2],
+                                                        [0,2]])
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        #plt.clf()
+        HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+        plt.colorbar(HM)
+        plt.legend()
+        plt.savefig("%sHM_PF_Response_relDiffnorm.png"%(plotsD), bbox_inches="tight")
+
+
+        plt.clf()
+        plt.figure()
+        #plt.suptitle('x-Korrektur Prediction-Target ')
+        plt.ylabel("$ \\frac{|\\vec{U}- \\vec{\mathrm{MET}}|}{|\\vec{\mathrm{MET}}|} $")
+        plt.xlabel("$U_{\parallel}-\\vec{\mathrm{MET}}$")
+        rel_Norm_Diff = np.divide(HM_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6), Outputs['Boson_Pt'])
+        Resolution_para = -Outputs['NN_LongZ']-Outputs['Boson_Pt']
+        heatmap, xedges, yedges = np.histogram2d(  Resolution_para, rel_Norm_Diff,  bins=50,
+                                                 range=[[0,3],
+                                                        [0,4]])
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        #plt.clf()
+        HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+        plt.colorbar(HM)
+        plt.legend()
+        plt.savefig("%sHM_NN_Resolution_para_relDiffnorm.png"%(plotsD), bbox_inches="tight")
+
+
+        plt.clf()
+        plt.figure()
+        #plt.suptitle('x-Korrektur Prediction-Target ')
+        plt.ylabel("$ \\frac{|\\vec{U}- \\vec{\mathrm{MET}}|}{|\\vec{\mathrm{MET}}|} $")
+        plt.xlabel("$U_{\parallel}-\\vec{\mathrm{MET}}$")
+        rel_Norm_Diff = np.divide(HM_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1), Outputs['Boson_Pt'])
+        Resolution_para = -Outputs['recoilslimmedMETs_LongZ']-Outputs['Boson_Pt']
+        heatmap, xedges, yedges = np.histogram2d(  Resolution_para, rel_Norm_Diff,  bins=50,
+                                                 range=[[0,3],
+                                                        [0,4]])
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        #plt.clf()
+        HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+        plt.colorbar(HM)
+        plt.legend()
+        plt.savefig("%sHM_PF_Resolution_para_relDiffnorm.png"%(plotsD), bbox_inches="tight")
+
+        plt.clf()
+        plt.figure()
+        #plt.suptitle('x-Korrektur Prediction-Target ')
+        plt.ylabel("$ \\frac{|\\vec{U}- \\vec{\mathrm{MET}}|}{|\\vec{\mathrm{MET}}|} $")
+        plt.xlabel("$U_{\perp}$")
+        rel_Norm_Diff = np.divide(HM_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6), Outputs['Boson_Pt'])
+        Resolution_perp = Outputs['NN_PerpZ']
+        heatmap, xedges, yedges = np.histogram2d(  Resolution_perp, rel_Norm_Diff,  bins=50,
+                                                 range=[[0,3],
+                                                        [0,4]])
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        #plt.clf()
+        HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+        plt.colorbar(HM)
+        plt.legend()
+        plt.savefig("%sHM_NN_Resolution_perp_relDiffnorm.png"%(plotsD), bbox_inches="tight")
+
+
+        plt.clf()
+        plt.figure()
+        #plt.suptitle('x-Korrektur Prediction-Target ')
+        plt.ylabel("$ \\frac{|\\vec{U}- \\vec{\mathrm{MET}}|}{|\\vec{\mathrm{MET}}|} $")
+        plt.xlabel("$U_{\perp}$")
+        rel_Norm_Diff = np.divide(HM_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1), Outputs['Boson_Pt'])
+        Resolution_perp = Outputs['recoilslimmedMETs_PerpZ']
+        heatmap, xedges, yedges = np.histogram2d(  Resolution_perp, rel_Norm_Diff,  bins=50,
+                                                 range=[[0,3],
+                                                        [0,4]])
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        #plt.clf()
+        HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+        plt.colorbar(HM)
+        plt.legend()
+        plt.savefig("%sHM_PF_Resolution_perp_relDiffnorm.png"%(plotsD), bbox_inches="tight")
+
+        plt.clf()
+        plt.figure()
+        #plt.suptitle('x-Korrektur Prediction-Target ')
+        plt.xlabel("$ |\\vec{U}- \\vec{\mathrm{MET}}| $")
+        plt.ylabel("Response")
+        Norm_Diff = HM_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1)
+        Response = np.divide(-Outputs['recoilslimmedMETs_LongZ'], Outputs['Boson_Pt'] )
+        heatmap, xedges, yedges = np.histogram2d(  Norm_Diff, Response,  bins=50,
+                                                 range=[[0,20],
+                                                        [0,2]])
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        #plt.clf()
+        HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+        plt.colorbar(HM)
+        plt.legend()
+        plt.savefig("%sHM_Response_PF_Diff_norm.png"%(plotsD), bbox_inches="tight")
+        plt.close()
+
+
+
 
 
 
@@ -247,7 +409,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
         plt.savefig("%sHist_x.png"%(plotsD), bbox_inches="tight")
-
+        plt.close()
 
 
 
@@ -282,7 +444,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
         plt.savefig("%sHist_y.png"%(plotsD), bbox_inches="tight")
-
+        plt.close()
 
 
         fig=plt.figure(figsize=(10,6))
@@ -317,6 +479,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
         plt.savefig("%sHist_Delta_x.png"%(plotsD), bbox_inches="tight")
+        plt.close()
 
         fig=plt.figure(figsize=(10,6))
         fig.patch.set_facecolor('white')
@@ -350,7 +513,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
         plt.savefig("%sHist_Delta_y.png"%(plotsD), bbox_inches="tight")
-
+        plt.close()
 
 
         fig=plt.figure(figsize=(10,6))
@@ -387,6 +550,10 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
         plt.savefig("%sHist_Delta_x_Gaussfit.png"%(plotsD), bbox_inches="tight")
+        plt.close()
+
+
+
 
         fig=plt.figure(figsize=(10,6))
         fig.patch.set_facecolor('white')
@@ -422,7 +589,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.grid()
         #plt.ylim(ylimResMVAMin, ylimResMax)
         plt.savefig("%sHist_Delta_y_Gaussfit.png"%(plotsD), bbox_inches="tight")
-
+        plt.close()
 
 
     plt.clf()
@@ -441,6 +608,9 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
 
     plt.legend()
     plt.savefig("%sHM_PF-Tar_Tar_x.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
 
     plt.clf()
     plt.figure()
@@ -473,6 +643,29 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
 
     plt.legend()
     plt.savefig("%sHM_Delta_x_Tar_x.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
+
+
+
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ \Delta p_{T,x}^Z$")
+    plt.ylabel("$ \Delta p_{T,y}^Z$")
+    heatmap, xedges, yedges = np.histogram2d(  NN_Diff_x, NN_Diff_y,  bins=50,
+                                             range=[[np.percentile(NN_Diff_x,5),np.percentile(NN_Diff_x,95)],
+                                                    [np.percentile(NN_Diff_y,5),np.percentile(NN_Diff_y,95)]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm())
+    plt.colorbar(HM)
+
+    plt.legend()
+    plt.savefig("%sHM_Delta_x_Delta_y.png"%(plotsD), bbox_inches="tight")
+
 
     plt.clf()
     plt.figure()
@@ -488,18 +681,22 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     plt.colorbar(HM)
     plt.legend()
     plt.savefig("%sHM_Delta_y_Tar_y.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
 
     plt.clf()
     plt.figure()
     #plt.suptitle('Targets: x-y-correlation ')
     plt.ylabel("$p_{T,y}^Z$")
     plt.xlabel("$p_{T,x}^Z$")
-    heatmap, xedges, yedges = np.histogram2d(  Targets[:,1] , Targets[:,0], bins=50, range=[[np.percentile(Targets[:,0],5),np.percentile(Targets[:,0],95)],[np.percentile( Targets[:,1],5), np.percentile(Targets[:,1],95)]])
+    heatmap, xedges, yedges = np.histogram2d(  Targets[:,1] , Targets[:,0], bins=50, range=[[-40,40],[-40, 40]])
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     HM = plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm() )
     plt.colorbar(HM)
     plt.legend()
     plt.savefig("%sHM_Targets_Correlation_Kar.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
 
 
     PF_x, PF_y = pol2kar(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'])
@@ -514,6 +711,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     plt.colorbar(HM)
     plt.legend()
     plt.savefig("%sHM_PF_Correlation_Kar.png"%(plotsD), bbox_inches="tight")
+    plt.close()
 
 
     plt.clf()
@@ -527,6 +725,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     plt.colorbar(HM)
     plt.legend()
     plt.savefig("%sHM_Targets_Correlation_Pol.png"%(plotsD), bbox_inches="tight")
+    plt.close()
 
 
     plt.clf()
@@ -534,13 +733,13 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     #plt.suptitle('predictions: x-y-correlation ')
     plt.ylabel("$p_{T,y}^Z$")
     plt.xlabel("$p_{T,x}^Z$")
-    heatmap, xedges, yedges = np.histogram2d(  predictions[:,1] , predictions[:,0], bins=50, range=[[np.percentile(predictions[:,0],5),np.percentile(predictions[:,0],95)],[np.percentile( predictions[:,1],5), np.percentile(predictions[:,1],95)]])
+    heatmap, xedges, yedges = np.histogram2d(  predictions[:,1] , predictions[:,0], bins=50,  range=[[-25,25],[-25, 25]])
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     HM= plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm())
     plt.colorbar(HM)
     plt.legend()
     plt.savefig("%sHM_predictions_Correlation.png"%(plotsD), bbox_inches="tight")
-
+    plt.close()
 
 
 

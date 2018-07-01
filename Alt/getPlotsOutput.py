@@ -10,8 +10,8 @@ import matplotlib.mlab as mlab
 import ROOT
 import matplotlib.cm as cm
 import matplotlib.patches as mpatches
+import scipy.stats
 import matplotlib.ticker as mtick
-from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
 import h5py
 import sys
 
@@ -20,13 +20,12 @@ fName ="/storage/b/tkopf/mvamet/skim/out.root"
 nbins = 10
 nbinsVertex = 5
 nbinsHist = 250
-nbinsHistBin =300
+nbinsHistBin =150
 nbins_relR = 10
 colors = cm.brg(np.linspace(0, 1, 3))
 
 colors_InOut = cm.brg(np.linspace(0, 1, 8))
 colors2 = cm.brg(np.linspace(0, 1, nbins))
-HistLimMin, HistLimMax = -50, 50
 #Data settings
 
 def div0( a, b ):
@@ -35,9 +34,6 @@ def div0( a, b ):
         c = np.true_divide( a, b )
         c[ ~ np.isfinite( c )] = 0  # -inf inf NaN
     return c
-
-
-
 
 def loadData(inputD):
 
@@ -49,14 +45,12 @@ def loadData(inputD):
     'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi',
     'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi',
     'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi',
-    'LongZCorrectedRecoil_Pt', 'LongZCorrectedRecoil_Phi',
     'LongZCorrectedRecoil_LongZ', 'LongZCorrectedRecoil_PerpZ',
     'recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ',
     'recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ',
     'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ',
     'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ',
     'recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ',
-    'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ',
     'NN_LongZ', 'NN_PerpZ'
      ],)
     DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
@@ -160,25 +154,10 @@ def plotMVAResolutionOverpTZ_woutError_perp_RC(branchString, labelName, errbars_
 
 
 
-def Histogram_Deviation_para_pT(branchString, labelName, errbars_shift):
+def Histogram_Deviation_para(branchString, labelName, errbars_shift):
     Mean = np.mean(-(DFName[branchString])-DFName.Boson_Pt.values)
     Std = np.std(-(DFName[branchString])-DFName.Boson_Pt.values)
-    if branchString in ['NN_LongZ', 'recoilslimmedMETs_LongZ']:
-        plt.hist((-(DFName[branchString])-DFName.Boson_Pt.values), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-    else:
-        plt.hist((-(DFName[branchString])-DFName.Boson_Pt.values), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
-
-def Histogram_Deviation_perp_pT(branchString, labelName, errbars_shift):
-    Mean = np.mean((DFName[branchString]))
-    Std = np.std((DFName[branchString]))
-    if branchString in ['NN_PerpZ', 'recoilslimmedMETs_PerpZ']:
-        plt.hist(((DFName[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-    else:
-        plt.hist(((DFName[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
-
-
+    plt.hist((-(DFName[branchString])-DFName.Boson_Pt.values), bins=nbinsHist, range=[-50, 50], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors[errbars_shift])
 
 def Histogram_Deviation_para_Bin(branchString, labelName, bin):
     Mean = np.mean(-(DFName[branchString])-DFName.Boson_Pt.values)
@@ -186,99 +165,32 @@ def Histogram_Deviation_para_Bin(branchString, labelName, bin):
     n, _ = np.histogram(-(DFName[branchString])-DFName.Boson_Pt.values, bins=nbinsHistBin)
     plt.hist((-(DFName[branchString])-DFName.Boson_Pt.values), bins=nbinsHistBin, range=(_[bin], _[bin+1]), label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors2[bin])
 
-def Histogram_Norm_Comparison(branchStringLong, branchStringPerp, labelName, errbars_shift):
-    Norm_ = np.sqrt(np.square(DFName[branchStringLong])+np.square(DFName[branchStringPerp]))
-    Mean = np.mean(Norm_-DFName.Boson_Pt.values)
-    Std = np.std(Norm_-DFName.Boson_Pt.values)
-    if branchStringLong in ['NN_LongZ', 'recoilslimmedMETs_LongZ']:
-        plt.hist(Norm_-DFName.Boson_Pt.values, bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-    else:
-        plt.hist(Norm_-DFName.Boson_Pt.values, bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
-def Histogram_Angle_Dev(branchStringLong, branchStringPerp, labelName, errbars_shift):
-    if branchStringLong == 'NN_LongZ':
-        r_, phi_ = kar2pol(DFName[branchStringLong], DFName[branchStringPerp])
-        phi_ = angularrange(phi_ +DFName['Boson_Phi'])
-        Mean = np.mean(phi_)
-        Std = np.std(phi_)
-    else:
-        r_, phi_ = kar2pol(DFName[branchStringLong], DFName[branchStringPerp])
-        phi_ = angularrange(phi_ -np.pi)
-        Mean = np.mean(phi_)
-        Std = np.std(phi_)
-    if branchStringLong in ['NN_LongZ', 'recoilslimmedMETs_Pt']:
-        plt.hist(phi_[~np.isnan(phi_)], bins=nbinsHist, range=[-np.pi, np.pi], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-    else:
-        plt.hist(phi_[~np.isnan(phi_)], bins=nbinsHist, range=[-np.pi, np.pi], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
-def Histogram_Angle(branchStringLong, branchStringPerp, labelName, errbars_shift):
-    r_, phi_ = kar2pol(DFName[branchStringLong], DFName[branchStringPerp])
-    phi_ = angularrange(phi_ +np.pi)
-    Mean = np.mean(phi_)
-    Std = np.std(phi_)
-    if branchStringLong in ['NN_LongZ', 'recoilslimmedMETs_LongZ']:
-        plt.hist(phi_[~np.isnan(phi_)], bins=nbinsHist, range=[-np.pi, np.pi], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-    else:
-        plt.hist(phi_[~np.isnan(phi_)], bins=nbinsHist, range=[-np.pi, np.pi], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
-
-def Histogram_Norm(branchStringLong, branchStringPerp, labelName, errbars_shift):
-    Norm_ = np.sqrt(np.square(DFName[branchStringLong])+np.square(DFName[branchStringPerp]))
-    Mean = np.mean(Norm_)
-    Std = np.std(Norm_)
-    if branchStringLong in ['NN_LongZ', 'recoilslimmedMETs_LongZ']:
-        plt.hist(Norm_, bins=nbinsHist, range=[0, 75], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-    else:
-        plt.hist(Norm_, bins=nbinsHist, range=[0, 75], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
-def Histogram_Norm_Pt(branchStringLong, labelName, errbars_shift):
-    Norm_ = DFName.Boson_Pt.values
-    Mean = np.mean(DFName.Boson_Pt.values)
-    Std = np.std(Norm_)
-    plt.hist(Norm_, bins=nbinsHist, range=[0, 75], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-
 
 def Histogram_Deviation_para_PV(branchString, labelName, errbars_shift):
     Mean = np.mean(-(DFName_nVertex[branchString])-DFName_nVertex.Boson_Pt.values)
     Std = np.std(-(DFName_nVertex[branchString])-DFName_nVertex.Boson_Pt.values)
-    if branchString in ['NN_LongZ', 'recoilslimmedMETs_LongZ']:
-        plt.hist((-(DFName_nVertex[branchString])-DFName_nVertex.Boson_Pt.values), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-    else:
-        plt.hist((-(DFName_nVertex[branchString])-DFName_nVertex.Boson_Pt.values), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
+    plt.hist((-(DFName_nVertex[branchString])-DFName_nVertex.Boson_Pt.values), bins=nbinsHist, range=[-50, 50], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 def Histogram_Deviation_perp_PV(branchString, labelName, errbars_shift):
     Mean = np.mean((DFName_nVertex[branchString]))
     Std = np.std((DFName_nVertex[branchString]))
-    if branchString in ['NN_PerpZ', 'recoilslimmedMETs_PerpZ']:
-        plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-    else:
-        plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+    plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[-50, 50], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 def Hist_LongZ(branchString, labelName, errbars_shift):
     if branchString == 'Boson_Pt':
         Mean = np.mean((DFName_nVertex[branchString]))
         Std = np.std((DFName_nVertex[branchString]))
-        plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
+        plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[-50, 50], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
     else:
-        if branchString in ['NN_LongZ', 'recoilslimmedMETs_LongZ']:
-            Mean = np.mean(-(DFName_nVertex[branchString]))
-            Std = np.std(-(DFName_nVertex[branchString]))
-            plt.hist((-(DFName_nVertex[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-        else:
-            Mean = np.mean(-(DFName_nVertex[branchString]))
-            Std = np.std(-(DFName_nVertex[branchString]))
-            plt.hist((-(DFName_nVertex[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
-
+        Mean = np.mean(-(DFName_nVertex[branchString]))
+        Std = np.std(-(DFName_nVertex[branchString]))
+        plt.hist((-(DFName_nVertex[branchString])), bins=nbinsHist, range=[-50, 50], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 def Hist_PerpZ(branchString, labelName, errbars_shift):
     Mean = np.mean((DFName_nVertex[branchString]))
     Std = np.std((DFName_nVertex[branchString]))
-    if branchString in ['NN_PerpZ', 'recoilslimmedMETs_PerpZ']:
-        plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
-    else:
-        plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+    plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[-50, 50], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 
 def Histogram_relResponse(branchString, labelName, errbars_shift):
@@ -417,7 +329,7 @@ def plotMVAResolutionOverNVertex_woutError_perp_RC(branchString, labelName, errb
 def Histogram_Deviation_perp(branchString, labelName, errbars_shift):
     Mean = np.mean(DFName[branchString])
     Std = np.std(DFName[branchString])
-    plt.hist(DFName[branchString], bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors[errbars_shift])
+    plt.hist(DFName[branchString], bins=nbinsHist, range=[-50, 50], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors[errbars_shift])
 
 def Mean_Std_Deviation_pTZ_para(branchString, labelName, errbars_shift):
     binwidth = (DFName.Boson_Pt.values.max() - DFName.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
@@ -508,12 +420,12 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.xlabel('$p_{T}^Z $ in GeV')
     plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
+    plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(ResponseMin, ResponseMax)
-    plt.savefig("%sResponse_pT.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Response_pT.png"%(plotsD))
     plt.close()
 
     fig=plt.figure(figsize=(10,6))
@@ -532,12 +444,12 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.xlabel('$p_{T}^Z $ in GeV')
     plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
+    plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(ResponseMinErr, ResponseMaxErr)
-    plt.savefig("%sResponse_pT_wErr.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Response_pT_wErr.png"%(plotsD))
     plt.close()
 
 
@@ -557,12 +469,12 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.xlabel('#$ \mathrm{PV}$ ')
     plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
+    plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(0, ResponseMax)
-    plt.savefig("%sResponse_PV.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Response_PV.png"%(plotsD))
     plt.close()
 
 
@@ -582,12 +494,12 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.xlabel('#$ \mathrm{PV}$ ')
     plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
+    plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(ResponseMinErr, ResponseMaxErr)
-    plt.savefig("%sResponse_PV_wErr.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Response_PV_wErr.png"%(plotsD))
     plt.close()
 
     ##########Resolutions #########
@@ -608,16 +520,38 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.xlabel('$p_{T}^Z $ in GeV')
     plt.ylabel('$\sigma \\left( U_{\parallel}- p_{T}^Z \\right) $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
+    plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_para_pT.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Resolution_Long_pT.png"%(plotsD))
     plt.close()
 
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
 
+    plotMVAResolutionOverpTZ_woutError_para_RC('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    plotMVAResolutionOverpTZ_woutError_para_RC('NN_LongZ', 'NN', 2)
+    plotMVAResolutionOverpTZ_woutError_para_RC('recoilslimmedMETs_LongZ', 'PF', 1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$p_{T}^Z $ in GeV')
+    plt.ylabel('$\\frac{\sigma \\left( U_{\parallel}- p_{T}^Z \\right)}{\\frac{U_{\parallel}}{p_{T}^Z}} $ ')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title('Resolution $U_{\parallel}$, Response corrected')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    ##plt.ylim(ylimResMVAMin_RC, ylimResMax_RC)
+    plt.savefig("%sOutput_Resolution_Long_pT_RC.png"%(plotsD))
+    plt.close()
 
 
     fig=plt.figure(figsize=(10,6))
@@ -635,12 +569,12 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.xlabel('$p_{T}^Z $ in GeV')
     plt.ylabel('$\\langle U_{\parallel}- p_{T}^Z \\rangle$ in GeV')
-    #plt.title('Mean Deviation $U_{\parallel}-p_T^Z$')
+    plt.title('Mean Deviation $U_{\parallel}-p_T^Z$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(-20, 10)
-    plt.savefig("%sDelta_para_pT.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sMeanDeviation_pT.png"%(plotsD))
     plt.close()
 
 
@@ -660,16 +594,38 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.xlabel('#$ \mathrm{PV}$ ')
     plt.ylabel('$\sigma \\left( U_{\parallel}- p_{T}^Z \\right) $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
+    plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_para_PV.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Resolution_Long_PV.png"%(plotsD))
     plt.close()
 
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
 
+    plotMVAResolutionOverNVertex_woutError_para_RC('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    plotMVAResolutionOverNVertex_woutError_para_RC('NN_LongZ', 'NN', 2)
+    plotMVAResolutionOverNVertex_woutError_para_RC('recoilslimmedMETs_LongZ', 'PF', 1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
+
+    plt.xlabel('#$ \mathrm{PV}$ ')
+    plt.ylabel('$\\frac{\sigma \\left( U_{\parallel}- p_{T}^Z \\right)}{\\frac{U_{\parallel}}{p_{T}^Z}} $ ')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title('Resolution $U_{\parallel}$, Response corrected')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    ##plt.ylim(ylimResMVAMin_RC, ylimResMax_RC)
+    plt.savefig("%sOutput_Resolution_Long_PV_RC.png"%(plotsD))
+    plt.close()
 
 
     fig=plt.figure(figsize=(10,6))
@@ -686,13 +642,13 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle U_{\parallel} - \mathrm{MET} \\rangle$ in GeV')
-    #plt.title('Mean Deviation $U_{\parallel}-p_T^Z$')
+    plt.ylabel('$\\langle U_{\parallel} - p_T^Z \\rangle$ in GeV')
+    plt.title('Mean Deviation $U_{\parallel}-p_T^Z$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(-20, 20)
-    plt.savefig("%sDelta_para_PV.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sMeanDeviation_PV.png"%(plotsD))
     plt.close()
 
 
@@ -713,16 +669,38 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.xlabel('$p_{T}^Z $ in GeV')
     plt.ylabel('$\sigma \\left( U_{\perp} \\right) $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\perp}$')
+    plt.title('Resolution $U_{\perp}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_perp_pT.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Resolution_Perp_pT.png"%(plotsD))
     plt.close()
 
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
 
+    plotMVAResolutionOverpTZ_woutError_perp_RC('LongZCorrectedRecoil_PerpZ', 'GBRT', 0)
+    plotMVAResolutionOverpTZ_woutError_perp_RC('NN_PerpZ', 'NN', 2)
+    plotMVAResolutionOverpTZ_woutError_perp_RC('recoilslimmedMETs_PerpZ', 'PF', 1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$p_{T}^Z $ in GeV')
+    plt.ylabel('$\\frac{\sigma \\left( U_{\perp} \\right) }{\\frac{U_{\parallel}}{p_T^Z}} $ ')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title('Resolution $U_{\perp}$, Response corrected')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    ##plt.ylim(ylimResMVAMin_RC, ylimResMax_RC)
+    plt.savefig("%sOutput_Resolution_Perp_pT_RC.png"%(plotsD))
+    plt.close()
 
 
 
@@ -742,38 +720,47 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.xlabel('#$ \mathrm{PV}$ ')
     plt.ylabel('$\sigma \\left( U_{\perp} \\right) $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\perp}$')
+    plt.title('Resolution $U_{\perp}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_perp_PV.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Resolution_Perp_PV.png"%(plotsD))
     plt.close()
-
-
-
-
-
-
-
-
-
-
 
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
+    plotMVAResolutionOverNVertex_woutError_perp_RC('LongZCorrectedRecoil_PerpZ', 'GBRT', 0)
+    plotMVAResolutionOverNVertex_woutError_perp_RC('NN_PerpZ', 'NN', 2)
+    plotMVAResolutionOverNVertex_woutError_perp_RC('recoilslimmedMETs_PerpZ', 'PF', 1)
 
-    Histogram_Deviation_para_PV('recoilpatpfNoPUMET_LongZ', 'No PU MET',0)
-    Histogram_Deviation_para_PV('recoilpatpfPUCorrectedMET_LongZ', 'PU corrected MET',1)
-    Histogram_Deviation_para_PV( 'recoilpatpfPUMET_LongZ', 'PU MET',2)
-    Histogram_Deviation_para_PV('recoilpatpfTrackMET_LongZ', 'Track MET',3)
-    Histogram_Deviation_para_PV('recoilslimmedMETsPuppi_LongZ', 'Puppi MET',4)
-    Histogram_Deviation_para_PV('LongZCorrectedRecoil_LongZ', 'GBRT MET', 5)
-    Histogram_Deviation_para_PV('recoilslimmedMETs_LongZ', 'PF MET', 1)
-    Histogram_Deviation_para_PV('NN_LongZ', 'NN MET', 6)
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
+
+    plt.xlabel('#$ \mathrm{PV}$ ')
+    plt.ylabel('$\\frac{\sigma \\left( U_{\perp} \\right)}{\\frac{U_{\parallel}}{p_T^Z}} $ ')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title('Resolution $U_{\perp}$, Response corrected')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    ##plt.ylim(ylimResMVAMin_RC, ylimResMax_RC)
+    plt.savefig("%sOutput_Resolution_Perp_PV_RC.png"%(plotsD))
+    plt.close()
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    Histogram_Deviation_para_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    Histogram_Deviation_para_PV('NN_LongZ', 'NN', 2)
+    Histogram_Deviation_para_PV('recoilslimmedMETs_LongZ', 'PF', 1)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -781,15 +768,15 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ U_{\parallel} - \mathrm{MET}  $ in GeV')
+    plt.xlabel('$ U_{\parallel} - p_T^Z  $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Deviation Histogram parallel')
+    plt.title('Deviation Histogram parallel')
     #plt.text('$p_T$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_Delta_para.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Deviation_Hist_para.png"%(plotsD))
     plt.close()
 
 
@@ -797,114 +784,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-
-    Histogram_Norm_Comparison('recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ', 'No PU MET',0)
-    Histogram_Norm_Comparison('recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ','PU corrected MET',1)
-    Histogram_Norm_Comparison( 'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ', 'PU MET',2)
-    Histogram_Norm_Comparison('recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ', 'Track MET',3)
-    Histogram_Norm_Comparison('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ', 'Puppi MET',4)
-    Histogram_Norm_Comparison('LongZCorrectedRecoil_LongZ', 'LongZCorrectedRecoil_PerpZ', 'GBRT MET', 5)
-    Histogram_Norm_Comparison('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ', 'PF MET', 1)
-    Histogram_Norm_Comparison('NN_LongZ','NN_PerpZ', 'NN MET', 6)
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.ylabel('Counts')
-    plt.xlabel('$ |\\vec{U}| - |\\vec{\mathrm{MET}}|  $ in GeV')
-    plt.xlim(HistLimMin,HistLimMax)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Deviation Histogram norm')
-    #plt.text('$p_T$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_Delta_norm.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-
-    Histogram_Norm_Pt('Boson_Pt', 'Target MET',7)
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.ylabel('Counts')
-    plt.xlabel('$ |\\vec{\mathrm{MET}}|   $ in GeV')
-    plt.xlim(0,75)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Deviation Histogram norm')
-    #plt.text('$p_T$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_norm_pT.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-
-    Histogram_Norm('recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ', 'No PU MET',0)
-    Histogram_Norm('recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ','PU corrected MET',1)
-    Histogram_Norm( 'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ', 'PU MET',2)
-    Histogram_Norm('recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ', 'Track MET',3)
-    Histogram_Norm('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ', 'Puppi MET',4)
-    Histogram_Norm('LongZCorrectedRecoil_LongZ', 'LongZCorrectedRecoil_PerpZ', 'GBRT MET', 5)
-    Histogram_Norm('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ', 'PF MET', 1)
-    Histogram_Norm_Pt('Boson_Pt', 'Target MET',7)
-    #Histogram_Norm('NN_LongZ','NN_PerpZ', 'NN MET', 6)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.ylabel('Counts')
-    plt.xlabel('$ |U|   $ in GeV')
-    plt.xlim(0,75)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Deviation Histogram norm')
-    #plt.text('$p_T$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_norm.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-
-
-
-    Histogram_Deviation_perp_PV('recoilpatpfNoPUMET_PerpZ', 'No PU MET',0)
-    Histogram_Deviation_perp_PV('recoilpatpfPUCorrectedMET_PerpZ', 'PU corrected MET',1)
-    Histogram_Deviation_perp_PV( 'recoilpatpfPUMET_PerpZ', 'PU MET',2)
-    Histogram_Deviation_perp_PV('recoilpatpfTrackMET_PerpZ', 'Track MET',3)
-    Histogram_Deviation_perp_PV('recoilslimmedMETsPuppi_PerpZ', 'Puppi MET',4)
-    Histogram_Deviation_perp_PV('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    Histogram_Deviation_perp_PV('LongZCorrectedRecoil_PerpZ', 'GBRT', 0)
+    Histogram_Deviation_perp_PV('NN_PerpZ', 'NN', 2)
     Histogram_Deviation_perp_PV('recoilslimmedMETs_PerpZ', 'PF', 1)
-    Histogram_Deviation_perp_PV('NN_PerpZ', 'NN', 6)
-
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -913,31 +795,98 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.ylabel('Counts')
     plt.xlabel('$ U_{\perp}  $ in GeV')
-    plt.xlim(HistLimMin,HistLimMax)
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Deviation Histogram perpendicular')
+    plt.title('Deviation Histogram perpendicular')
     #plt.text('$p_T$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_perp.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Deviation_Hist_perp.png"%(plotsD))
+    plt.close()
+
+
+
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    Histogram_Deviation_para_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    Histogram_Deviation_para_PV('NN_LongZ', 'NN', 6)
+    Histogram_Deviation_para_PV('recoilslimmedMETs_LongZ', 'PF', 1)
+    Histogram_Deviation_para_PV('recoilpatpfNoPUMET_LongZ', 'No PU MET',0)
+    Histogram_Deviation_para_PV('recoilpatpfPUCorrectedMET_LongZ', 'PU corrected MET',1)
+    Histogram_Deviation_para_PV( 'recoilpatpfPUMET_LongZ', 'PU MET',2)
+    Histogram_Deviation_para_PV('recoilpatpfTrackMET_LongZ', 'Track MET',3)
+    Histogram_Deviation_para_PV('LongZCorrectedRecoil_LongZ', 'PF MET',4)
+    Histogram_Deviation_para_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    #Histogram_Deviation_perp_PV('NN_LongZ', 'NN', 6)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$ U_{\parallel} - p_T^Z  $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title('Deviation Histogram parallel')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    ##plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%sOutput_Deviation_Hist_Inputs_para.png"%(plotsD))
+    plt.close()
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    Histogram_Deviation_perp_PV('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    Histogram_Deviation_perp_PV('NN_PerpZ', 'NN', 6)
+    Histogram_Deviation_perp_PV('recoilslimmedMETs_PerpZ', 'PF', 1)
+    Histogram_Deviation_perp_PV('recoilpatpfNoPUMET_PerpZ', 'No PU MET',0)
+    Histogram_Deviation_perp_PV('recoilpatpfPUCorrectedMET_PerpZ', 'PU corrected MET',1)
+    Histogram_Deviation_perp_PV( 'recoilpatpfPUMET_PerpZ', 'PU MET',2)
+    Histogram_Deviation_perp_PV('recoilpatpfTrackMET_PerpZ', 'Track MET',3)
+    #Histogram_Deviation_perp_PV('LongZCorrectedRecoil_PerpZ', 'PF MET',4)
+    Histogram_Deviation_perp_PV('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    #Histogram_Deviation_perp_PV('NN_LongZ', 'NN', 6)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$ U_{\perp}  $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title('Deviation Histogram perpendicular')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    ##plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.savefig("%sOutput_Deviation_Hist_Inputs_perp.png"%(plotsD))
     plt.close()
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-
+    Hist_LongZ('LongZCorrectedRecoil_LongZ', 'GBRT', 5)
+    Hist_LongZ('NN_LongZ', 'NN', 6)
+    Hist_LongZ('recoilslimmedMETs_LongZ', 'PF', 1)
     Hist_LongZ('recoilpatpfNoPUMET_LongZ', 'No PU MET',0)
     Hist_LongZ('recoilpatpfPUCorrectedMET_LongZ', 'PU corrected MET',1)
     Hist_LongZ( 'recoilpatpfPUMET_LongZ', 'PU MET',2)
     Hist_LongZ('recoilpatpfTrackMET_LongZ', 'Track MET',3)
-    Hist_LongZ('recoilslimmedMETsPuppi_LongZ', 'Puppi MET',3)
-    Hist_LongZ('LongZCorrectedRecoil_LongZ', 'GBRT MET', 5)
-    Hist_LongZ('recoilslimmedMETs_LongZ', 'PF MET', 1)
-    Hist_LongZ('Boson_Pt', 'Target MET',4)
-    Hist_LongZ('NN_LongZ', 'NN MET', 6)
+    Hist_LongZ('Boson_Pt', 'Target',4)
+
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -946,15 +895,14 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.ylabel('Counts')
     plt.xlabel('$ U_{\parallel}   $ in GeV')
-    plt.xlim(HistLimMin,HistLimMax)
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title(' Histogram parallel component')
+    plt.title(' Histogram parallel component')
     #plt.text('$p_T$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_para.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sHist_Inputs_LongZ.png"%(plotsD))
     plt.close()
 
 
@@ -962,15 +910,16 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-
+    Hist_PerpZ('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    Hist_PerpZ('NN_PerpZ', 'NN', 6)
+    Hist_PerpZ('recoilslimmedMETs_PerpZ', 'PF', 1)
     Hist_PerpZ('recoilpatpfNoPUMET_PerpZ', 'No PU MET',0)
     Hist_PerpZ('recoilpatpfPUCorrectedMET_PerpZ', 'PU corrected MET',1)
     Hist_PerpZ( 'recoilpatpfPUMET_PerpZ', 'PU MET',2)
     Hist_PerpZ('recoilpatpfTrackMET_PerpZ', 'Track MET',3)
-    Hist_PerpZ('recoilslimmedMETsPuppi_PerpZ', 'Puppi MET',4)
-    Hist_PerpZ('LongZCorrectedRecoil_PerpZ', 'GBRT MET', 5)
-    Hist_PerpZ('recoilslimmedMETs_PerpZ', 'PF MET', 1)
-    Hist_PerpZ('NN_PerpZ', 'NN MET', 6)
+    #Hist_PerpZ('recoilslimmedMETs_LongZ', 'PF MET',4)
+    Hist_PerpZ('LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    #Histogram_Deviation_perp_PV('NN_LongZ', 'NN', 6)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -979,18 +928,17 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.ylabel('Counts')
     plt.xlabel('$ U_{\perp}  $ in GeV')
-    plt.xlim(HistLimMin,HistLimMax)
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title(' Histogram perpendicular component')
+    plt.title(' Histogram perpendicular component')
     #plt.text('$p_T$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_perp.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sHist_Inputs_PerpZ.png"%(plotsD))
     plt.close()
 
-    '''
+
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -1004,35 +952,25 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.ylabel('Counts')
     plt.xlabel('$ U_{\parallel} - p_T^Z  $ in GeV')
-    plt.xlim(HistLimMin,HistLimMax)
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Response Histogram by Bin')
+    plt.title('Response Histogram by Bin')
     #plt.text('$p_T$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sOutput_Response_Hist_Bin.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Response_Hist_Bin.png"%(plotsD))
     plt.close()
-    '''
+
 
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-
-
-
-
-    Histogram_Deviation_para_PV('recoilpatpfNoPUMET_LongZ', 'No PU MET',0)
-    Histogram_Deviation_para_PV('recoilpatpfPUCorrectedMET_LongZ', 'PU corrected MET',1)
-    Histogram_Deviation_para_PV( 'recoilpatpfPUMET_LongZ', 'PU MET',2)
-    Histogram_Deviation_para_PV('recoilpatpfTrackMET_LongZ', 'Track MET',3)
-    Histogram_Deviation_para_PV('recoilslimmedMETsPuppi_LongZ', 'Puppi MET',4)
-    Histogram_Deviation_para_PV('LongZCorrectedRecoil_LongZ', 'GBRT MET', 5)
-    Histogram_Deviation_para_PV('recoilslimmedMETs_LongZ', 'PF MET', 7)
-    Histogram_Deviation_para_PV('NN_LongZ', 'NN MET', 6)
+    Histogram_Deviation_para_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    Histogram_Deviation_para_PV('NN_LongZ', 'NN', 2)
+    Histogram_Deviation_para_PV('recoilslimmedMETs_LongZ', 'PF', 1)
 
 
     box = ax.get_position()
@@ -1041,38 +979,24 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ U_{\parallel} - \mathrm{MET}  $ in GeV')
-    plt.xlim(HistLimMin,HistLimMax)
+    plt.xlabel('$ U_{\parallel} - p_T^Z  $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Deviation Histogram parallel')
+    plt.title('Deviation Histogram parallel')
     #plt.text('$p_T$ and $\# PV$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_Delta_para.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Deviation_Hist_PV_para.png"%(plotsD))
     plt.close()
-
-
-
-
-
-
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-
-
-    Histogram_Angle_Dev('recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ', 'No PU MET',0)
-    Histogram_Angle_Dev('recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ','PU corrected MET',1)
-    Histogram_Angle_Dev( 'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ', 'PU MET',2)
-    Histogram_Angle_Dev('recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ', 'Track MET',3)
-    Histogram_Angle_Dev('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ', 'Puppi MET',4)
-    Histogram_Angle_Dev('LongZCorrectedRecoil_LongZ', 'LongZCorrectedRecoil_PerpZ', 'GBRT MET', 5)
-    Histogram_Angle_Dev('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ', 'PF MET', 1)
-    Histogram_Angle_Dev('NN_LongZ','NN_PerpZ', 'NN MET', 6)
+    Histogram_Deviation_para_PV('LongZCorrectedRecoil_PerpZ', 'GBRT', 0)
+    Histogram_Deviation_para_PV('NN_PerpZ', 'NN', 2)
+    Histogram_Deviation_para_PV('recoilslimmedMETs_PerpZ', 'PF', 1)
 
 
     box = ax.get_position()
@@ -1081,33 +1005,50 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ \\Delta \\alpha $ in rad')
-    plt.xlim(-np.pi,np.pi)
+    plt.xlabel('$ U_{\perp}$ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Deviation Histogram perp')
-    #plt.text('$p_T$ and $\# pT$ range restriction')
+    plt.title('Deviation Histogram perp')
+    #plt.text('$p_T$ and $\# PV$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
     ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_Delta_phi.png"%(plotsD), bbox_inches="tight")
+    plt.savefig("%sOutput_Deviation_Hist_PV_perp.png"%(plotsD))
     plt.close()
 
-    '''
+
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
+    Histogram_relResponse('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    Histogram_relResponse('NN_LongZ', 'NN', 2)
+    Histogram_relResponse('recoilslimmedMETs_LongZ', 'PF', 1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.ylabel('Counts')
+    plt.xlabel('$ \\frac{U_{\parallel} - p_T^Z}{p_T^Z}  $')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
+    plt.title('relative Deviation Histogram')
+    #plt.text('$p_T$ range restriction')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.xlim(-50, 50)
+    plt.savefig("%sOutput_relResponse_Hist.png"%(plotsD))
 
 
-    Histogram_Angle('recoilpatpfNoPUMET_Phi', 'No PU MET',0)
-    Histogram_Angle('recoilpatpfPUCorrectedMET_Phi','PU corrected MET',1)
-    Histogram_Angle( 'recoilpatpfPUMET_Phi', 'PU MET',2)
-    Histogram_Angle('recoilpatpfTrackMET_Phi', 'Track MET',3)
-    Histogram_Angle('recoilslimmedMETsPuppi_Phi', 'Puppi MET',4)
-    Histogram_Angle('LongZCorrectedRecoil_Phi', 'GBRT MET', 5)
-    Histogram_Angle('recoilslimmedMETs_Phi', 'PF MET', 1)
-    Histogram_Angle('NN_LongZ','NN_PerpZ', 'NN MET', 6)
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    Histogram_relResponse_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    Histogram_relResponse_PV('NN_LongZ', 'NN', 2)
+    Histogram_relResponse_PV('recoilslimmedMETs_LongZ', 'PF', 1)
 
 
     box = ax.get_position()
@@ -1116,18 +1057,17 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.ylabel('Counts')
-    plt.xlabel('$  \\alpha $ in rad')
-    plt.xlim(-np.pi,np.pi)
+    plt.xlabel('$ \\frac{U_{\parallel} - p_T^Z}{p_T^Z}  $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('Deviation Histogram perp')
-    #plt.text('$p_T$ and $\# pT$ range restriction')
+    plt.title('relative Deviation Histogram')
+    #plt.text('$p_T$ and $\# PV$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_phi.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
+    ##plt.ylim(-50, 50)
+    plt.savefig("%sOutput_relResponse_Hist_PV.png"%(plotsD))
+
+
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1143,16 +1083,16 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
-    plt.ylabel('$\\langle  U_{\parallel} - \mathrm{MET} \\rangle$')
-    plt.xlabel('$\mathrm{MET} $ in GeV')
+    plt.ylabel('$\\langle  U_{\parallel} - p_T^Z \\rangle$')
+    plt.xlabel('$p_T^Z $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('parallel deviation over $p_T^Z$')
+    plt.title('parallel deviation over $p_T^Z$')
     #plt.text('$p_T$ and $\# PV$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    ##plt.ylim(HistLimMin, HistLimMax)
-    plt.savefig("%sDelta_para_Std_para_pT.png"%(plotsD), bbox_inches="tight")
+    ##plt.ylim(-50, 50)
+    plt.savefig("%sDeviation_pTZ_para.png"%(plotsD))
 
 
     fig=plt.figure(figsize=(10,6))
@@ -1170,15 +1110,15 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.ylabel('$\\langle  U_{\perp} \\rangle$')
-    plt.xlabel('$ \mathrm{MET} $ in GeV')
+    plt.xlabel('$ p_T^Z $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-    #plt.title('perpendicular deviation over $p_T^Z$')
+    plt.title('perpendicular deviation over $p_T^Z$')
     #plt.text('$p_T$ and $\# PV$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    ##plt.ylim(HistLimMin, HistLimMax)
-    plt.savefig("%sDelta_perp_Std_perp_pT.png"%(plotsD), bbox_inches="tight")
+    ##plt.ylim(-50, 50)
+    plt.savefig("%sDeviation_pTZ_perp.png"%(plotsD))
 
 
     fig=plt.figure(figsize=(10,6))
@@ -1195,15 +1135,15 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
-    plt.ylabel('$\\langle  U_{\parallel} - \mathrm{MET} \\rangle$')
+    plt.ylabel('$\\langle  U_{\parallel} - p_T^Z \\rangle$')
     plt.xlabel('\#PV')
-    #plt.title('parallel deviation over \#PV')
+    plt.title('parallel deviation over \#PV')
     #plt.text('$p_T$ and $\# PV$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    ##plt.ylim(HistLimMin, HistLimMax)
-    plt.savefig("%sDelta_para_Std_para_PV.png"%(plotsD), bbox_inches="tight")
+    ##plt.ylim(-50, 50)
+    plt.savefig("%sDeviation_PV_para.png"%(plotsD))
 
 
     fig=plt.figure(figsize=(10,6))
@@ -1222,14 +1162,31 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plt.ylabel('$\\langle  U_{\perp} \\rangle$')
     plt.xlabel('\#PV')
-    #plt.title('parallel deviation over \#PV')
+    plt.title('parallel deviation over \#PV')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    ##plt.ylim(HistLimMin, HistLimMax)
-    plt.savefig("%sDelta_perp_Std_perp_PV.png"%(plotsD), bbox_inches="tight")
+    ##plt.ylim(-50, 50)
+    plt.savefig("%sDeviation_PV_perp.png"%(plotsD))
 
 
+    plt.close()
+    plt.figure()
+    plt.suptitle('Histogram deviation over $\# \mathrm{PV}$ ')
+    plt.xlabel("$\# \mathrm{PV}$")
+    plt.ylabel('$ U_{\parallel} - p_T^Z  $ in GeV')
+    heatmap, xedges, yedges = np.histogram2d(
+        map(np.subtract, -(DFName_nVertex['NN_LongZ']),  DFName_nVertex.Boson_Pt) ,
+        DFName_nVertex.NVertex, bins=50,
+        range=[[0,50],
+               [ -10, 10]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.close()
+    plt.imshow(heatmap.T, extent=extent, origin='lower')
+    #plt.colorbar(heatmap.T)
+    plt.legend()
+    plt.savefig("%sOutput_Response_HM_PV.png"%(plotsD))
+    plt.close()
 
 
 

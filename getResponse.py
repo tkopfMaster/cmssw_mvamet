@@ -12,6 +12,7 @@ import matplotlib.cm as cm
 import matplotlib.patches as mpatches
 import scipy.stats
 import matplotlib.ticker as mtick
+from matplotlib.colors import LogNorm
 import h5py
 import sys
 
@@ -89,6 +90,97 @@ def plotMVAResponseOverpTZ_woutError(branchString, labelName, errbars_shift):
     stdc = np.std((-(DFName[branchString])/DFName.Boson_Pt))
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
 
+
+def plotMVANormOverpTZ(branchString, labelName, errbars_shift):
+    binwidth = (DFName.Boson_Pt.values.max() - DFName.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
+    n, _ = np.histogram(DFName.Boson_Pt, bins=nbins)
+    if branchString=='NN_LongZ':
+        NN_Pt = np.sqrt(np.multiply(DFName['NN_LongZ'],DFName['NN_LongZ'])+np.multiply(DFName['NN_PerpZ'],DFName['NN_PerpZ']))
+        sy, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(NN_Pt/DFName.Boson_Pt))
+        sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(NN_Pt/DFName.Boson_Pt)**2)
+        meanc = np.mean(NN_Pt/DFName.Boson_Pt)
+        stdc = np.std(NN_Pt/DFName.Boson_Pt)
+    else:
+        sy, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=((DFName[branchString])/DFName.Boson_Pt))
+        sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(DFName[branchString]/DFName.Boson_Pt)**2)
+        meanc = np.mean(DFName[branchString]/DFName.Boson_Pt)
+        stdc = np.std(DFName[branchString]/DFName.Boson_Pt)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
+
+def plotMVAAngularOverpTZ(branchStringLong, branchStringPerp, labelName, errbars_shift):
+    binwidth = (DFName.Boson_Pt.values.max() - DFName.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
+    n, _ = np.histogram(DFName.Boson_Pt, bins=nbins)
+    if branchStringLong=='NN_LongZ':
+        r_, phi_ = kar2pol(DFName['NN_LongZ'], DFName['NN_PerpZ'])
+        phi_ = angularrange(phi_+np.pi)
+        sy, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(phi_))
+        sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(phi_)**2)
+        meanc = np.mean(phi_)
+        stdc = np.std(phi_)
+    else:
+        r_, phi_ = kar2pol(DFName[branchStringLong], DFName[branchStringPerp])
+        phi_ = angularrange(phi_+np.pi)
+        sy, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(phi_))
+        sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(phi_)**2)
+        meanc = np.mean(phi_)
+        stdc = np.std(phi_)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
+
+
+
+def plotMVANormOverpTZ_wErr(branchString, labelName, errbars_shift):
+    binwidth = (DFName.Boson_Pt.values.max() - DFName.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
+    n, _ = np.histogram(DFName.Boson_Pt, bins=nbins)
+    if branchString=='NN_LongZ':
+        NN_Pt = np.sqrt(np.multiply(DFName['NN_LongZ'],DFName['NN_LongZ'])+np.multiply(DFName['NN_PerpZ'],DFName['NN_PerpZ']))
+        sy, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(NN_Pt/DFName.Boson_Pt))
+        sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(NN_Pt/DFName.Boson_Pt)**2)
+        meanc = np.mean(NN_Pt/DFName.Boson_Pt)
+        stdc = np.std(NN_Pt/DFName.Boson_Pt)
+    else:
+        sy, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=((DFName[branchString])/DFName.Boson_Pt))
+        sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(DFName[branchString]/DFName.Boson_Pt)**2)
+        meanc = np.mean(DFName[branchString]/DFName.Boson_Pt)
+        stdc = np.std(DFName[branchString]/DFName.Boson_Pt)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+
+def plotMVAAngularOverpTZ_wErr(branchStringLong, branchStringPerp, labelName, errbars_shift):
+    binwidth = (DFName.Boson_Pt.values.max() - DFName.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
+    n, _ = np.histogram(DFName.Boson_Pt, bins=nbins)
+    if branchStringLong=='NN_LongZ':
+        r_, phi_ = kar2pol(DFName['NN_LongZ'], DFName['NN_PerpZ'])
+        phi_ = angularrange(phi_+np.pi)
+        sy, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(phi_))
+        sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(phi_)**2)
+        meanc = np.mean(phi_)
+        stdc = np.std(phi_)
+    else:
+        r_, phi_ = kar2pol(DFName[branchStringLong], DFName[branchStringPerp])
+        phi_ = angularrange(phi_+np.pi)
+        sy, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(phi_))
+        sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(phi_)**2)
+        meanc = np.mean(phi_)
+        stdc = np.std(phi_)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+
+
+
 def plotMVAResponseOverpTZ_woutError_Tresh(branchString, labelName, errbars_shift):
     DFName_Tresh = DFName[DFName['Boson_Pt']>pTTresh]
     binwidth = (DFName_Tresh.Boson_Pt.values.max() - DFName_Tresh.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
@@ -129,7 +221,11 @@ def plotMVAResponseOverpTZ_wError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(DFName[branchString]/DFName.Boson_Pt)**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResponseOverNVertex_wError(branchString, labelName, errbars_shift):
@@ -139,7 +235,11 @@ def plotMVAResponseOverNVertex_wError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString]/DFName_nVertex.Boson_Pt)**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 
@@ -151,6 +251,37 @@ def plotMVAResolutionOverpTZ_woutError_para(branchString, labelName, errbars_shi
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
     plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+
+
+
+def mean_Response(branchString_Long, branchString_Perp, labelName, errbars_shift):
+    binwidth = (-np.pi - np.pi)/(200)
+    n, _ = np.histogram(DFName.Boson_Pt, bins=nbins)
+    NN_r, NN_phi = kar2pol(-DFName[branchString_Long], DFName[branchString_Perp])
+
+    n, _ = np.histogram(NN_phi, bins=200)
+    sy, _ = np.histogram(NN_phi, bins=200, weights=np.divide(-DFName[branchString_Long], DFName['Boson_Pt'] ))
+    sy2, _ = np.histogram(NN_phi, bins=200, weights=np.divide(-DFName[branchString_Long], DFName['Boson_Pt'] )**2)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/2*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift], linewidth=1.0)
+
+
+
+def mean_Response_CR(branchString_Long, branchString_Perp, labelName, errbars_shift):
+    binwidth = (-np.pi/180*10- np.pi/180*10)/(200)
+    n, _ = np.histogram(DFName.Boson_Pt, bins=nbins)
+    NN_r, NN_phi = kar2pol(-DFName[branchString_Long], DFName[branchString_Perp])
+
+    n, _ = np.histogram(NN_phi, bins=200, range=[-np.pi/180*10, np.pi/180*10])
+    sy, _ = np.histogram(NN_phi, bins=200, weights=np.divide(-DFName[branchString_Long], DFName['Boson_Pt'] ), range=[-np.pi/180*10, np.pi/180*10])
+    sy2, _ = np.histogram(NN_phi, bins=200, weights=np.divide(-DFName[branchString_Long], DFName['Boson_Pt'] )**2, range=[-np.pi/180*10, np.pi/180*10])
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/2*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift], linewidth=1.0)
+
 
 def plotMVAResolutionOverNVertex_woutError_para(branchString, labelName, errbars_shift):
     binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
@@ -226,6 +357,16 @@ def Hist_Response(branchString, labelName, errbars_shift):
     Std = np.std(Response)
 
     plt.hist(Response, bins=nbinsHist, range=[ResponseMin, ResponseMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+
+def Hist_InvMET(branchString, labelName, errbars_shift):
+    Response2 = np.divide(-(DFName[branchString]), DFName['Boson_Pt'])
+    Response = np.divide(1, DFName['Boson_Pt'])
+    Response = Response[~np.isnan(Response2)]
+    Mean = np.mean(Response)
+    Std = np.std(Response)
+
+    plt.hist(Response, bins=nbinsHist, range=[ResponseMin, ResponseMax], label='$\\frac{1}{\mathrm{MET}}$, %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+
 
 def Hist_Resolution_para(branchString, labelName, errbars_shift):
     Mean = np.mean((-(DFName[branchString])-DFName['Boson_Pt']))
@@ -387,7 +528,10 @@ def plotMVAResponseOverpTZ_wError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName.Boson_Pt, bins=nbins, weights=(DFName[branchString]/DFName.Boson_Pt)**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResponseOverNVertex_wError(branchString, labelName, errbars_shift):
@@ -397,7 +541,11 @@ def plotMVAResponseOverNVertex_wError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString]/DFName_nVertex.Boson_Pt)**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
     #plt.plot((_[1:] + _[:-1])/2, mean, marker='.', label=labelName, linestyle="None", color=MVAcolors[errbars_shift])
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
@@ -496,7 +644,10 @@ def Mean_Std_Deviation_pTZ_para(branchString, labelName, errbars_shift):
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def Mean_Std_Deviation_pTZ_perp(branchString, labelName, errbars_shift):
     binwidth = (DFName.Boson_Pt.values.max() - DFName.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
@@ -506,7 +657,10 @@ def Mean_Std_Deviation_pTZ_perp(branchString, labelName, errbars_shift):
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def Mean_Std_Deviation_PV_para(branchString, labelName, errbars_shift):
     binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
@@ -516,7 +670,10 @@ def Mean_Std_Deviation_PV_para(branchString, labelName, errbars_shift):
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def Mean_Std_Deviation_PV_perp(branchString, labelName, errbars_shift):
     binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
@@ -526,7 +683,11 @@ def Mean_Std_Deviation_PV_perp(branchString, labelName, errbars_shift):
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    if errbars_shift==5: errbars_shift2 = 0
+    elif errbars_shift==6: errbars_shift2 = 1
+    elif errbars_shift==1: errbars_shift2 = 0
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+
 
 
 
@@ -565,7 +726,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     ################################MVA Output ################################
     nbinsVertex = 10
     #########Response u_para/pTZ ###########
-    '''
+
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -589,7 +750,106 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     #plt.ylim(ResponseMin, ResponseMax)
     plt.savefig("%sResponse_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
-    '''
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plotMVANormOverpTZ('LongZCorrectedRecoil_Pt', 'GBRT', 5)
+    plotMVANormOverpTZ('NN_LongZ', 'NN', 6)
+    plotMVANormOverpTZ('recoilslimmedMETs_Pt', 'PF', 1)
+    plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$p_{T}^Z $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ResponseMin, ResponseMax)
+    plt.savefig("%sNorm_pT.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plotMVANormOverpTZ_wErr('LongZCorrectedRecoil_Pt', 'GBRT', 5)
+    plotMVANormOverpTZ_wErr('NN_LongZ', 'NN', 6)
+    plotMVANormOverpTZ_wErr('recoilslimmedMETs_Pt', 'PF', 1)
+    plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$p_{T}^Z $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ResponseMin, ResponseMax)
+    plt.savefig("%sNorm_pT_werr.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plotMVAAngularOverpTZ('LongZCorrectedRecoil_LongZ','LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    plotMVAAngularOverpTZ('NN_LongZ','NN_PerpZ', 'NN', 6)
+    plotMVAAngularOverpTZ('recoilslimmedMETs_LongZ','recoilslimmedMETs_PerpZ', 'PF', 1)
+    plt.plot([0, 200], [0, 0], color='k', linestyle='--', linewidth=1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$p_{T}^Z $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ResponseMin, ResponseMax)
+    plt.savefig("%sDelta_Alpha_pT.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plotMVAAngularOverpTZ_wErr('LongZCorrectedRecoil_LongZ','LongZCorrectedRecoil_PerpZ', 'GBRT', 5)
+    plotMVAAngularOverpTZ_wErr('NN_LongZ','NN_PerpZ', 'NN', 6)
+    plotMVAAngularOverpTZ_wErr('recoilslimmedMETs_LongZ','recoilslimmedMETs_PerpZ', 'PF', 1)
+    plt.plot([0, 200], [0, 0], color='k', linestyle='--', linewidth=1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$p_{T}^Z $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ResponseMin, ResponseMax)
+    plt.savefig("%sDelta_Alpha_pT_werr.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1352,8 +1612,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
-    plt.ylabel('$  \\frac{U_{\parallel}}{p_T^Z}} $')
-    plt.xlabel('Counts')
+    plt.xlabel('$  \\frac{U_{\parallel}}{p_T^Z}} $')
+    plt.ylabel('Counts')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
     #plt.title('parallel deviation over $p_T^Z$')
     #plt.text('$p_T$ and $\# PV$ range restriction')
@@ -1439,6 +1699,417 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.grid()
     ##plt.ylim(HistLimMin, HistLimMax)
     plt.savefig("%sDelta_perp_Std_perp_PV.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("Response")
+    NN_r, NN_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    Response = np.divide(-DFName['NN_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  NN_phi, Response,  bins=50,
+                                             range=[[-np.pi/2,np.pi/2],
+                                                    [0,2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_NN_Delta_Alpha.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("Response")
+    dPhi = np.linspace(-np.pi, np.pi, 200)
+    Response_pTperfect = np.cos(dPhi)
+    mean_Response('NN_LongZ', 'NN_PerpZ', 'NN', 0)
+    mean_Response('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ', 'PF', 1)
+    plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='perfect guess $p_T$')
+    plt.legend()
+    plt.ylim(-20,20)
+    plt.rcParams['agg.path.chunksize'] = 10000
+    plt.savefig("%sNN_Delta_Alpha_perfect_Guess.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("Response")
+    dPhi = np.linspace(-np.pi/180*10, np.pi/180*10, 200)
+    Response_pTperfect = np.cos(dPhi)
+    mean_Response_CR('NN_LongZ', 'NN_PerpZ', 'NN', 0)
+    mean_Response_CR('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ', 'PF', 1)
+    plt.plot(np.linspace(-np.pi/180*10, np.pi/180*10, 2000), np.cos(np.linspace(-np.pi/180*10, np.pi/180*10, 2000)), linewidth=2, markersize=12, label='perfect guess $p_T$')
+    plt.ylim(-5,5)
+    plt.legend()
+    plt.savefig("%sResponse_NN_Delta_Alpha_CR.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("Response")
+    PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
+    Response = np.divide(-DFName['recoilpatpfPUMET_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  PF_phi, Response,  bins=50,
+                                             range=[[-np.pi,np.pi],
+                                                    [0,2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_PF_Delta_Alpha.png"%(plotsD), bbox_inches="tight")
+
+    '''
+    plt.clf()
+    plt.figure()
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
+    PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
+    Response = np.divide(-DFName['recoilpatpfPUMET_LongZ'], DFName['Boson_Pt'] )
+    x=PF_phi
+    y=DFName['recoilpatpfPUMET_Pt']-DFName['Boson_Pt']
+    z=Response
+    x=np.unique(x)
+    y=np.unique(y)
+    X,Y = np.meshgrid(x,y)
+    Z=z.reshape(len(y),len(x))
+    plt.pcolormesh(X,Y,Z)
+    plt.show()
+    plt.legend()
+    plt.savefig("%sCM_PF_Response_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
+    PF_r, PF_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    Response = np.divide(-DFName['NN_LongZ'], DFName['Boson_Pt'] )
+    x=PF_phi
+    y=np.sqrt(np.multiply(DFName['NN_LongZ'], DFName['NN_LongZ'])+ np.multiply(DFName['NN_PerpZ'], DFName['NN_PerpZ']))-DFName['Boson_Pt']
+    z=Response
+    x=np.unique(x)
+    y=np.unique(y)
+    X,Y = np.meshgrid(x,y)
+    Z=z.reshape(len(y),len(x))
+    plt.pcolormesh(X,Y,Z)
+    plt.show()
+    plt.legend()
+    plt.savefig("%sCM_NN_Response_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
+    '''
+    '''
+    plt.clf()
+    plt.figure()
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
+    y=np.sqrt(np.multiply(DFName['recoilslimmedMETs_LongZ'], DFName['recoilslimmedMETs_LongZ'])+ np.multiply(DFName['recoilslimmedMETs_PerpZ'], DFName['recoilslimmedMETs_PerpZ']))-DFName['Boson_Pt']
+    delta_alpha=np.linspace(-np.pi,np.pi,201)
+    delta_pT=np.linspace(y.min(),y.max(),201)
+    PF_r, PF_phi = kar2pol(-DFName['recoilslimmedMETs_LongZ'], DFName['recoilslimmedMETs_PerpZ'])
+    Response = np.divide(-DFName['recoilslimmedMETs_LongZ'], DFName['Boson_Pt'] )
+    x=PF_phi
+    HM2=np.empty([200, 200])
+    for i in range(0,200):
+        for j in range(0,200):
+            HM2[i,j]=np.mean(Response[(PF_phi>=delta_alpha[i]) & (PF_phi<delta_alpha[i+1]) & (y>=delta_pT[j]) & (y<delta_pT[j+1])])
+    heatmap, xedges, yedges = HM2, delta_alpha, delta_pT
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=[-np.pi/2,np.pi/2, -50, 50], origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.xlim(-np.pi/2,np.pi/2)
+    plt.ylim(-50,50)
+    plt.show()
+    plt.legend()
+    plt.savefig("%sHM_PF_Response_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
+    '''
+    '''
+    plt.clf()
+    plt.figure()
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
+    delta_alpha=np.linspace(-np.pi,np.pi,201)
+    y=np.sqrt(np.multiply(DFName['NN_LongZ'], DFName['NN_LongZ'])+ np.multiply(DFName['NN_PerpZ'], DFName['NN_PerpZ']))-DFName['Boson_Pt']
+    delta_pT=np.linspace(y.min(),y.max(),201)
+    PF_r, PF_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    Response = np.divide(-DFName['NN_LongZ'], DFName['Boson_Pt'] )
+    x=PF_phi
+    HM2=np.empty([200, 200])
+    for i in range(0,200):
+        for j in range(0,200):
+            HM2[i,j]=np.mean(Response[(PF_phi>=delta_alpha[i]) & (PF_phi<delta_alpha[i+1]) & (y>=delta_pT[j]) & (y<delta_pT[j+1])])
+    heatmap, xedges, yedges = HM2, delta_alpha, delta_pT
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.xlim(-np.pi/2,np.pi/2)
+    plt.ylim(-200,200)
+    plt.colorbar(HM)
+    plt.show()
+    plt.legend()
+    plt.savefig("%sHM_NN_Response_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
+    '''
+
+    plt.clf()
+    plt.figure()
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
+    PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
+    DeltapT = DFName['recoilpatpfPUMET_Pt'] - DFName['Boson_Pt']
+    heatmap, xedges, yedges = np.histogram2d(  PF_phi, DeltapT,  bins=50,
+                                             range=[[-np.pi/2,np.pi/2],
+                                                    [-10,10]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_PF_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
+    PF_r, PF_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    NN_pT = np.sqrt(np.multiply(DFName['NN_LongZ'],DFName['NN_LongZ'])+ np.multiply(DFName['NN_PerpZ'],DFName['NN_PerpZ']))
+    DeltapT = NN_pT - DFName['Boson_Pt']
+    heatmap, xedges, yedges = np.histogram2d(  PF_phi, DeltapT,  bins=50,
+                                             range=[[-np.pi/2,np.pi/2],
+                                                    [-10,10]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_NN_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("Response")
+    PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
+    Response = np.divide(-DFName['recoilpatpfPUMET_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  PF_phi, Response,  bins=50,
+                                             range=[[-np.pi/2,np.pi/2],
+                                                    [0,2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_PF_Delta_Alpha_CO.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("Response")
+    PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
+    Response = np.divide(-DFName['recoilpatpfPUMET_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  PF_phi, Response,  bins=[25,25],
+                                             range=[[-np.pi/2,np.pi/2],
+                                                    [0.75,1.25]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_PF_Delta_Alpha_CR.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("Response")
+    PF_r, PF_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    Response = np.divide(-DFName['NN_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  PF_phi, Response,  bins=[25,25],
+                                             range=[[-np.pi/2,np.pi/2],
+                                                    [0.75,1.25]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_NN_Delta_Alpha_CR.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.ylabel("$ \Delta \\alpha $")
+    plt.xlabel("$p_T$")
+    NN_r, NN_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    heatmap, xedges, yedges = np.histogram2d(  PF_r, PF_phi,  bins=50,
+                                             range=[[0,200], [-np.pi/2,np.pi/2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_NN_Delta_Alpha_pT.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.ylabel("$ \Delta \\alpha $")
+    plt.xlabel("$p_T$")
+    NN_r, NN_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
+    heatmap, xedges, yedges = np.histogram2d(  PF_r, PF_phi,  bins=50,
+                                             range=[[0,200], [-np.pi/2,np.pi/2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_PF_Delta_Alpha_pT.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.ylabel("$ \Delta \\alpha $")
+    plt.xlabel("$p_T$")
+    PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
+    heatmap, xedges, yedges = np.histogram2d(  PF_r, PF_phi,  bins=50,
+                                             range=[[0,30], [-np.pi/2,np.pi/2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_PF_Delta_Alpha_pT.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.ylabel("$ \Delta \\alpha $")
+    plt.xlabel("$p_T$")
+    NN_r, NN_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    heatmap, xedges, yedges = np.histogram2d(  NN_r, NN_phi,  bins=50,
+                                             range=[[0,30], [-np.pi/2,np.pi/2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_NN_Delta_Alpha_pT.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ p_T^Z $")
+    plt.ylabel("Response")
+    NN_r, NN_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    Response = np.divide(-DFName['NN_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  DFName['Boson_Pt'], Response,  bins=[25,25],
+                                             range=[[0,10],
+                                                    [0,2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_NN_Delta_pT_10.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ p_T^Z $")
+    plt.ylabel("Response")
+    NN_r, NN_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    Response = np.divide(-DFName['NN_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  DFName['Boson_Pt'], Response,  bins=[25,25],
+                                             range=[[0,200],
+                                                    [0,2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_NN_Delta_pT_0_200.png"%(plotsD), bbox_inches="tight")
+
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ \Delta \\alpha $")
+    plt.ylabel("Response")
+    NN_r, NN_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    Response = np.divide(-DFName['NN_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  NN_phi, Response,  bins=[25,25],
+                                             range=[[0,10],
+                                                    [0,2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_NN_Delta_pT_10.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ p_T^Z $")
+    plt.ylabel("Response")
+    PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
+    Response = np.divide(-DFName['recoilpatpfPUMET_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  DFName['Boson_Pt'], Response,  bins=[25,25],
+                                             range=[[0,10],
+                                                    [0,2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_PF_Delta_pT_10.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ p_T^Z $")
+    plt.ylabel("Response")
+    PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
+    Response = np.divide(-DFName['recoilpatpfPUMET_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  DFName['Boson_Pt'], Response,  bins=[25,25],
+                                             range=[[0,200],
+                                                    [0,2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_PF_Delta_pT_0_200.png"%(plotsD), bbox_inches="tight")
+
+    plt.clf()
+    plt.figure()
+    #plt.suptitle('x-Korrektur Prediction-Target ')
+    plt.xlabel("$ p_T^Z $")
+    plt.ylabel("Response")
+    NN_r, NN_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
+    Response = np.divide(-DFName['NN_LongZ'], DFName['Boson_Pt'] )
+    heatmap, xedges, yedges = np.histogram2d(  DFName['Boson_Pt'], Response,  bins=[25,25],
+                                             range=[[150,200],
+                                                    [0,2]])
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    #plt.clf()
+    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
+    plt.colorbar(HM)
+    plt.legend()
+    plt.savefig("%sHM_Response_NN_Delta_pT_150.png"%(plotsD), bbox_inches="tight")
+
+
+
+
 
 
     print('PF: Wie viele negative Responses', np.sum(DFName['recoilpatpfPUMET_LongZ']<0))
