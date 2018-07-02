@@ -49,7 +49,7 @@ fi
 #python $src_di/prepareInput.py $inputFile $files_di $NN_mode $plots_di
 #python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/applyNN.py $inputFile $files_di $optimizer $loss $NN_mode
-python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $GBRTFile2
+#python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $GBRTFile2
 #python $src_di/prepareOutput.py $GBRTFile2 $files_di $NN_mode $plots_di
 #python $src_di/getPlotsInput.py $inputFile $plots_di
 #python $src_di/getPlotsOutputclean.py $GBRTFile2 $files_di $plots_di

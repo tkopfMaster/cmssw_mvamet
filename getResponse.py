@@ -387,7 +387,7 @@ def Histogram_Deviation_perp_pT(branchString, labelName, errbars_shift, ScaleErr
         plt.hist(((DFName[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 def Hist_Response(branchString, labelName, errbars_shift, ScaleErr):
-    Response = np.divide(-(DFName[branchString]), DFName['Boson_Pt'])
+    Response = -(DFName[branchString])/DFName['Boson_Pt']
     Response = Response[~np.isnan(Response)]
     Mean = np.mean(Response)
     Std = np.std(Response)
@@ -795,7 +795,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plotMVAResponseOverpTZ_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     plotMVAResponseOverpTZ_woutError('NN_LongZ', 'NN', 6, ScaleErr)
     plotMVAResponseOverpTZ_woutError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-    plotMVAResponseOverpTZ_woutError('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
+    #plotMVAResponseOverpTZ_woutError('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
     plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
 
     box = ax.get_position()
@@ -920,7 +920,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     Hist_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     Hist_Response('NN_LongZ', 'NN', 6, ScaleErr)
     Hist_Response('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-    Hist_Response('ScaledNN_LongZ', 'NN', 0, ScaleErr)
+    #Hist_Response('ScaledNN_LongZ', 'NN', 0, ScaleErr)
     plt.plot([1, 1], [0, 90000], color='k', linestyle='--', linewidth=1)
 
     box = ax.get_position()
@@ -1001,7 +1001,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plotMVAResponseOverNVertex_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 6, ScaleErr)
-    plotMVAResponseOverNVertex_woutError('ScaNN_LongZ', 'NN scaled', 0, ScaleErr)
+    #plotMVAResponseOverNVertex_woutError('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
     plotMVAResponseOverNVertex_woutError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
     plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -1079,6 +1079,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     plotMVAResolutionOverpTZ_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     plotMVAResolutionOverpTZ_woutError_para('NN_LongZ', 'NN', 6, ScaleErr)
+    #plotMVAResolutionOverpTZ_woutError_para('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
     plotMVAResolutionOverpTZ_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
 
     box = ax.get_position()
@@ -1127,6 +1128,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
 
     Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr)
+    #Hist_Resolution_para('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
     Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
 
     box = ax.get_position()
@@ -1151,6 +1153,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     pTRangeString_0_100 = '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 100\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     Hist_Resolution_para_0_100('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     Hist_Resolution_para_0_100('NN_LongZ', 'NN', 6, ScaleErr)
+    #Hist_Resolution_para_0_100('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
     Hist_Resolution_para_0_100('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
 
     box = ax.get_position()
@@ -1893,7 +1896,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.ylabel("Response")
     dPhi = np.linspace(-np.pi, np.pi, 200)
     Response_pTperfect = np.cos(dPhi)
-    mean_Response('NN_LongZ', 'NN_PerpZ', 'NN', 0, ScaleErr)
+    mean_Response('NN_LongZ', 'NN_PerpZ', 'NN', 6, ScaleErr)
     mean_Response('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr)
     plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='perfect guess $p_T$')
     plt.legend()
@@ -1909,11 +1912,12 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.ylabel("Response")
     dPhi = np.linspace(-np.pi, np.pi, 200)
     Response_pTperfect = np.cos(dPhi)
-    mean_Response_wErr('NN_LongZ', 'NN_PerpZ', 'NN', 0, ScaleErr)
+    mean_Response_wErr('NN_LongZ', 'NN_PerpZ', 'NN', 6, ScaleErr)
+    #mean_Response_wErr('ScaledNN_LongZ', 'NN_PerpZ', 'NN scaled', 0, ScaleErr)
     mean_Response_wErr('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr)
     plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='perfect guess $p_T$')
     plt.legend()
-    plt.ylim(-20,20)
+    plt.ylim(-8,5)
     plt.grid()
     plt.rcParams['agg.path.chunksize'] = 10000
     plt.savefig("%sNN_Delta_Alpha_perfect_Guess_wErr.png"%(plotsD), bbox_inches="tight")
@@ -1925,10 +1929,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex):
     plt.ylabel("Response")
     dPhi = np.linspace(-np.pi/180*10, np.pi/180*10, 200)
     Response_pTperfect = np.cos(dPhi)
-    mean_Response_CR('NN_LongZ', 'NN_PerpZ', 'NN', 0, ScaleErr)
+    mean_Response_CR('NN_LongZ', 'NN_PerpZ', 'NN', 6, ScaleErr)
     mean_Response_CR('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr)
     plt.plot(np.linspace(-np.pi/180*10, np.pi/180*10, 2000), np.cos(np.linspace(-np.pi/180*10, np.pi/180*10, 2000)), linewidth=2, markersize=12, label='perfect guess $p_T$')
-    plt.ylim(0,3)
+    plt.ylim(0,5)
     plt.grid()
     plt.legend()
     plt.savefig("%sResponse_NN_Delta_Alpha_CR.png"%(plotsD), bbox_inches="tight")
@@ -2309,8 +2313,9 @@ if __name__ == "__main__":
     plotDir = sys.argv[3]
     print(plotDir)
     DFName_plain = loadData(inputDir)
-    DFName_plain = DFName_plain.assign(ScaledNN_LongZ=p.Series(DFName_plain['NN_LongZ']/0.42).values)
-    DFName_plain = DFName_plain.assign(ScaledNN_LongZ=p.Series(DFName_plain['NN_PerpZ']/0.42).values)
+    #DFName_plain['NN_LongZ']=-DFName_plain['NN_LongZ']
+    #DFName_plain['ScaledNN_LongZ']=DFName_plain['NN_LongZ']/0.42
+    #DFName_plain['ScaledNN_LongZ']=DFName_plain['NN_PerpZ']/0.42
     DFName=DFName_plain[DFName_plain['Boson_Pt']<=200]
     DFName=DFName[DFName['Boson_Pt']>0]
     DFName=DFName[DFName['NVertex']<=50]

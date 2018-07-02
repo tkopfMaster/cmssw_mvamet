@@ -47,7 +47,7 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
         mZ_r, mZ_phi =  pol2kar(mZ_r, mZ_phi)
     elif NN_mode == 'xy':
         mZ_x, mZ_y = (NN_Output['MET_GroundTruth'][:,0]), (NN_Output['MET_GroundTruth'][:,1])
-        a_x, a_y = (NN_Output['MET_Predictions'][:,0]), (NN_Output['MET_Predictions'][:,1])
+        a_x, a_y = (NN_Output['MET_Predictions'][:,0])/0.42, (NN_Output['MET_Predictions'][:,1])/0.42
         mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
     else:
         mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
