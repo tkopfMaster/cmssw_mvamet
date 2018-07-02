@@ -698,7 +698,6 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     plt.close()
 
 
-
     PF_x, PF_y = pol2kar(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'])
     plt.clf()
     plt.figure()
@@ -773,8 +772,10 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
     plt.legend(["Loss","Validation Loss"], loc='upper left')
     plt.yscale('log')
     plt.savefig("%sLoss.png"%(plotsD), bbox_inches="tight")
-
-
+    #print("Korrellationskoeffizient zwischen ")
+    print("Korrellationskoeffizient zwischen Targets x, y", np.corrcoef(Targets[:,0],Targets[:,1]))
+    print("Korrellationskoeffizient zwischen Predictions x, y", np.corrcoef(predictions[:,0],predictions[:,1]))
+    print("Korrellationskoeffizient zwischen Delta x, Delta y", np.corrcoef(predictions[:,0]-Targets[:,0],predictions[:,1]-Targets[:,1]))
 
     NN_Output.close()
     NN_Output_applied.close()
