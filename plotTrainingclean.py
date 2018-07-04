@@ -8,6 +8,7 @@ import matplotlib.cm as cm
 import matplotlib.mlab as mlab
 from matplotlib.colors import LogNorm
 from getPlotsOutputclean import loadData
+from getResponse import getResponse, getResponseIdx
 from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
 
 
@@ -28,18 +29,19 @@ def Histogram_Angle(phi_, labelName, errbars_shift):
         plt.hist(phi_, bins=nbinsHist, range=[-np.pi, np.pi], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 
-def Hist_Diff_norm(r,phi,pr,pphi, labelName, col):
+def Hist_Diff_norm(r,phi,pr,pphi, labelName, col, rangemin, rangemax):
     if labelName=='NN':
-        x = r
-        y = phi
+        x = r[(pr > rangemin) & (pr < rangemax)]
+        y = phi[(pr > rangemin) & (pr < rangemax)]
     else:
-        x = pol2kar_x(r,phi)
-        y = pol2kar_y(r,phi)
-    px = -pol2kar_x(pr,pphi)
-    py = -pol2kar_y(pr,pphi)
+        x = pol2kar_x(r[(pr > rangemin) & (pr < rangemax)],phi[(pr > rangemin) & (pr < rangemax)])
+        y = pol2kar_y(r[(pr > rangemin) & (pr < rangemax)],phi[(pr > rangemin) & (pr < rangemax)])
+    px = -pol2kar_x(pr[(pr > rangemin) & (pr < rangemax)],pphi[(pr > rangemin) & (pr < rangemax)])
+    py = -pol2kar_y(pr[(pr > rangemin) & (pr < rangemax)],pphi[(pr > rangemin) & (pr < rangemax)])
     delta_x_sq = np.square(np.subtract(x,px))
     delta_y_sq = np.square(np.subtract(y,py))
     norm = np.sqrt(delta_x_sq+delta_y_sq)
+
     if labelName in ['NN', 'PF'] :
         plt.hist(norm, bins=nbinsHist, range=[diff_p_min, diff_p_max], label=labelName+', mean=%.2f$\pm$%.2f'%(np.mean(norm), np.std(norm)), histtype='step', ec=colors_InOut[col], linewidth=1.5, normed=True)
     else:
@@ -85,22 +87,20 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         InputsTargets = h5py.File("%sNN_Input_%s.h5" % (outputD,NN_mode), "r")
 
         Outputs = loadData(rootOutput)
-        #Outputs = Outputs[Outputs['Boson_Pt']<=200]
-        #Outputs = Outputs[Outputs['NVertex']<=50]
 
         fig=plt.figure(figsize=(10,6))
         fig.patch.set_facecolor('white')
         ax = plt.subplot(111)
         nbinsHist = 250
 
-        Hist_Diff_norm(Outputs['recoilpatpfTrackMET_Pt'], Outputs['recoilpatpfTrackMET_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'Track', 0)
-        Hist_Diff_norm(Outputs['recoilpatpfNoPUMET_Pt'], Outputs['recoilpatpfNoPUMET_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NoPU', 2)
-        Hist_Diff_norm(Outputs['recoilpatpfPUCorrectedMET_Pt'], Outputs['recoilpatpfPUCorrectedMET_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PUCorrected', 3)
-        Hist_Diff_norm(Outputs['recoilpatpfPUMET_Pt'], Outputs['recoilpatpfPUMET_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PU', 4)
-        Hist_Diff_norm(Outputs['recoilslimmedMETsPuppi_Pt'], Outputs['recoilslimmedMETsPuppi_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'Puppi', 5)
-        Hist_Diff_norm(Outputs['LongZCorrectedRecoil_Pt'], Outputs['LongZCorrectedRecoil_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'GBRT', 7)
-        Hist_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1)
-        Hist_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6)
+        Hist_Diff_norm(Outputs['recoilpatpfTrackMET_Pt'], Outputs['recoilpatpfTrackMET_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'Track', 0, 0, 200)
+        Hist_Diff_norm(Outputs['recoilpatpfNoPUMET_Pt'], Outputs['recoilpatpfNoPUMET_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NoPU', 2, 0, 200)
+        Hist_Diff_norm(Outputs['recoilpatpfPUCorrectedMET_Pt'], Outputs['recoilpatpfPUCorrectedMET_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PUCorrected', 3, 0, 200)
+        Hist_Diff_norm(Outputs['recoilpatpfPUMET_Pt'], Outputs['recoilpatpfPUMET_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PU', 4, 0, 200)
+        Hist_Diff_norm(Outputs['recoilslimmedMETsPuppi_Pt'], Outputs['recoilslimmedMETsPuppi_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'Puppi', 5, 0, 200)
+        Hist_Diff_norm(Outputs['LongZCorrectedRecoil_Pt'], Outputs['LongZCorrectedRecoil_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'GBRT', 7, 0, 200)
+        Hist_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1, 0, 200)
+        Hist_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6, 0, 200)
 
 
         box = ax.get_position()
@@ -110,9 +110,6 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.ylabel('Counts')
         plt.xlabel('$|\\vec{U}-\\vec{MET}|$ in GeV')
         plt.xlim(diff_p_min,diff_p_max)
-        #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
-        #plt.title(' Histogram $p_{T,x}$')
-        #plt.text('$p_T$ range restriction')
 
         ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
         plt.grid()
@@ -127,9 +124,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         #plt.suptitle('x-Korrektur Prediction-Target ')
         plt.ylabel("$ |\\vec{U}- \\vec{\mathrm{MET}}| $")
         plt.xlabel("Response")
-        Norm_Diff = HM_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6)
-        Response = np.divide(-Outputs['NN_LongZ'], Outputs['Boson_Pt'] )
-        heatmap, xedges, yedges = np.histogram2d(  Norm_Diff, Response,  bins=50,
+        heatmap, xedges, yedges = np.histogram2d(  Norm_Diff[getResponseIdx('NN_LongZ')], getResponse('NN_LongZ'),  bins=50,
                                                  range=[[0,20],
                                                         [0.75,1.25]])
         extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -145,8 +140,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.ylabel("$ \\frac{|\\vec{U}- \\vec{\mathrm{MET}}|}{|\\vec{\mathrm{MET}}|} $")
         plt.xlabel("Response")
         rel_Norm_Diff = np.divide(HM_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6), Outputs['Boson_Pt'])
-        Response = np.divide(-Outputs['NN_LongZ'], Outputs['Boson_Pt'] )
-        heatmap, xedges, yedges = np.histogram2d(  Response, rel_Norm_Diff,  bins=50,
+        heatmap, xedges, yedges = np.histogram2d(  getResponse('NN_LongZ')[getResponseIdx('NN_LongZ')== ~np.isnan(rel_Norm_Diff)], rel_Norm_Diff[getResponseIdx('NN_LongZ')== ~np.isnan(rel_Norm_Diff)],  bins=50,
                                                  range=[[0,2],
                                                         [0,2]])
         extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -163,8 +157,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.ylabel("$ \\frac{|\\vec{U}- \\vec{\mathrm{MET}}|}{|\\vec{\mathrm{MET}}|} $")
         plt.xlabel("Response")
         rel_Norm_Diff = np.divide(HM_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1), Outputs['Boson_Pt'])
-        Response = np.divide(-Outputs['recoilslimmedMETs_LongZ'], Outputs['Boson_Pt'] )
-        heatmap, xedges, yedges = np.histogram2d(  Response, rel_Norm_Diff,  bins=50,
+        heatmap, xedges, yedges = np.histogram2d(  getResponse('recoilslimmedMETs_LongZ')[getResponseIdx('recoilslimmedMETs_Pt')== ~np.isnan(rel_Norm_Diff)], rel_Norm_Diff[getResponseIdx('recoilslimmedMETs_Pt')== ~np.isnan(rel_Norm_Diff)],  bins=50,
                                                  range=[[0,2],
                                                         [0,2]])
         extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -182,7 +175,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.xlabel("$U_{\parallel}-\\vec{\mathrm{MET}}$")
         rel_Norm_Diff = np.divide(HM_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6), Outputs['Boson_Pt'])
         Resolution_para = -Outputs['NN_LongZ']-Outputs['Boson_Pt']
-        heatmap, xedges, yedges = np.histogram2d(  Resolution_para, rel_Norm_Diff,  bins=50,
+        heatmap, xedges, yedges = np.histogram2d(  Resolution_para[~np.isnan(rel_Norm_Diff)], rel_Norm_Diff[~np.isnan(rel_Norm_Diff)],  bins=50,
                                                  range=[[0,3],
                                                         [0,4]])
         extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -200,7 +193,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.xlabel("$U_{\parallel}-\\vec{\mathrm{MET}}$")
         rel_Norm_Diff = np.divide(HM_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1), Outputs['Boson_Pt'])
         Resolution_para = -Outputs['recoilslimmedMETs_LongZ']-Outputs['Boson_Pt']
-        heatmap, xedges, yedges = np.histogram2d(  Resolution_para, rel_Norm_Diff,  bins=50,
+        heatmap, xedges, yedges = np.histogram2d(  Resolution_para[~np.isnan(rel_Norm_Diff)], rel_Norm_Diff[~np.isnan(rel_Norm_Diff)],  bins=50,
                                                  range=[[0,3],
                                                         [0,4]])
         extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -217,7 +210,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.xlabel("$U_{\perp}$")
         rel_Norm_Diff = np.divide(HM_Diff_norm(predictions[:,0], predictions[:,1], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'NN', 6), Outputs['Boson_Pt'])
         Resolution_perp = Outputs['NN_PerpZ']
-        heatmap, xedges, yedges = np.histogram2d(  Resolution_perp, rel_Norm_Diff,  bins=50,
+        heatmap, xedges, yedges = np.histogram2d(  Resolution_perp[~np.isnan(rel_Norm_Diff)], rel_Norm_Diff[~np.isnan(rel_Norm_Diff)],  bins=50,
                                                  range=[[0,3],
                                                         [0,4]])
         extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -235,7 +228,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.xlabel("$U_{\perp}$")
         rel_Norm_Diff = np.divide(HM_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1), Outputs['Boson_Pt'])
         Resolution_perp = Outputs['recoilslimmedMETs_PerpZ']
-        heatmap, xedges, yedges = np.histogram2d(  Resolution_perp, rel_Norm_Diff,  bins=50,
+        heatmap, xedges, yedges = np.histogram2d(  Resolution_perp[~np.isnan(rel_Norm_Diff)], rel_Norm_Diff[~np.isnan(rel_Norm_Diff)],  bins=50,
                                                  range=[[0,3],
                                                         [0,4]])
         extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -251,8 +244,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         plt.xlabel("$ |\\vec{U}- \\vec{\mathrm{MET}}| $")
         plt.ylabel("Response")
         Norm_Diff = HM_Diff_norm(Outputs['recoilslimmedMETs_Pt'], Outputs['recoilslimmedMETs_Phi'], Outputs['Boson_Pt'], Outputs['Boson_Phi'], 'PF', 1)
-        Response = np.divide(-Outputs['recoilslimmedMETs_LongZ'], Outputs['Boson_Pt'] )
-        heatmap, xedges, yedges = np.histogram2d(  Norm_Diff, Response,  bins=50,
+        heatmap, xedges, yedges = np.histogram2d(  Norm_Diff[getResponseIdx('recoilslimmedMETs_LongZ')], getResponse('recoilslimmedMETs_LongZ'),  bins=50,
                                                  range=[[0,20],
                                                         [0,2]])
         extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
@@ -283,7 +275,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
         Histogram_Angle(Outputs['LongZCorrectedRecoil_Phi'], 'GBRT MET', 5)
         Histogram_Angle(Outputs['recoilslimmedMETs_Phi'], 'PF MET', 1)
         NN_r, NN_phi = kar2pol(predictions[:,0], predictions[:,1])
-        #Histogram_Angle(NN_phi, 'NN MET', 6)
+        Histogram_Angle(Outputs['NN_Phi'], 'NN MET', 6)
         Histogram_Angle(Outputs['Boson_Phi'], 'Targets', 7)
 
         box = ax.get_position()
@@ -312,7 +304,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput):
 
 
         print('shape predictions[:,0]', predictions[:,0].shape)
-
+        print('shape predictions[:,0]+sum(Outputs[Boson_Pt]==0)', len(predictions[:,0])+sum(Outputs['Boson_Pt']==0))
 
         '''
         fig=plt.figure(figsize=(10,6))

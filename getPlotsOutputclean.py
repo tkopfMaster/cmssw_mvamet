@@ -57,7 +57,7 @@ def loadData(inputD):
     'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ',
     'recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ',
     'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ',
-    'NN_LongZ', 'NN_PerpZ'
+    'NN_LongZ', 'NN_PerpZ', 'NN_Phi', 'NN_Pt'
      ],)
     DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
     return(DFName)

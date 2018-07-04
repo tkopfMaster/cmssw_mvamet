@@ -27,7 +27,7 @@ def div0( a, b ):
 def loadData(fName, NN_mode):
     treeName = 't'
     arrayName = rnp.root2array(fName, branches=['Boson_Pt',
-        'recoilslimmedMETs_Pt'],)
+        'recoilslimmedMETs_Pt', 'Boson_Phi'],)
     DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
     return(DFName)
 
@@ -46,9 +46,13 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
         a_x, a_y = kar2pol(a_r, a_phi)
         mZ_r, mZ_phi =  pol2kar(mZ_r, mZ_phi)
     elif NN_mode == 'xy':
+
         mZ_x, mZ_y = (NN_Output['MET_GroundTruth'][:,0]), (NN_Output['MET_GroundTruth'][:,1])
-        a_x, a_y = (NN_Output['MET_Predictions'][:,0])/0.42, (NN_Output['MET_Predictions'][:,1])/0.42
+        a_x, a_y = (NN_Output['MET_Predictions'][:,0]), (NN_Output['MET_Predictions'][:,1])
         mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
+        DFName = loadData(inputD, NN_mode)
+        mZ_phi = DFName['Boson_Pt']
+        a_r, a_phi = np.sqrt(a_x*a_x+a_y*a_y), np.arctan2(a_y, a_x)
     else:
         mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
         a_x, a_y = NN_Output['MET_Predictions'][:,0], (NN_Output['MET_Predictions'][:,1])
@@ -67,62 +71,43 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
         mZ_y = mZ_y*Scale_Z
     mZ_r2,mZ_phi = kar2pol(mZ_x, mZ_y)
     print("mZ_r,mZ_phi", mZ_r,mZ_phi)
-    a_r,a_phi = kar2pol(a_x,a_y)
+    #a_r,a_phi = kar2pol(a_x,a_y)
     a_x2, a_y2 = pol2kar(a_r, a_phi)
     print('Diff Test a_x, a_y', a_x2-a_x, a_y2-a_y)
     print("a_r,a_phi", a_r,a_phi)
     print('a_-a_r', a_-a_r)
 
-    Diff_phi = np.arccos(np.divide(np.add(np.multiply(a_x, mZ_x), np.multiply(a_y, mZ_y)), np.multiply(a_, mZ_r)))
+    #Diff_phi = np.arccos(np.divide(np.add(np.multiply(a_x, mZ_x), np.multiply(a_y, mZ_y)), np.multiply(a_, mZ_r)))
     #NN_LongZ = np.divide(np.add(np.multiply(a_x, mZ_x), np.multiply(a_y, mZ_y)), mZ_r)
     #NN_PerpZ = np.sin(Diff_phi)*a_
 
-    NN_LongZ = div0(np.add(np.multiply(a_x, mZ_x) , np.multiply(a_y, mZ_y)), mZ_r)
-    ParaVx, ParaVy = div0(NN_LongZ*mZ_x, mZ_r), div0(NN_LongZ*mZ_y, mZ_r)
-    NN_PerpZ = np.sqrt( np.multiply(a_x-ParaVx, a_x-ParaVx) + np.multiply(a_y-ParaVy, a_y-ParaVy) )
-    #NN_LongZ, NN_PerpZ = -np.cos(angularrange(np.add(a_phi,-mZ_phi)))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
+    #NN_LongZ = div0(np.add(np.multiply(a_x, mZ_x) , np.multiply(a_y, mZ_y)), mZ_r)
+    #ParaVx, ParaVy = div0(NN_LongZ*mZ_x, mZ_r), div0(NN_LongZ*mZ_y, mZ_r)
+    #NN_PerpZ = np.sqrt( np.multiply(a_x-ParaVx, a_x-ParaVx) + np.multiply(a_y-ParaVy, a_y-ParaVy) )
+    NN_LongZ, NN_PerpZ = -np.cos(angularrange(np.add(a_phi,-mZ_phi)))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
     #NN_LongZ, NN_PerpZ= pol2kar(a_r,angularrange(a_phi-mZ_phi))
-    NN_PerpZ[angularrange(a_phi-mZ_phi)<0]= -NN_PerpZ[angularrange(a_phi-mZ_phi)<0]
-    NN_LongZ = -NN_LongZ
-
-    #
-    #NN_LongZ, NN_PerpZ = NN_LongZ_l.tolist(), NN_PerpZ_l.tolist()
-    #print("NN_LongZ, NN_PerpZ", NN_LongZ, NN_PerpZ)
-    #NN_LongZ = div0(np.multiply(a_x, mZ_x)+np.multiply(a_y, mZ_y) , list(map(np.sqrt,np.add(np.multiply(mZ_x,mZ_x),np.multiply(mZ_y,mZ_y)))))
-    #NN_PerpZ = np.sqrt(np.subtract(np.multiply(a_,a_), np.multiply(NN_LongZ,NN_LongZ)))
+    #NN_PerpZ[angularrange(a_phi-mZ_phi)<0]= -NN_PerpZ[angularrange(a_phi-mZ_phi)<0]
+    #NN_LongZ = -NN_LongZ
     dset = NN_MVA.create_dataset("NN_LongZ", dtype='d', data=NN_LongZ)
     dset = NN_MVA.create_dataset("NN_PerpZ", dtype='d', data=NN_PerpZ)
+    dset = NN_MVA.create_dataset("NN_Phi", dtype='d', data=a_phi)
+    dset = NN_MVA.create_dataset("NN_r", dtype='d', data=a_r)
     NN_MVA.close()
-
-    #branch_Long = np.array(NN_LongZ , dtype=[('NN_LongZ', 'f8')])
-    branch_Long_Perp = np.array( zip(NN_LongZ,NN_PerpZ), dtype=[('NN_LongZ', 'f8'), ('NN_PerpZ', 'f8')])
+    delta_r, delta_phi = kar2pol(-NN_LongZ, NN_PerpZ)
+    a_phi = angularrange(delta_phi+mZ_phi)
     branch_Long = np.array(NN_LongZ , dtype=[('NN_LongZ', 'f8')])
-    print("NN_LongZ, NN_PerpZ, numpy arrays", NN_LongZ[0:10], NN_PerpZ[0:10])
-    print("branch_Long_Perp, numpy ndarrays", branch_Long_Perp[0:10])
     root_numpy.array2root(branch_Long, inputD, treename='t' , mode='update')
-    #root_numpy.array2root(branch_Long_Perp, inputD, treename='t' , mode='update')
     branch_Perp = np.array(NN_PerpZ , dtype=[('NN_PerpZ', 'f8')])
     root_numpy.array2root(branch_Perp, inputD, treename='t' , mode='update')
+    branch_Phi = np.array(a_phi , dtype=[('NN_Phi', 'f8')])
+    root_numpy.array2root(branch_Phi, inputD, treename='t' , mode='update')
+    branch_r = np.array(a_r , dtype=[('NN_Pt', 'f8')])
+    root_numpy.array2root(branch_r, inputD, treename='t' , mode='update')
     print("length branch_Long", len(branch_Long))
     print("length branch_Perp", len(branch_Perp))
     print('richtig, wenn auf a trainiert: -LongZ-pTZ', -NN_LongZ-mZ_r)
     print('richtig, wenn auf Z trainiert: LongZ-pTZ', np.add(NN_LongZ,-mZ_r))
-    '''
-    rfile = ROOT.TFile.Open(inputD)
-    tree = rfile.Get('t')
-    print([b.GetName() for b in tree.GetListOfBranches()])  # prints ['n_int', 'f_float', 'd_double']
 
-    # remove the branch named 'd_double'
-    #tree.SetBranchStatus('NN_LongZ', 0)
-    #tree.SetBranchStatus('NN_PerpZ', 0)
-    root_numpy.array2tree(branch_Long_Perp, tree=tree)
-
-    # copy the tree into a new file
-    rfile_out = ROOT.TFile.Open(outputDir+'Summer17_NN_Output.root', 'recreate')
-    newtree = tree.CloneTree()
-    newtree.Write()
-    print([b.GetName() for b in newtree.GetListOfBranches()])
-    '''
     plt.clf()
     plt.figure()
     plt.suptitle('y: Prediction vs. Target ')
