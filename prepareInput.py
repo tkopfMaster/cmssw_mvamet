@@ -48,7 +48,31 @@ def angularrange(Winkel):
         Winkel=((Winkel+np.pi)%(2*np.pi)-(np.pi))
     return(Winkel)
 
+def loadDataTau(fName):
+    tfile = ROOT.TFile(fName)
+    for key in tfile.GetListOfKeys():
+            if key.GetName() == "MAPAnalyzer/t":
+                tree = key.ReadObj()
+    arrayName = rnp.tree2array(tree, branches=['genMET_Pt', 'genMET_Phi','Boson_Pt', 'Boson_Phi', 'NVertex' ,
+        'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
+        'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
+        'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
+        'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
+        'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
+        'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ],)
 
+
+    '''treeName = 't'
+    arrayName = rnp.root2array(fName, branches=['Boson_Pt', 'Boson_Phi', 'NVertex' ,
+        'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
+        'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
+        'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
+        'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
+        'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
+        'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ],)
+    '''
+    DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
+    return(DFName)
 
 def loadData(fName):
     tfile = ROOT.TFile(fName)
@@ -582,32 +606,35 @@ def getInputs_proj(DataF):
     writeInputs.close()
 
 
-def getInputs(fName, NN_mode, outputD):
-
-    if NN_mode == 'xy':
-        Data = loadData(fName)
-        Inputs = getInputs_xy(Data, outputD)
-    elif NN_mode =='xyr':
-        Data = loadData(fName)
-        Inputs = getInputs_xyr(Data)
-    elif NN_mode =='xyra':
-        Data = loadData(fName)
-        Inputs = getInputs_xyra(Data)
-    elif NN_mode =='xyd':
-        Data = loadData(fName)
-        Inputs = getInputs_xyd(Data, outputD)
-    elif NN_mode =='nr':
-        Data = loadData(fName)
-        Inputs = getInputs_nr(Data)
-    elif NN_mode == 'absCorr':
-        Data = loadData(fName)
-        Inputs = getInputs_absCorr(Data)
-    elif NN_mode == 'rphi':
-        Data = loadData(fName)
-        Inputs = getInputs_rphi(Data, outputD)
+def getInputs(fName, NN_mode, outputD, PhysicsProcess):
+    if PhysicsProcess=='Tau':
+        Data = loadDataTau(fName)
+        Inputs = getInputs_Tau_xy(Data, outputD)
     else:
-        Data = loadData_proj(fName)
-        Inputs =  getInputs_proj(Data)
+        if NN_mode == 'xy':
+            Data = loadData(fName)
+            Inputs = getInputs_xy(Data, outputD)
+        elif NN_mode =='xyr':
+            Data = loadData(fName)
+            Inputs = getInputs_xyr(Data)
+        elif NN_mode =='xyra':
+            Data = loadData(fName)
+            Inputs = getInputs_xyra(Data)
+        elif NN_mode =='xyd':
+            Data = loadData(fName)
+            Inputs = getInputs_xyd(Data, outputD)
+        elif NN_mode =='nr':
+            Data = loadData(fName)
+            Inputs = getInputs_nr(Data)
+        elif NN_mode == 'absCorr':
+            Data = loadData(fName)
+            Inputs = getInputs_absCorr(Data)
+        elif NN_mode == 'rphi':
+            Data = loadData(fName)
+            Inputs = getInputs_rphi(Data, outputD)
+        else:
+            Data = loadData_proj(fName)
+            Inputs =  getInputs_proj(Data)
 
 
 
@@ -618,7 +645,8 @@ if __name__ == "__main__":
     outputDir = sys.argv[2]
     NN_mode = sys.argv[3]
     plotsD = sys.argv[4]
+    PhysicsProcess = plotsD = sys.argv[5]
     print(fileName)
     writeInputs = h5py.File("%sNN_Input_%s.h5"%(outputDir,NN_mode), "w")
-    getInputs(fileName, NN_mode, plotsD)
+    getInputs(fileName, NN_mode, plotsD, PhysicsProcess)
     #getTarge
