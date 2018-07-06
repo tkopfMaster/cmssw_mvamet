@@ -26,8 +26,8 @@ def div0( a, b ):
 
 def loadData(fName, NN_mode):
     treeName = 't'
-    arrayName = rnp.root2array(fName, branches=['Boson_Pt',
-        'recoilslimmedMETs_Pt', 'Boson_Phi'],)
+    arrayName = rnp.root2array(fName, branches=[Target_Pt,
+        'recoilslimmedMETs_Pt', Target_Phi],)
     DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
     return(DFName)
 
@@ -38,7 +38,7 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
         a_x, a_y, a_r = NN_Output['MET_Predictions'][:,0], NN_Output['MET_Predictions'][:,1], NN_Output['MET_Predictions'][:,2]
     elif NN_mode == 'xyd':
         PF_Z_pT = loadData(inputD, NN_mode)
-        mZ_x, mZ_y, mZ_r = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1], PF_Z_pT['Boson_Pt']
+        mZ_x, mZ_y, mZ_r = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1], PF_Z_pT[Target_Pt]
         a_x, a_y, a_r = -NN_Output['MET_Predictions'][:,0], -NN_Output['MET_Predictions'][:,1], NN_Output['MET_Predictions'][:,2]+PF_Z_pT['recoilslimmedMETs_Pt']
     elif NN_mode == 'rphi':
         mZ_r, mZ_phi = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
@@ -50,8 +50,6 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
         mZ_x, mZ_y = (NN_Output['MET_GroundTruth'][:,0]), (NN_Output['MET_GroundTruth'][:,1])
         a_x, a_y = (NN_Output['MET_Predictions'][:,0]), (NN_Output['MET_Predictions'][:,1])
         mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
-        DFName = loadData(inputD, NN_mode)
-        mZ_phi = DFName['Boson_Pt']
         a_r, a_phi = np.sqrt(a_x*a_x+a_y*a_y), np.arctan2(a_y, a_x)
     else:
         mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
@@ -95,14 +93,28 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     NN_MVA.close()
     delta_r, delta_phi = kar2pol(-NN_LongZ, NN_PerpZ)
     a_phi = angularrange(delta_phi+mZ_phi)
-    branch_Long = np.array(NN_LongZ , dtype=[('NN_LongZ', 'f8')])
-    root_numpy.array2root(branch_Long, inputD, treename='t' , mode='update')
-    branch_Perp = np.array(NN_PerpZ , dtype=[('NN_PerpZ', 'f8')])
-    root_numpy.array2root(branch_Perp, inputD, treename='t' , mode='update')
-    branch_Phi = np.array(a_phi , dtype=[('NN_Phi', 'f8')])
-    root_numpy.array2root(branch_Phi, inputD, treename='t' , mode='update')
-    branch_r = np.array(a_r , dtype=[('NN_Pt', 'f8')])
-    root_numpy.array2root(branch_r, inputD, treename='t' , mode='update')
+    if not PhysicsProcess=='Tau':
+        branch_Long = np.array(NN_LongZ , dtype=[('NN_LongZ', 'f8')])
+        root_numpy.array2root(branch_Long, inputD, treename='t' , mode='update')
+        branch_Perp = np.array(NN_PerpZ , dtype=[('NN_PerpZ', 'f8')])
+        root_numpy.array2root(branch_Perp, inputD, treename='t' , mode='update')
+        branch_Phi = np.array(a_phi , dtype=[('NN_Phi', 'f8')])
+        root_numpy.array2root(branch_Phi, inputD, treename='t' , mode='update')
+        branch_r = np.array(a_r , dtype=[('NN_Pt', 'f8')])
+        root_numpy.array2root(branch_r, inputD, treename='t' , mode='update')
+    else:
+        tfile = ROOT.TFile(inputD)
+        for key in tfile.GetListOfKeys():
+                print('key.GetName()', key.GetName())
+                tree = key.ReadObj()
+                branch_Long = np.array(NN_LongZ , dtype=[('NN_LongZ', 'f8')])
+                root_numpy.array2root(branch_Long, inputD, treename='tree' , mode='update')
+                branch_Perp = np.array(NN_PerpZ , dtype=[('NN_PerpZ', 'f8')])
+                root_numpy.array2root(branch_Perp, inputD, treename='tree' , mode='update')
+                branch_Phi = np.array(a_phi , dtype=[('NN_Phi', 'f8')])
+                root_numpy.array2root(branch_Phi, inputD, treename='tree' , mode='update')
+                branch_r = np.array(a_r , dtype=[('NN_Pt', 'f8')])
+                root_numpy.array2root(branch_r, inputD, treename='tree' , mode='update')
     print("length branch_Long", len(branch_Long))
     print("length branch_Perp", len(branch_Perp))
     print('richtig, wenn auf a trainiert: -LongZ-pTZ', -NN_LongZ-mZ_r)
@@ -137,6 +149,13 @@ if __name__ == "__main__":
     outputDir = sys.argv[2]
     NN_mode = sys.argv[3]
     plotsD = sys.argv[4]
+    PhysicsProcess = sys.argv[5]
+    if PhysicsProcess == 'Tau':
+        Target_Pt = 'genMet_Pt'
+        Target_Phi = 'genMet_Phi'
+    else:
+        Target_Pt = 'Boson_Pt'
+        Target_Phi = 'Boson_Phi'
     print(outputDir)
     NN_MVA = h5py.File("%s/NN_MVA_%s.h5"%(outputDir,NN_mode), "w")
     prepareOutput(outputDir, inputDir, NN_mode, plotsD)

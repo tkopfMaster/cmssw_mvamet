@@ -3,7 +3,7 @@
 import h5py
 import matplotlib as mpl
 mpl.use('Agg')
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import sys
 import numpy as np
 from os import environ
@@ -35,7 +35,7 @@ def getModel(outputD, optimiz, loss_, NN_mode, plotsD):
     print("Loaded MET Targets dataset with {} entries.".format(Targets.shape))
     print("Example Targets entry: {}".format(Targets[0:10,:]))
 
-
+    print('Zeile 38')
     # Select TensorFlow as backend for Keras
     environ["KERAS_BACKEND"] = "tensorflow"
     np.random.seed(1234)  #immer vor keras
@@ -43,7 +43,7 @@ def getModel(outputD, optimiz, loss_, NN_mode, plotsD):
     from keras.models import Sequential
     from keras.layers.core import Dense, Dropout
     from keras.optimizers import Adam
-
+    print('Zeile 46')
     # Define model
     model = Sequential()
     model.add(
@@ -66,19 +66,22 @@ def getModel(outputD, optimiz, loss_, NN_mode, plotsD):
                     kernel_initializer="glorot_uniform",
                     activation="linear"))  # Regressions
         model.summary()
-
+    print('Zeile 69')
     # Set loss, optimizer and evaluation metrics
     from own_loss_functions import mean_squared_error_r, perp_long_error
     if "mean_squared_error_r" in loss_: loss_function = mean_squared_error_r
     elif "perp_long_error" in loss_: loss_function = perp_long_error
     else: loss_function = loss_
+    print('Zeile 75')
     model.compile(
                     loss=loss_function,
                     optimizer=optimiz)
                     #metrics=["mean_absolute_error", "mean_squared_error"])
 
     # Split dataset in training and testing
+    print('Zeile 82')
     from sklearn.model_selection import train_test_split
+    print('Zeile 84')
     Inputs_train, Inputs_test, Targets_train, Targets_test = train_test_split(
         Inputs, Targets,
         test_size=0.90,
@@ -88,7 +91,7 @@ def getModel(outputD, optimiz, loss_, NN_mode, plotsD):
         test_size=0.5,
         random_state=1234)
 
-
+    print('Zeile 91')
     # Train
     from keras.callbacks import EarlyStopping, ModelCheckpoint
     history = model.fit(

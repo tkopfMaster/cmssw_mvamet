@@ -13,9 +13,11 @@ import matplotlib.ticker as mtick
 import h5py
 import sys
 
+
+
 colors = cm.brg(np.linspace(0, 1, 7))
 
-def div0( a, b ):
+def div0( a, b , Target_Pt, Target_Phi):
     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
     with np.errstate(divide='ignore', invalid='ignore'):
         c = np.true_divide( a, b )
@@ -48,22 +50,33 @@ def angularrange(Winkel):
         Winkel=((Winkel+np.pi)%(2*np.pi)-(np.pi))
     return(Winkel)
 
-def loadDataTau(fName):
+def loadData(fName, Target_Pt, Target_Phi):
     tfile = ROOT.TFile(fName)
     for key in tfile.GetListOfKeys():
-            if key.GetName() == "MAPAnalyzer/t":
+            print('key.GetName()', key.GetName())
+            if key.GetName() in  ["MAPAnalyzer/t", "MAPAnalyzer/1"]:
                 tree = key.ReadObj()
-    arrayName = rnp.tree2array(tree, branches=['genMET_Pt', 'genMET_Phi','Boson_Pt', 'Boson_Phi', 'NVertex' ,
-        'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
-        'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
-        'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
-        'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
-        'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
-        'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ],)
+                arrayName = rnp.tree2array(tree, branches=[Target_Pt, Target_Phi, 'NVertex' ,
+                    'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
+                    'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
+                    'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
+                    'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
+                    'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
+                    'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ],)
+            else:
+                tree = key.ReadObj()
+                print('Target_Pt', Target_Pt)
+                arrayName = rnp.root2array(fName, branches=[Target_Pt, Target_Phi, 'NVertex' ,
+                    'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
+                    'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
+                    'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
+                    'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
+                    'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
+                    'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ],)
 
 
     '''treeName = 't'
-    arrayName = rnp.root2array(fName, branches=['Boson_Pt', 'Boson_Phi', 'NVertex' ,
+    arrayName = rnp.root2array(fName, branches=[Target_Pt, Target_Phi, 'NVertex' ,
         'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
         'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
         'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
@@ -74,47 +87,17 @@ def loadDataTau(fName):
     DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
     return(DFName)
 
-def loadData(fName):
-    tfile = ROOT.TFile(fName)
-    for key in tfile.GetListOfKeys():
-            if key.GetName() == "MAPAnalyzer/t":
-                tree = key.ReadObj()
-    arrayName = rnp.tree2array(tree, branches=['Boson_Pt', 'Boson_Phi', 'NVertex' ,
-        'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
-        'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
-        'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
-        'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
-        'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
-        'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ],)
 
 
-    '''treeName = 't'
-    arrayName = rnp.root2array(fName, branches=['Boson_Pt', 'Boson_Phi', 'NVertex' ,
-        'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
-        'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
-        'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
-        'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
-        'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
-        'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ],)
-    '''
-    DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
-    return(DFName)
-
-def loadData_proj(fName):
+def loadData_proj(fName, Target_Pt, Target_Phi):
     treeName = 't'
-    arrayName = rnp.root2array(fName, treeName, branches=['Boson_Pt', 'Boson_Phi', 'NVertex' ,   'recoilslimmedMETsPuppi_PerpZ', 'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETs_PerpZ', 'recoilslimmedMETs_LongZ', 'recoilpatpfNoPUMET_PerpZ','recoilpatpfNoPUMET_LongZ','recoilpatpfPUCorrectedMET_PerpZ', 'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUMET_PerpZ', 'recoilpatpfPUMET_LongZ', 'recoilpatpfTrackMET_PerpZ', 'recoilpatpfTrackMET_LongZ' ],)
+    arrayName = rnp.root2array(fName, treeName, branches=[Target_Pt, Target_Phi, 'NVertex' ,   'recoilslimmedMETsPuppi_PerpZ', 'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETs_PerpZ', 'recoilslimmedMETs_LongZ', 'recoilpatpfNoPUMET_PerpZ','recoilpatpfNoPUMET_LongZ','recoilpatpfPUCorrectedMET_PerpZ', 'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUMET_PerpZ', 'recoilpatpfPUMET_LongZ', 'recoilpatpfTrackMET_PerpZ', 'recoilpatpfTrackMET_LongZ' ],)
     DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
     return(DFName)
 #Data settings
 
-def pol2kar_x(norm, phi):
-    x = np.sin(phi[:])*norm[:]
-    return(x)
-def pol2kar_y(norm, phi):
-    y = np.cos(phi[:])*norm[:]
-    return(y)
 
-def getInputs_xy(DataF, outputD):
+def getInputs_xy(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
         pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']) ])
@@ -155,14 +138,18 @@ def getInputs_xy(DataF, outputD):
         DataF['recoilslimmedMETsPuppi_sumEt']])'''
 
 
-
-    dset_Target = writeInputs.create_dataset("Target",  dtype='f',
-        data=[-pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),
-        -pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi'])])
+    if PhysicsProcess=='Tau':
+        dset_Target = writeInputs.create_dataset("Target",  dtype='f',
+            data=[pol2kar_x(DataF[Target_Pt], DataF[Target_Phi]),
+            pol2kar_y(DataF[Target_Pt], DataF[Target_Phi])])
+    else:
+        dset_Target = writeInputs.create_dataset("Target",  dtype='f',
+            data=[-pol2kar_x(DataF[Target_Pt], DataF[Target_Phi]),
+            -pol2kar_y(DataF[Target_Pt], DataF[Target_Phi])])
 
     writeInputs.close()
 
-def getInputs_xyd(DataF, outputD):
+def getInputs_xyd(DataF, outputD, Target_Pt, Target_Phi):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
         pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
@@ -191,9 +178,9 @@ def getInputs_xyd(DataF, outputD):
 
 
     dset_Target = writeInputs.create_dataset("Target",  dtype='f',
-        data=[-pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),
-        -pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi']),
-        DataF['Boson_Pt']-DataF['recoilslimmedMETs_Pt'] ])
+        data=[-pol2kar_x(DataF[Target_Pt], DataF[Target_Phi]),
+        -pol2kar_y(DataF[Target_Pt], DataF[Target_Phi]),
+        DataF[Target_Pt]-DataF['recoilslimmedMETs_Pt'] ])
 
     LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
 
@@ -287,7 +274,7 @@ def getInputs_xyd(DataF, outputD):
 
     writeInputs.close()
 
-def getInputs_nr(DataF):
+def getInputs_nr(DataF, Target_Pt, Target_Phi):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
         pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
@@ -316,9 +303,9 @@ def getInputs_nr(DataF):
 
 
     dset_Target = writeInputs.create_dataset("Target",  dtype='f',
-        data=[-div0(pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),DataF['Boson_Pt']),
-        -div0(pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi']),DataF['Boson_Pt']),
-        DataF['Boson_Pt']
+        data=[-div0(pol2kar_x(DataF[Target_Pt], DataF[Target_Phi]),DataF[Target_Pt]),
+        -div0(pol2kar_y(DataF[Target_Pt], DataF[Target_Phi]),DataF[Target_Pt]),
+        DataF[Target_Pt]
         ])
 
     LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
@@ -413,7 +400,7 @@ def getInputs_nr(DataF):
 
     writeInputs.close()
 
-def getInputs_xyr(DataF):
+def getInputs_xyr(DataF, Target_Pt, Target_Phi):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
         pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
@@ -442,12 +429,12 @@ def getInputs_xyr(DataF):
 
 
     dset_Target = writeInputs.create_dataset("Target",  dtype='f',
-        data=[-pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),
-        -pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi']),
-        DataF['Boson_Pt']])
+        data=[-pol2kar_x(DataF[Target_Pt], DataF[Target_Phi]),
+        -pol2kar_y(DataF[Target_Pt], DataF[Target_Phi]),
+        DataF[Target_Pt]])
     writeInputs.close()
 
-def getInputs_rphi(DataF, outputD):
+def getInputs_rphi(DataF, outputD, Target_Pt, Target_Phi):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[DataF['recoilslimmedMETs_Pt'],
               DataF['recoilslimmedMETs_Phi']])
@@ -469,8 +456,8 @@ def getInputs_rphi(DataF, outputD):
 
 
     dset_Target = writeInputs.create_dataset("Target",  dtype='f',
-        data=[DataF['Boson_Pt'],
-              angularrange(DataF['Boson_Phi']+np.pi)])
+        data=[DataF[Target_Pt],
+              angularrange(DataF[Target_Phi]+np.pi)])
 
 
     fig=plt.figure(figsize=(10,6))
@@ -478,13 +465,22 @@ def getInputs_rphi(DataF, outputD):
     ax = plt.subplot(111)
     nbinsHist = 150
     LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
-    plt.hist(angularrange(dset_PF[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PF, mean=%.2f'%np.mean(angularrange(dset_PF[1,:]+np.pi)), histtype='step', ec=colors[0])
-    plt.hist(angularrange(dset_Track[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Track, mean=%.2f'%np.mean(angularrange(dset_Track[1,:]+np.pi)), histtype='step', ec=colors[1])
-    plt.hist(angularrange(dset_NoPU[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='NoPU, mean=%.2f'%np.mean(angularrange(dset_NoPU[1,:]+np.pi)), histtype='step', ec=colors[2])
-    plt.hist(angularrange(dset_PUCorrected[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PUCorrected, mean=%.2f'%np.mean(angularrange(dset_PUCorrected[1,:]+np.pi)), histtype='step', ec=colors[3])
-    plt.hist(angularrange(dset_PU[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PU, mean=%.2f'%np.mean(angularrange(dset_PU[1,:]+np.pi)), histtype='step', ec=colors[4])
-    plt.hist(angularrange(dset_Puppi[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Puppi, mean=%.2f'%np.mean(angularrange(dset_Puppi[1,:]+np.pi)), histtype='step', ec=colors[5])
-    plt.hist(dset_Target[1,:], bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Target, mean=%.2f'%np.mean(dset_Target[1,:]), histtype='step', ec=colors[6])
+    if PhysicsProcess=='Tau':
+        plt.hist(angularrange(dset_PF[1,:]), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PF, mean=%.2f'%np.mean(angularrange(dset_PF[1,:])), histtype='step', ec=colors[0])
+        plt.hist(angularrange(dset_Track[1,:]), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Track, mean=%.2f'%np.mean(angularrange(dset_Track[1,:])), histtype='step', ec=colors[1])
+        plt.hist(angularrange(dset_NoPU[1,:]), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='NoPU, mean=%.2f'%np.mean(angularrange(dset_NoPU[1,:])), histtype='step', ec=colors[2])
+        plt.hist(angularrange(dset_PUCorrected[1,:]), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PUCorrected, mean=%.2f'%np.mean(angularrange(dset_PUCorrected[1,:])), histtype='step', ec=colors[3])
+        plt.hist(angularrange(dset_PU[1,:]), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PU, mean=%.2f'%np.mean(angularrange(dset_PU[1,:])), histtype='step', ec=colors[4])
+        plt.hist(angularrange(dset_Puppi[1,:]), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Puppi, mean=%.2f'%np.mean(angularrange(dset_Puppi[1,:])), histtype='step', ec=colors[5])
+        plt.hist(dset_Target[1,:], bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Target, mean=%.2f'%np.mean(dset_Target[1,:]), histtype='step', ec=colors[6])
+    else:
+        plt.hist(angularrange(dset_PF[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PF, mean=%.2f'%np.mean(angularrange(dset_PF[1,:]+np.pi)), histtype='step', ec=colors[0])
+        plt.hist(angularrange(dset_Track[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Track, mean=%.2f'%np.mean(angularrange(dset_Track[1,:]+np.pi)), histtype='step', ec=colors[1])
+        plt.hist(angularrange(dset_NoPU[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='NoPU, mean=%.2f'%np.mean(angularrange(dset_NoPU[1,:]+np.pi)), histtype='step', ec=colors[2])
+        plt.hist(angularrange(dset_PUCorrected[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PUCorrected, mean=%.2f'%np.mean(angularrange(dset_PUCorrected[1,:]+np.pi)), histtype='step', ec=colors[3])
+        plt.hist(angularrange(dset_PU[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='PU, mean=%.2f'%np.mean(angularrange(dset_PU[1,:]+np.pi)), histtype='step', ec=colors[4])
+        plt.hist(angularrange(dset_Puppi[1,:]+np.pi), bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Puppi, mean=%.2f'%np.mean(angularrange(dset_Puppi[1,:]+np.pi)), histtype='step', ec=colors[5])
+        plt.hist(dset_Target[1,:], bins=nbinsHist, range=[-np.pi*1.1, np.pi*1.1], label='Target, mean=%.2f'%np.mean(dset_Target[1,:]), histtype='step', ec=colors[6])
 
 
     box = ax.get_position()
@@ -534,7 +530,7 @@ def getInputs_rphi(DataF, outputD):
 
     writeInputs.close()
 
-def getInputs_xyra(DataF):
+def getInputs_xyra(DataF, Target_Pt, Target_Phi):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
         pol2kar_y(DataF['recoilslimmedMETs_Pt'], DataF['recoilslimmedMETs_Phi']),
@@ -563,15 +559,15 @@ def getInputs_xyra(DataF):
 
 
     dset_Target = writeInputs.create_dataset("Target",  dtype='f',
-        data=[pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),
-        pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi']),
-        div0(DataF['Boson_Pt'],DataF['recoilslimmedMETs_Pt'])])
+        data=[pol2kar_x(DataF[Target_Pt], DataF[Target_Phi]),
+        pol2kar_y(DataF[Target_Pt], DataF[Target_Phi]),
+        div0(DataF[Target_Pt],DataF['recoilslimmedMETs_Pt'])])
     writeInputs.close()
 
-def getInputs_absCorr(DataF):
+def getInputs_absCorr(DataF, Target_Pt, Target_Phi):
     return()
 
-def getInputs_proj(DataF):
+def getInputs_proj(DataF, Target_Pt, Target_Phi):
     dset_PF = writeInputs.create_dataset("PF",  dtype='f',
         data=[DataF['recoilslimmedMETs_LongZ'],
         DataF['recoilslimmedMETs_PerpZ'],
@@ -599,39 +595,39 @@ def getInputs_proj(DataF):
 
 
     dset_Target = writeInputs.create_dataset("Target",  dtype='f',
-        data=[-pol2kar_x(DataF['Boson_Pt'], DataF['Boson_Phi']),
-        -pol2kar_y(DataF['Boson_Pt'], DataF['Boson_Phi']),
-        DataF['Boson_Pt']
+        data=[-pol2kar_x(DataF[Target_Pt], DataF[Target_Phi]),
+        -pol2kar_y(DataF[Target_Pt], DataF[Target_Phi]),
+        DataF[Target_Pt]
         ])
     writeInputs.close()
 
 
-def getInputs(fName, NN_mode, outputD, PhysicsProcess):
+def getInputs(fName, NN_mode, outputD, PhysicsProcess, Target_Pt, Target_Phi):
     if PhysicsProcess=='Tau':
-        Data = loadDataTau(fName)
-        Inputs = getInputs_Tau_xy(Data, outputD)
+        Data = loadData(fName,  Target_Pt, Target_Phi)
+        Inputs = getInputs_xy(Data, outputD, PhysicsProcess, Target_Pt, Target_Phi)
     else:
         if NN_mode == 'xy':
-            Data = loadData(fName)
-            Inputs = getInputs_xy(Data, outputD)
+            Data = loadData(fName,  Target_Pt, Target_Phi)
+            Inputs = getInputs_xy(Data, outputD, Target_Pt, Target_Phi)
         elif NN_mode =='xyr':
-            Data = loadData(fName)
+            Data = loadData(fName,  Target_Pt, Target_Phi)
             Inputs = getInputs_xyr(Data)
         elif NN_mode =='xyra':
-            Data = loadData(fName)
+            Data = loadData(fName,  Target_Pt, Target_Phi)
             Inputs = getInputs_xyra(Data)
         elif NN_mode =='xyd':
-            Data = loadData(fName)
-            Inputs = getInputs_xyd(Data, outputD)
+            Data = loadData(fName,  Target_Pt, Target_Phi)
+            Inputs = getInputs_xyd(Data, outputD, Target_Pt, Target_Phi)
         elif NN_mode =='nr':
-            Data = loadData(fName)
+            Data = loadData(fName,  Target_Pt, Target_Phi)
             Inputs = getInputs_nr(Data)
         elif NN_mode == 'absCorr':
-            Data = loadData(fName)
+            Data = loadData(fName,  Target_Pt, Target_Phi)
             Inputs = getInputs_absCorr(Data)
         elif NN_mode == 'rphi':
-            Data = loadData(fName)
-            Inputs = getInputs_rphi(Data, outputD)
+            Data = loadData(fName,  Target_Pt, Target_Phi)
+            Inputs = getInputs_rphi(Data, outputD, Target_Pt, Target_Phi)
         else:
             Data = loadData_proj(fName)
             Inputs =  getInputs_proj(Data)
@@ -645,8 +641,14 @@ if __name__ == "__main__":
     outputDir = sys.argv[2]
     NN_mode = sys.argv[3]
     plotsD = sys.argv[4]
-    PhysicsProcess = plotsD = sys.argv[5]
+    PhysicsProcess = sys.argv[5]
+    if PhysicsProcess == 'Tau':
+        Target_Pt = 'genMet_Pt'
+        Target_Phi = 'genMet_Phi'
+    else:
+        Target_Pt = 'Boson_Pt'
+        Target_Phi = 'Boson_Phi'
     print(fileName)
     writeInputs = h5py.File("%sNN_Input_%s.h5"%(outputDir,NN_mode), "w")
-    getInputs(fileName, NN_mode, plotsD, PhysicsProcess)
+    getInputs(fileName, NN_mode, plotsD, PhysicsProcess, Target_Pt, Target_Phi)
     #getTarge

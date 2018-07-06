@@ -11,7 +11,7 @@ import ROOT
 import matplotlib.cm as cm
 import matplotlib.patches as mpatches
 import matplotlib.ticker as mtick
-from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
+from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange, loadData
 import h5py
 import sys
 
@@ -39,7 +39,7 @@ def div0( a, b ):
 
 
 
-def loadData(inputD):
+def loadData2(inputD):
 
     tree='t'
     arrayName = rnp.root2array(inputD,  branches=['Boson_Pt', 'Boson_Phi', 'NVertex' ,
@@ -61,6 +61,55 @@ def loadData(inputD):
      ],)
     DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
     return(DFName)
+
+def loadData_woutGBRT(NNOutput, rootInput, Target_Pt, Target_Phi):
+    tfile = ROOT.TFile(rootInput)
+    for key in tfile.GetListOfKeys():
+            print('key.GetName()', key.GetName())
+            if key.GetName() in  ["MAPAnalyzer/t", "MAPAnalyzer/1"]:
+                tree = key.ReadObj()
+                arrayName = rnp.tree2array(tree, branches=[Target_Pt, Target_Phi, 'NVertex' ,
+                'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi',
+                'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi',
+                'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi',
+                'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi',
+                'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi',
+                'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi',
+                'recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ',
+                'recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ',
+                'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ',
+                'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ',
+                'recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ',
+                'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ'
+                 ],)
+                arrayNameNN=rnp.root2array(fName, treename='tree', branches=['NN_LongZ', 'NN_PerpZ', 'NN_Phi', 'NN_Pt'  ],)
+            else:
+                tree = key.ReadObj()
+                print('Target_Pt', Target_Pt)
+                '''
+                arrayName = rnp.root2array(fName, branches=[Target_Pt, Target_Phi, 'NVertex' ,
+                'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi',
+                'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi',
+                'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi',
+                'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi',
+                'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi',
+                'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi',
+                'recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ',
+                'recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ',
+                'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ',
+                'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ',
+                'recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ',
+                'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ'],)
+                '''
+                arrayNameNN=rnp.root2array(NNOutput, treename='tree', branches=['NN_LongZ', 'NN_PerpZ', 'NN_Phi', 'NN_Pt'  ],)
+
+
+
+    DFNameInput = loadData(rootInput)
+    DFNameNN = pd.DataFrame.from_records(arrayNameNN.view(np.recarray))
+    DFName = pd.concat([DFNameInput, DFNameNN])
+    return(DFName)
+
 
 def plotMVAResponseOverpTZ_woutError(branchString, labelName, errbars_shift):
     binwidth = (DFName.Boson_Pt.values.max() - DFName.Boson_Pt.values.min())/(nbins) #5MET-Definitionen
