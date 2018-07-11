@@ -12,9 +12,6 @@ trainingname="${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
-else
-		trainingname='xyrTargets'
-    echo "$trainingname empty"
 fi
 #inputFile=/storage/b/tkopf/mvamet/skim/out.root
 #inputFile=/storage/b/tkopf/mvamet/skim/Tau.root
@@ -51,7 +48,7 @@ fi
 #python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/applyNN.py $inputFile $files_di $optimizer $loss $NN_mode
 
-#python $src_di/prepareOutput.py $inputFile $files_di $NN_mode $plots_di $PhysicsProcess
+python $src_di/prepareOutput.py $inputFile $files_di $NN_mode $plots_di $PhysicsProcess
 #python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $inputFile
 #python $src_di/getPlotsInput.py $inputFile $plots_di $PhysicsProcess
 #python $src_di/getPlotsOutputclean.py $inputFile $files_di $plots_di $PhysicsProcess $inputFile $NN_mode

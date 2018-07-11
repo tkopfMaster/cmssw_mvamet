@@ -125,12 +125,8 @@ if __name__ == "__main__":
     NN_mode = sys.argv[3]
     plotsD = sys.argv[4]
     PhysicsProcess = sys.argv[5]
-    if PhysicsProcess == 'Tau':
-        Target_Pt = 'genMet_Pt'
-        Target_Phi = 'genMet_Phi'
-    else:
-        Target_Pt = 'Boson_Pt'
-        Target_Phi = 'Boson_Phi'
+    Target_Pt = 'Boson_Pt'
+    Target_Phi = 'Boson_Phi'
     print(outputDir)
     NN_MVA = h5py.File("%s/NN_MVA_%s.h5"%(outputDir,NN_mode), "w")
     prepareOutput(outputDir, inputDir, NN_mode, plotsD)

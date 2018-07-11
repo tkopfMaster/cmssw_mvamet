@@ -8,22 +8,26 @@ import sys
 import numpy as np
 from os import environ
 
-
+pTCut = 30
 #NN_mode = 'xyr'
 
 
 def loadInputsTargets(outputD):
     InputsTargets = h5py.File("%sNN_Input_training_%s.h5" % (outputD,NN_mode), "r")
+    norm = np.sqrt(np.multiply(InputsTargets['Target'][:,0],InputsTargets['Target'][:,0]) + np.multiply(InputsTargets['Target'][:,1],InputsTargets['Target'][:,1]))
+
+    pTCut_Idx = norm.index[norm > pTCut].tolist()
+    Target =  InputsTargets['Target']
     Input = np.row_stack((
-                InputsTargets['PF'],
-                InputsTargets['Track'],
-                InputsTargets['NoPU'],
-                InputsTargets['PUCorrected'],
-                InputsTargets['PU'],
-                InputsTargets['Puppi']
+                InputsTargets['PF'][pTCut_Idx,:],
+                InputsTargets['Track'][pTCut_Idx,:],
+                InputsTargets['NoPU'][pTCut_Idx,:],
+                InputsTargets['PUCorrected'][pTCut_Idx,:],
+                InputsTargets['PU'][pTCut_Idx,:],
+                InputsTargets['Puppi'][pTCut_Idx,:]
                 ))
 
-    Target =  InputsTargets['Target']
+
     return (np.transpose(Input), np.transpose(Target))
 
 

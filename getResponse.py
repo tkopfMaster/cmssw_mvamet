@@ -930,10 +930,6 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ResponseMinErr, ResponseMaxErr = -0.5, 2.5
 
     PF_Delta_pT, PF_Delta_Phi = kar2pol(DFName['recoilslimmedMETs_LongZ'],DFName['recoilslimmedMETs_PerpZ'])
-    print('Crosscheck PF LongZ and Delta genMet: PF_phi-genMet_Phi', angularrange(DFName['recoilslimmedMETs_Phi']-DFName[Target_Phi]))
-    print('Crosscheck PF LongZ and Delta genMet: alpha PerpZ', PF_Delta_Phi)
-    print('Crosscheck PF LongZ and Delta genMet: delta(PF_phi-genMet_Phi)-alpha PerpZ', angularrange(DFName['recoilslimmedMETs_Phi']-DFName[Target_Phi])-PF_Delta_Phi)
-    print('Crosscheck PF LongZ and Delta genMet: delta(PF_phi-genMet_Phi)+alpha PerpZ', angularrange(DFName['recoilslimmedMETs_Phi']-DFName[Target_Phi])+PF_Delta_Phi)
 
 
 
@@ -3245,7 +3241,7 @@ if __name__ == "__main__":
     else:
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
-        DFName_plain = loadData(inputDir, Target_Pt, Target_Phi)
+        DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode)
     DFName=DFName_plain[DFName_plain[Target_Pt]<200]
     DFName=DFName[DFName[Target_Pt]>0]
     DFName=DFName[DFName['NVertex']<=50]

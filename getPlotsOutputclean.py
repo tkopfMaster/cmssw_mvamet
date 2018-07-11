@@ -41,6 +41,7 @@ def div0( a, b ):
 
 
 def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode):
+    '''
     tfile = ROOT.TFile(rootInput)
     for key in tfile.GetListOfKeys():
             print('key.GetName()', key.GetName())
@@ -62,14 +63,14 @@ def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode):
                  ],)
                 arrayNameNN=rnp.root2array(fName, treename='tree', branches=['NN_LongZ', 'NN_PerpZ', 'NN_Phi', 'NN_Pt'  ],)
             else:
-                tree = key.ReadObj()
-                NN_MVA = h5py.File("%s/NN_MVA_%s.h5"%(filesDir,NN_mode), "r+")
-                print("Keys: %s" % NN_MVA.keys())
-                DFNameNN = pd.DataFrame()
-                keys = NN_MVA.keys()
-                values = [NN_MVA[k] for k in keys]
-                for k, v in zip(keys, values):
-                    DFNameNN[k] = v
+    '''
+    NN_MVA = h5py.File("%s/NN_MVA_%s.h5"%(filesDir,NN_mode), "r+")
+    print("Keys: %s" % NN_MVA.keys())
+    DFNameNN = pd.DataFrame()
+    keys = NN_MVA.keys()
+    values = [NN_MVA[k] for k in keys]
+    for k, v in zip(keys, values):
+        DFNameNN[k] = v
                 #DFNameNN = NN_MVA.create_dataset([('NN_LongZ', 'f8'), ('NN_PerpZ', 'f8'), ('NN_Pt', 'f8'), ('NN_Phi', 'f8')])
 
 
