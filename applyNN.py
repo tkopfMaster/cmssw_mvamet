@@ -12,7 +12,7 @@ import root_numpy as rnp
 #NN_mode='xyr'
 
 def loadInputsTargets(outputD):
-    InputsTargets = h5py.File("%sNN_Input_%s.h5" % (outputD,NN_mode), "r")
+    InputsTargets = h5py.File("%sNN_Input_apply_%s.h5" % (outputD,NN_mode), "r")
     Input = np.row_stack((
                 InputsTargets['PF'],
                 InputsTargets['Track'],
@@ -27,7 +27,7 @@ def loadInputsTargets(outputD):
 
 
 def loadInputs(inputD):
-    InputsTargets = h5py.File("%sNN_Input_%s.h5" % (inputD, NN_mode), "r")
+    InputsTargets = h5py.File("%sNN_Input_apply_%s.h5" % (inputD, NN_mode), "r")
     Input = np.row_stack((
                 InputsTargets['PF'],
                 InputsTargets['Track'],
@@ -40,7 +40,7 @@ def loadInputs(inputD):
     return (np.transpose(Input))
 
 def loadTargets(inputD):
-    InputsTargets = h5py.File("%sNN_Input_%s.h5" % (inputD, NN_mode), "r")
+    InputsTargets = h5py.File("%sNN_Input_apply_%s.h5" % (inputD, NN_mode), "r")
 
     Target =  InputsTargets['Target']
     return (np.transpose(Target))

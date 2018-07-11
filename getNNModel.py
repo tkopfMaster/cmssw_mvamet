@@ -13,7 +13,7 @@ from os import environ
 
 
 def loadInputsTargets(outputD):
-    InputsTargets = h5py.File("%sNN_Input_%s.h5" % (outputD,NN_mode), "r")
+    InputsTargets = h5py.File("%sNN_Input_training_%s.h5" % (outputD,NN_mode), "r")
     Input = np.row_stack((
                 InputsTargets['PF'],
                 InputsTargets['Track'],

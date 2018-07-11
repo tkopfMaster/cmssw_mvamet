@@ -307,6 +307,8 @@ def plotMVANormOverpTZ_wErr(branchString, labelName, errbars_shift, ScaleErr):
     plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std*ScaleErr, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAAngularOverpTZ_wErr(branchStringPhi, labelName, errbars_shift, ScaleErr):
+    nbins=1000
+    ScaleErr=1
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
     n, _ = np.histogram(DFName[Target_Pt], bins=nbins)
     sy, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(getAngle(branchStringPhi)))
@@ -315,6 +317,10 @@ def plotMVAAngularOverpTZ_wErr(branchStringPhi, labelName, errbars_shift, ScaleE
     stdc = np.std(getAngle(branchStringPhi))
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
+    indSmaller45Degrees = [i for i,x in enumerate(std) if x<(45/180*np.pi)]
+    print('pT bin Start with std under 45 degrees', _[indSmaller45Degrees])
+    print('pT bin End with std under 45 degrees', _[indSmaller45Degrees+1])
+    print('crosscheck std with std under 45 degrees', std[indSmaller45Degrees])
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
     if errbars_shift==5: errbars_shift2 = 0
     elif errbars_shift==6: errbars_shift2 = 2
@@ -924,10 +930,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ResponseMinErr, ResponseMaxErr = -0.5, 2.5
 
     PF_Delta_pT, PF_Delta_Phi = kar2pol(DFName['recoilslimmedMETs_LongZ'],DFName['recoilslimmedMETs_PerpZ'])
-    print('Crosscheck PF LongZ and Delta genMet: PF_phi-genMet_Phi', angularrange(DFName['recoilslimmedMETs_Phi']-DFName['genMet_Phi']))
+    print('Crosscheck PF LongZ and Delta genMet: PF_phi-genMet_Phi', angularrange(DFName['recoilslimmedMETs_Phi']-DFName[Target_Phi]))
     print('Crosscheck PF LongZ and Delta genMet: alpha PerpZ', PF_Delta_Phi)
-    print('Crosscheck PF LongZ and Delta genMet: delta(PF_phi-genMet_Phi)-alpha PerpZ', angularrange(DFName['recoilslimmedMETs_Phi']-DFName['genMet_Phi'])-PF_Delta_Phi)
-    print('Crosscheck PF LongZ and Delta genMet: delta(PF_phi-genMet_Phi)+alpha PerpZ', angularrange(DFName['recoilslimmedMETs_Phi']-DFName['genMet_Phi'])+PF_Delta_Phi)
+    print('Crosscheck PF LongZ and Delta genMet: delta(PF_phi-genMet_Phi)-alpha PerpZ', angularrange(DFName['recoilslimmedMETs_Phi']-DFName[Target_Phi])-PF_Delta_Phi)
+    print('Crosscheck PF LongZ and Delta genMet: delta(PF_phi-genMet_Phi)+alpha PerpZ', angularrange(DFName['recoilslimmedMETs_Phi']-DFName[Target_Phi])+PF_Delta_Phi)
 
 
 
@@ -1107,6 +1113,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plotMVAAngularOverpTZ_wErr('NN_Phi', 'NN', 6, ScaleErr)
     plotMVAAngularOverpTZ_wErr('recoilslimmedMETs_Phi','PF', 1, ScaleErr)
     plt.plot([0, 200], [0, 0], color='k', linestyle='--', linewidth=1)
+
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -3238,7 +3245,7 @@ if __name__ == "__main__":
     else:
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
-        DFName_plain = loadData(rootOutput, Target_Pt, Target_Phi)
+        DFName_plain = loadData(inputDir, Target_Pt, Target_Phi)
     DFName=DFName_plain[DFName_plain[Target_Pt]<200]
     DFName=DFName[DFName[Target_Pt]>0]
     DFName=DFName[DFName['NVertex']<=50]
