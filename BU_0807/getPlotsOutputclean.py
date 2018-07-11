@@ -19,8 +19,8 @@ import sys
 fName ="/storage/b/tkopf/mvamet/skim/out.root"
 nbins = 10
 nbinsVertex = 5
-nbinsHist = 40
-nbinsHistBin = 40
+nbinsHist = 50
+nbinsHistBin =50
 nbins_relR = 10
 colors = cm.brg(np.linspace(0, 1, 3))
 
@@ -78,7 +78,7 @@ def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode):
     if Target_Pt == 'genMet_Pt':
         DFNameInput['recoilslimmedMETs_LongZ'] = np.cos(DFNameInput['recoilslimmedMETs_Phi']-DFNameInput[Target_Phi])*DFNameInput['recoilslimmedMETs_Pt']
         DFNameInput['recoilslimmedMETs_PerpZ'] = np.sin(DFNameInput['recoilslimmedMETs_Phi']-DFNameInput[Target_Phi])*DFNameInput['recoilslimmedMETs_Pt']
-        #DFNameNN = pd.DataFrame.from_records(arrayNameNN.view(np.recarray))
+    #DFNameNN = pd.DataFrame.from_records(arrayNameNN.view(np.recarray))
     DFName = pd.concat([DFNameInput, DFNameNN], axis=1, join_axes=[DFNameInput.index])
     return(DFName)
 
@@ -490,16 +490,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #Plot settings
     NPlotsLines = 6
     MVA_NPlotsLines = 3
-    if Target_Pt=='Boson_Pt':
-        LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
-    else:
-        LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \\tau \\tau  \\rightarrow \ \mu \mu }$'
-    pTRangeString_Err = '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString= '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString_low= '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
-    pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
-    pTRangeString_high= '$%8.2f\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.6666*100))
-    pTRangeStringNVertex = pTRangeString
+    pTRangeString = '$0\ \mathrm{GeV} < p_{T}^Z \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeStringNVertex = '$0\ \mathrm{GeV} < p_{T}^Z \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     colors = ['blue','green','red','cyan','magenta','yellow']
     MVAcolors =  colors

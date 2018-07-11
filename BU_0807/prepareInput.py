@@ -54,11 +54,10 @@ def loadData(fName, Target_Pt, Target_Phi):
     tfile = ROOT.TFile(fName)
     for key in tfile.GetListOfKeys():
             print('key.GetName()', key.GetName())
-            if key.GetName() == "MAPAnalyzer" and Target_Pt=='Boson_Pt':
+            if key.GetName() == "MAPAnalyzer/t" and Target_Pt=='Boson_Pt':
                 tree = key.ReadObj()
                 print('tree', tree)
-                treeName = 't'
-                arrayName = rnp.tree2array(tree,  branches=[Target_Pt, Target_Phi, 'NVertex' ,
+                arrayName = rnp.tree2array(tree, branches=[Target_Pt, Target_Phi, 'NVertex' ,
                     'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
                     'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
                     'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
@@ -167,7 +166,7 @@ def getInputs_xy(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi):
         pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'], DataF['recoilslimmedMETsPuppi_Phi'])])
     ''',
         DataF['recoilslimmedMETsPuppi_sumEt']])'''
-    dset_NoPV = writeInputs.create_dataset("NVertex",  dtype='f',data=[DataF['NVertex']] )
+
 
     if PhysicsProcess=='Tau':
         dset_Target = writeInputs.create_dataset("Target",  dtype='f',
@@ -640,7 +639,7 @@ def getInputs(fName, NN_mode, outputD, PhysicsProcess, Target_Pt, Target_Phi):
     else:
         if NN_mode == 'xy':
             Data = loadData(fName,  Target_Pt, Target_Phi)
-            Inputs = getInputs_xy(Data, outputD, PhysicsProcess, Target_Pt, Target_Phi)
+            Inputs = getInputs_xy(Data, outputD, Target_Pt, Target_Phi)
         elif NN_mode =='xyr':
             Data = loadData(fName,  Target_Pt, Target_Phi)
             Inputs = getInputs_xyr(Data)

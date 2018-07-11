@@ -4,7 +4,7 @@ python -c 'import keras; print(keras.__version__)'
 echo "trainingname eingeben"
 #read trainingname
 #trainingname='xyrTargets'
-PhysicsProcess="Tau"
+PhysicsProcess="Mu"
 optimizer="Adam"
 loss="mean_squared_error"
 NN_mode="xy"
@@ -14,11 +14,11 @@ if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
 else
 		trainingname='xyrTargets'
-    echo "$trainingname empty"
+    echo "$trainingname empty" 
 fi
-#inputFile=/storage/b/tkopf/mvamet/skim/out.root
-inputFile=/storage/b/tkopf/mvamet/skim/Tau.root
-#inputFile=/storage/b/tkopf/mvamet/Gridoutput/data1.root
+inputFile=/storage/b/tkopf/mvamet/skim/out.root
+#inputFile=/storage/b/tkopf/mvamet/skim/Tau.root
+#GBRTFile=/storage/b/tkopf/mvamet/Gridoutput/data1.root
 
 
 echo "GBRTFile2 $GBRTFile2"
@@ -47,14 +47,14 @@ if [ ! -d "trainings/$trainingname" ]; then
 	echo "files_di"
 fi
 #spaeter mal: config mit Art des Trainings festlegen
-#python $src_di/prepareInput.py $inputFile $files_di $NN_mode $plots_di $PhysicsProcess
-#python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
-#python $src_di/applyNN.py $inputFile $files_di $optimizer $loss $NN_mode
+python $src_di/prepareInput.py $inputFile $files_di $NN_mode $plots_di $PhysicsProcess
+python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
+python $src_di/applyNN.py $inputFile $files_di $optimizer $loss $NN_mode
 
-#python $src_di/prepareOutput.py $inputFile $files_di $NN_mode $plots_di $PhysicsProcess
+python $src_di/prepareOutput.py $inputFile $files_di $NN_mode $plots_di $PhysicsProcess
 python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $inputFile
 #python $src_di/getPlotsInput.py $inputFile $plots_di $PhysicsProcess
-#python $src_di/getPlotsOutputclean.py $inputFile $files_di $plots_di $PhysicsProcess $inputFile $NN_mode
-#python $src_di/getResponse.py $inputFile $files_di $plots_di $PhysicsProcess $NN_mode
+python $src_di/getPlotsOutputclean.py $inputFile $files_di $plots_di $PhysicsProcess $inputFile $NN_mode
+python $src_di/getResponse.py $inputFile $files_di $plots_di $PhysicsProcess $NN_mode
 cp -r $plots_di /usr/users/tkopf/www/METplots/
 cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/
