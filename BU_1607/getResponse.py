@@ -325,7 +325,7 @@ def plotMVAAngularOverpTZ_wErr(branchStringPhi, labelName, errbars_shift, ScaleE
     #print(std<45*np.pi/180)
     #print(np.where(std<45*np.pi/180))
     #print(indSmaller45Degrees)
-    print('MET definition std under 45 degrees', labelName)
+    print('MET definition std under 45 degrees', labelName])
     print('pT bin Start with std under 45 degrees', _[indSmaller45Degrees[0:10]])
     print('pT bin End with std under 45 degrees', _[indSmaller45Degrees[0:10]]+binwidth)
     print('crosscheck std with std under 45 degrees', std[indSmaller45Degrees[0:10]])
@@ -437,8 +437,8 @@ def mean_Response(branchString_Long, branchString_Phi, labelName, errbars_shift,
     NN_phi = getAngle(branchString_Phi)[getResponseIdx(branchString_Long)]
 
     n, _ = np.histogram(NN_phi, bins=20)
-    sy, _ = np.histogram(NN_phi, bins=20, weights=getResponse(branchString_Long))
-    sy2, _ = np.histogram(NN_phi, bins=20, weights=(getResponse(branchString_Long))**2)
+    sy, _ = np.histogram(NN_phi, bins=20, weights=getResponse('NN_LongZ'))
+    sy2, _ = np.histogram(NN_phi, bins=20, weights=(getResponse('NN_LongZ'))**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
@@ -574,7 +574,7 @@ def Hist_InvMET(branchString, labelName, errbars_shift, ScaleErr):
     Mean = np.mean(Response)
     Std = np.std(Response)
 
-    plt.hist(Response, bins=nbinsHist, range=[ResponseMin, ResponseMax], label='$\\frac{1}{p_T^Z}$, %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+    plt.hist(Response, bins=nbinsHist, range=[ResponseMin, ResponseMax], label='$\\frac{1}{\mathrm{MET}}$, %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
 
 def Hist_Resolution_para(branchString, labelName, errbars_shift, ScaleErr, rangemin, rangemax):
@@ -910,18 +910,18 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ScaleErr = 1
     NPlotsLines = 6
     MVA_NPlotsLines = 3
-    pTRangeString_Err = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$ \\ Error scaled: '+str(ScaleErr)
-    pTRangeString= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString_low= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
-    pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
-    pTRangeString_high= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.6666*100))
+    pTRangeString_Err = '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$ \\ Error scaled: '+str(ScaleErr)
+    pTRangeString= '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString_low= '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
+    pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
+    pTRangeString_high= '$%8.2f\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.6666*100))
     ptMin_low, ptMax_low = 0, np.percentile(DFName[Target_Pt], 33.3333)
     ptMin_mid, ptMax_mid = np.percentile(DFName[Target_Pt], 33.3333), np.percentile(DFName[Target_Pt], 66.6666)
     ptMin_high, ptMax_high = np.percentile(DFName[Target_Pt], 66.6666), 200
 
 
-    pTRangeString_Tresh = '$1\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeStringNVertex = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString_Tresh = '$1\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeStringNVertex = '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     if Target_Pt=='Boson_Pt':
         LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     else:
@@ -964,8 +964,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
@@ -987,8 +987,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle \\frac{U}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
+    plt.ylabel('$\\langle \\frac{U}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1015,7 +1015,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label='$ |Response|>10$'))
 
-    plt.xlabel('$ |p_T^Z|$')
+    plt.xlabel('$ |\mathrm{MET}|$')
     plt.ylabel('Count')
     #plt.title('Response $U_{\parallel}$')
 
@@ -1073,8 +1073,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_Err))
 
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle \\frac{U}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
+    plt.ylabel('$\\langle \\frac{U}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1098,7 +1098,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
     plt.ylabel('$\\langle \Delta \\alpha \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
@@ -1124,7 +1124,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_Err))
 
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
     plt.ylabel('$\\langle \Delta \\alpha \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
@@ -1134,7 +1134,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sDelta_Alpha_pT_werr.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -1149,7 +1149,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
-    plt.xlabel('$\\frac{U_{\parallel}}{p_T^Z}$')
+    plt.xlabel('$\\frac{U_{\parallel}}{\mathrm{MET}}$')
     plt.ylabel('Counts')
     plt.xlim(ResponseMin, ResponseMax)
     #plt.ylim(0, 90000)
@@ -1160,7 +1160,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlim(ResponseMin, ResponseMax)
     plt.savefig("%sResponse.png"%(plotsD), bbox_inches="tight")
     plt.close()
-    '''
+
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1177,7 +1177,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
 
-    plt.xlabel('$\\frac{U_{\parallel}}{p_T^Z}$')
+    plt.xlabel('$\\frac{U_{\parallel}}{\mathrm{MET}}$')
     plt.ylabel('Counts')
     plt.xlim(ResponseMin, ResponseMax)
     #plt.ylim(0, 90000)
@@ -1206,7 +1206,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
 
-    plt.xlabel('$\\frac{U_{\parallel}}{p_T^Z}$')
+    plt.xlabel('$\\frac{U_{\parallel}}{\mathrm{MET}}$')
     plt.ylabel('Counts')
     plt.xlim(ResponseMin, ResponseMax)
     #plt.ylim(0, 90000)
@@ -1234,7 +1234,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
 
-    plt.xlabel('$\\frac{U_{\parallel}}{p_T^Z}$')
+    plt.xlabel('$\\frac{U_{\parallel}}{\mathrm{MET}}$')
     plt.ylabel('Counts')
     plt.xlim(ResponseMin, ResponseMax)
     #plt.ylim(0, 85000)
@@ -1248,8 +1248,30 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
 
     '''
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
 
+    plotMVAResponseOverpTZ_woutError_Tresh('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+    plotMVAResponseOverpTZ_woutError_Tresh('NN_LongZ', 'NN', 6, ScaleErr)
+    plotMVAResponseOverpTZ_woutError_Tresh('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
+    plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
 
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_Tresh))
+
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ResponseMin, ResponseMax)
+    plt.savefig("%sResponse_pT_>1.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+    '''
 
 
 
@@ -1269,8 +1291,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1296,7 +1318,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1323,7 +1345,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1349,7 +1371,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1375,7 +1397,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1400,7 +1422,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_Tresh))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1426,7 +1448,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|} \\rangle$ ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1451,9 +1473,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\sigma \\left( U_{\parallel}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
+    plt.ylabel('$\sigma \\left( U_{\parallel}- |\\vec{\mathrm{MET}}| \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1476,7 +1498,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle |-\\vec{p}_T^Z| \\rangle$ in GeV ')
+    plt.ylabel('$\\langle |\\vec{\mathrm{MET}}| \\rangle$ in GeV ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1499,7 +1521,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle |-\\vec{p}_T^Z| \\rangle$ in GeV ')
+    plt.ylabel('$\\langle |\\vec{\mathrm{MET}}| \\rangle$ in GeV ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1523,7 +1545,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle |-\\vec{p}_T^Z| \\rangle$ in GeV ')
+    plt.ylabel('$\\langle |\\vec{\mathrm{MET}}| \\rangle$ in GeV ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1547,7 +1569,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle |-\\vec{p}_T^Z| \\rangle$ in GeV ')
+    plt.ylabel('$\\langle |\\vec{\mathrm{MET}}| \\rangle$ in GeV ')
     #plt.title('Response $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1572,9 +1594,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.xlabel('$U_{\parallel}-\mathrm{MET}$')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1598,9 +1620,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
 
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.xlabel('$U_{\parallel}-\mathrm{MET}$')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1625,9 +1647,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
 
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.xlabel('$U_{\parallel}-\mathrm{MET}$')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1653,9 +1675,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
 
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.xlabel('$U_{\parallel}-\mathrm{MET}$')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1668,7 +1690,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
-    pTRangeString_0_100 = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 100\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString_0_100 = '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 100\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     #Hist_Resolution_para_0_100('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     Hist_Resolution_para_0_100('NN_LongZ', 'NN', 6, ScaleErr)
     #Hist_Resolution_para_0_100('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
@@ -1679,9 +1701,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_0_100))
 
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.xlabel('$U_{\parallel}-\mathrm{MET}$')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1697,15 +1719,15 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #Hist_Resolution_para_100_150('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     Hist_Resolution_para_100_150('NN_LongZ', 'NN', 6, ScaleErr)
     Hist_Resolution_para_100_150('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-    pTRangeString_100_150 = '$100\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 150\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString_100_150 = '$100\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 150\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_100_150))
 
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.xlabel('$U_{\parallel}-\mathrm{MET}$')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1717,7 +1739,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
-    pTRangeString_150_200 = '$150\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString_150_200 = '$150\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     #Hist_Resolution_para_150_200('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     Hist_Resolution_para_150_200('NN_LongZ', 'NN', 6, ScaleErr)
     Hist_Resolution_para_150_200('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
@@ -1727,9 +1749,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_150_200))
 
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.xlabel('$U_{\parallel}-\mathrm{MET}$')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1753,7 +1775,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     plt.xlabel('$U_{\perp}$ in GeV')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1778,7 +1800,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     plt.xlabel('$U_{\perp}$ in GeV')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1804,7 +1826,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     plt.xlabel('$U_{\perp}$ in GeV')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1829,7 +1851,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     plt.xlabel('$U_{\perp}$ in GeV')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1846,7 +1868,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #MeanDeviation_Pt('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+    MeanDeviation_Pt('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     MeanDeviation_Pt('NN_LongZ', 'NN', 6, ScaleErr)
     MeanDeviation_Pt('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
 
@@ -1855,9 +1877,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle U_{\parallel}- |-\\vec{p}_T^Z| \\rangle$ in GeV')
-    #plt.title('Mean Deviation $U_{\parallel}-|-\\vec{p}_T^Z|$')
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
+    plt.ylabel('$\\langle U_{\parallel}- |\\vec{\mathrm{MET}}| \\rangle$ in GeV')
+    #plt.title('Mean Deviation $U_{\parallel}-|\\vec{\mathrm{MET}}|$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
@@ -1880,8 +1902,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\parallel}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.ylabel('$\sigma \\left( U_{\parallel}- |\\vec{\mathrm{MET}}| \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1904,8 +1926,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\parallel}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.ylabel('$\sigma \\left( U_{\parallel}- |\\vec{\mathrm{MET}}| \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1928,8 +1950,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\parallel}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.ylabel('$\sigma \\left( U_{\parallel}- |\\vec{\mathrm{MET}}| \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1952,8 +1974,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\parallel}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.ylabel('$\sigma \\left( U_{\parallel}- |\\vec{\mathrm{MET}}| \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\parallel}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -1977,8 +1999,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\perp}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.ylabel('$\sigma \\left( U_{\perp}- |\\vec{\mathrm{MET}}| \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\perp}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -2001,8 +2023,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\perp}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.ylabel('$\sigma \\left( U_{\perp}- |\\vec{\mathrm{MET}}| \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\perp}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -2025,8 +2047,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\perp}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.ylabel('$\sigma \\left( U_{\perp}- |\\vec{\mathrm{MET}}| \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\perp}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -2049,8 +2071,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\perp}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.ylabel('$\sigma \\left( U_{\perp}- |\\vec{\mathrm{MET}}| \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\perp}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -2065,7 +2087,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #MeanDeviation_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+    MeanDeviation_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     MeanDeviation_PV('NN_LongZ', 'NN', 6, ScaleErr)
     MeanDeviation_PV('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
 
@@ -2075,8 +2097,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle U_{\parallel} - p_T^Z \\rangle$ in GeV')
-    #plt.title('Mean Deviation $U_{\parallel}-|-\\vec{p}_T^Z|$')
+    plt.ylabel('$\\langle U_{\parallel} - \mathrm{MET} \\rangle$ in GeV')
+    #plt.title('Mean Deviation $U_{\parallel}-|\\vec{\mathrm{MET}}|$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
@@ -2099,9 +2121,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
+    plt.xlabel('$|\\vec{\mathrm{MET}}| $ in GeV')
     plt.ylabel('$\sigma \\left( U_{\perp} \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\perp}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -2130,7 +2152,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     plt.xlabel('#$ \mathrm{PV}$ ')
     plt.ylabel('$\sigma \\left( U_{\perp} \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Resolution $U_{\perp}$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -2170,8 +2192,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ U_{\parallel} - p_T^Z  $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    plt.xlabel('$ U_{\parallel} - \mathrm{MET}  $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Deviation Histogram parallel')
     #plt.text('$p_T$ range restriction')
 
@@ -2203,9 +2225,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ |\\vec{U}| - |-\\vec{p}_T^Z|  $ in GeV')
+    plt.xlabel('$ |\\vec{U}| - |\\vec{\mathrm{MET}}|  $ in GeV')
     plt.xlim(HistLimMin,HistLimMax)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Deviation Histogram norm')
     #plt.text('$p_T$ range restriction')
 
@@ -2241,7 +2263,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.ylabel('Counts')
     plt.xlabel('$ |U|   $ in GeV')
     plt.xlim(0,75)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Deviation Histogram norm')
     #plt.text('$p_T$ range restriction')
 
@@ -2277,7 +2299,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.ylabel('Counts')
     plt.xlabel('$ U_{\perp}  $ in GeV')
     plt.xlim(HistLimMin,HistLimMax)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Deviation Histogram perpendicular')
     #plt.text('$p_T$ range restriction')
 
@@ -2310,7 +2332,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.ylabel('Counts')
     plt.xlabel('$ U_{\parallel}   $ in GeV')
     plt.xlim(HistLimMin,HistLimMax)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title(' Histogram parallel component')
     #plt.text('$p_T$ range restriction')
 
@@ -2343,7 +2365,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.ylabel('Counts')
     plt.xlabel('$ U_{\perp}  $ in GeV')
     plt.xlim(HistLimMin,HistLimMax)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title(' Histogram perpendicular component')
     #plt.text('$p_T$ range restriction')
 
@@ -2366,9 +2388,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ U_{\parallel} - |-\\vec{p}_T^Z|  $ in GeV')
+    plt.xlabel('$ U_{\parallel} - |\\vec{\mathrm{MET}}|  $ in GeV')
     plt.xlim(HistLimMin,HistLimMax)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Response Histogram by Bin')
     #plt.text('$p_T$ range restriction')
 
@@ -2404,9 +2426,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ U_{\parallel} - p_T^Z  $ in GeV')
+    plt.xlabel('$ U_{\parallel} - \mathrm{MET}  $ in GeV')
     plt.xlim(HistLimMin,HistLimMax)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Deviation Histogram parallel')
     #plt.text('$p_T$ and $\# PV$ range restriction')
 
@@ -2449,7 +2471,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.ylabel('Counts')
     plt.xlabel('$ \\Delta \\alpha $ in rad')
     plt.xlim(-np.pi,np.pi)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
     #plt.title('Deviation Histogram perp')
     #plt.text('$p_T$ and $\# pT$ range restriction')
 
@@ -2476,7 +2498,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #Mean_Std_Deviation_pTZ_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+    Mean_Std_Deviation_pTZ_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     Mean_Std_Deviation_pTZ_para('NN_LongZ', 'NN', 6, ScaleErr)
     Mean_Std_Deviation_pTZ_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
 
@@ -2486,10 +2508,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
-    plt.ylabel('$\\langle  U_{\parallel} - p_T^Z \\rangle$')
-    plt.xlabel('$p_T^Z $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('parallel deviation over $|-\\vec{p}_T^Z|$')
+    plt.ylabel('$\\langle  U_{\parallel} - \mathrm{MET} \\rangle$')
+    plt.xlabel('$\mathrm{MET} $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
+    #plt.title('parallel deviation over $|\\vec{\mathrm{MET}}|$')
     #plt.text('$p_T$ and $\# PV$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -2505,7 +2527,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    Histogram_Response('recoilslimmedMETsPuppi_LongZ', 'Puppi', 5, ScaleErr)
+    #Histogram_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     Histogram_Response('NN_LongZ', 'NN', 6, ScaleErr)
     Histogram_Response('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
 
@@ -2515,10 +2537,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
-    plt.xlabel('$  \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|}} $')
+    plt.xlabel('$  \\frac{U_{\parallel}}{|\\vec{\mathrm{MET}}|}} $')
     plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('parallel deviation over $|-\\vec{p}_T^Z|$')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
+    #plt.title('parallel deviation over $|\\vec{\mathrm{MET}}|$')
     #plt.text('$p_T$ and $\# PV$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -2545,9 +2567,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.ylabel('$\\langle  U_{\perp} \\rangle$')
-    plt.xlabel('$ p_T^Z $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('perpendicular deviation over $|-\\vec{p}_T^Z|$')
+    plt.xlabel('$ \mathrm{MET} $ in GeV')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|\\vec{\mathrm{MET}}|} \\right) $ in GeV')
+    #plt.title('perpendicular deviation over $|\\vec{\mathrm{MET}}|$')
     #plt.text('$p_T$ and $\# PV$ range restriction')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -2571,7 +2593,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
-    plt.ylabel('$\\langle  U_{\parallel} - p_T^Z \\rangle$')
+    plt.ylabel('$\\langle  U_{\parallel} - \mathrm{MET} \\rangle$')
     plt.xlabel('\#PV')
     #plt.title('parallel deviation over \#PV')
     #plt.text('$p_T$ and $\# PV$ range restriction')
@@ -2621,7 +2643,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.legend()
     plt.savefig("%sHM_Response_NN_Delta_Alpha.png"%(plotsD), bbox_inches="tight")
     plt.close()
-    '''
+
     plt.clf()
     plt.figure()
     plt.suptitle(pTRangeString_low)
@@ -2728,7 +2750,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.legend()
     plt.savefig("%sHM_Response_PF_Delta_Alpha_high.png"%(plotsD), bbox_inches="tight")
     plt.close()
-    '''
+
 
     print("NN: Korrellationskoeffizient zwischen Response und Resolution para",np.corrcoef(-DFName['NN_LongZ']/DFName[Target_Pt], -DFName['NN_LongZ']-DFName[Target_Pt]))
     print("PF: Korrellationskoeffizient zwischen Response und Resolution para",np.corrcoef(-DFName['recoilslimmedMETs_LongZ']/DFName[Target_Pt], -DFName['recoilslimmedMETs_LongZ']-DFName[Target_Pt]))
@@ -2752,8 +2774,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     dPhi = np.linspace(-np.pi, np.pi, 200)
     Response_pTperfect = np.cos(dPhi)
     mean_Response('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErr)
-    mean_Response('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErr)
-    mean_Response('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErr)
+    mean_Response('recoilslimmedMETs_Phi', 'recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr)
     plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
     plt.legend()
     plt.ylim(-7,5)
@@ -2771,7 +2792,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     Response_pTperfect = np.cos(dPhi)
     ScaleErrResponse = 1000
     mean_Response_wErr('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErrResponse, 0, 200, 20)
-    mean_Response_wErr('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErrResponse, 0, 200, 20)
+    #mean_Response_wErr('ScaledNN_LongZ', 'NN_PerpZ', 'NN scaled', 0, ScaleErr)
     mean_Response_wErr('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErrResponse, 0, 200, 20)
     plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
     plt.legend()
@@ -2789,7 +2810,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     dPhi = np.linspace(-np.pi, np.pi, 200)
     Response_pTperfect = np.cos(dPhi)
     mean_Response_wErr('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErrResponse, ptMin_low, ptMax_low, 20)
-    mean_Response_wErr('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErrResponse, ptMin_low, ptMax_low, 20)
+    #mean_Response_wErr('ScaledNN_LongZ', 'NN_PerpZ', 'NN scaled', 0, ScaleErr)
     mean_Response_wErr('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErrResponse, ptMin_low, ptMax_low, 20)
     plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
     plt.legend()
@@ -2807,7 +2828,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     dPhi = np.linspace(-np.pi, np.pi, 200)
     Response_pTperfect = np.cos(dPhi)
     mean_Response_wErr('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErrResponse, ptMin_mid, ptMax_mid, 10)
-    mean_Response_wErr('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErrResponse, ptMin_mid, ptMax_mid, 10)
+    #mean_Response_wErr('ScaledNN_LongZ', 'NN_PerpZ', 'NN scaled', 0, ScaleErr)
     mean_Response_wErr('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErrResponse, ptMin_mid, ptMax_mid, 10)
     plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
     plt.legend()
@@ -2825,7 +2846,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     dPhi = np.linspace(-np.pi, np.pi, 200)
     Response_pTperfect = np.cos(dPhi)
     mean_Response_wErr('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErrResponse, ptMin_high, ptMax_high, 10)
-    mean_Response_wErr('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErrResponse, ptMin_high, ptMax_high, 10)
+    #mean_Response_wErr('ScaledNN_LongZ', 'NN_PerpZ', 'NN scaled', 0, ScaleErr)
     mean_Response_wErr('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErrResponse, ptMin_high, ptMax_high, 10)
     plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
     plt.legend()
@@ -2889,7 +2910,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.clf()
     plt.figure()
     plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
     PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
     Response = np.divide(-DFName['recoilpatpfPUMET_LongZ'], DFName[Target_Pt] )
     x=PF_phi
@@ -2908,7 +2929,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.clf()
     plt.figure()
     plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
     PF_r, PF_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
     Response = np.divide(-DFName['NN_LongZ'], DFName[Target_Pt] )
     x=PF_phi
@@ -2927,7 +2948,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.clf()
     plt.figure()
     plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
     y=np.sqrt(np.multiply(DFName['recoilslimmedMETs_LongZ'], DFName['recoilslimmedMETs_LongZ'])+ np.multiply(DFName['recoilslimmedMETs_PerpZ'], DFName['recoilslimmedMETs_PerpZ']))-DFName[Target_Pt]
     delta_alpha=np.linspace(-np.pi,np.pi,201)
     delta_pT=np.linspace(y.min(),y.max(),201)
@@ -2953,7 +2974,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.clf()
     plt.figure()
     plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
     delta_alpha=np.linspace(-np.pi,np.pi,201)
     y=np.sqrt(np.multiply(DFName['NN_LongZ'], DFName['NN_LongZ'])+ np.multiply(DFName['NN_PerpZ'], DFName['NN_PerpZ']))-DFName[Target_Pt]
     delta_pT=np.linspace(y.min(),y.max(),201)
@@ -2975,11 +2996,11 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.legend()
     plt.savefig("%sHM_NN_Response_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
     '''
-    '''
+
     plt.clf()
     plt.figure()
     plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
     DeltapT = DFName['recoilpatpfPUMET_Pt'] - DFName[Target_Pt]
     heatmap, xedges, yedges = np.histogram2d( getAngle('recoilpatpfPUMET_Phi'), DeltapT,  bins=50,
                                              range=[[-np.pi,np.pi],
@@ -2995,7 +3016,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.clf()
     plt.figure()
     plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
+    plt.ylabel("$|U|-|\mathrm{MET}|$")
     heatmap, xedges, yedges = np.histogram2d(  angularrange(DFName['NN_Phi']+np.pi-DFName['NN_Phi']), DFName['NN_Pt'] - DFName[Target_Pt],  bins=50,
                                              range=[[-np.pi,np.pi],
                                                     [-10,10]])
@@ -3051,7 +3072,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.colorbar(HM)
     plt.legend()
     plt.savefig("%sHM_Response_NN_Delta_Alpha_CR.png"%(plotsD), bbox_inches="tight")
-    '''
+
 
     plt.clf()
     plt.figure()
@@ -3081,7 +3102,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.legend()
     plt.savefig("%sHM_PF_Delta_Alpha_pT.png"%(plotsD), bbox_inches="tight")
 
-    '''
+
     plt.clf()
     plt.figure()
     #plt.suptitle('x-Korrektur Prediction-Target ')
@@ -3114,7 +3135,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.clf()
     plt.figure()
     #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
+    plt.xlabel("$ |\\vec{\mathrm{MET}}| $")
     plt.ylabel("Response")
     heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('NN_LongZ')], getResponse('NN_LongZ'),  bins=[25,25],
                                              range=[[0,10],
@@ -3130,7 +3151,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.clf()
     plt.figure()
     #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
+    plt.xlabel("$ |\\vec{\mathrm{MET}}| $")
     plt.ylabel("Response")
     heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('NN_LongZ')], getResponse('NN_LongZ'),  bins=[25,25],
                                              range=[[0,200],
@@ -3161,7 +3182,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.clf()
     plt.figure()
     #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
+    plt.xlabel("$ |\\vec{\mathrm{MET}}| $")
     plt.ylabel("Response")
     heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('recoilpatpfPUMET_LongZ')], getResponse('recoilpatpfPUMET_LongZ'),  bins=[25,25],
                                              range=[[0,10],
@@ -3172,11 +3193,11 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.colorbar(HM)
     plt.legend()
     plt.savefig("%sHM_Response_PF_Delta_pT_10.png"%(plotsD), bbox_inches="tight")
-    '''
+
     plt.clf()
     plt.figure()
     #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
+    plt.xlabel("$ |\\vec{\mathrm{MET}}| $")
     plt.ylabel("Response")
     heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('recoilpatpfPUMET_LongZ')], getResponse('recoilpatpfPUMET_LongZ'),  bins=[25,25],
                                              range=[[0,200],
@@ -3187,11 +3208,11 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.colorbar(HM)
     plt.legend()
     plt.savefig("%sHM_Response_PF_Delta_pT_0_200.png"%(plotsD), bbox_inches="tight")
-    '''
+
     plt.clf()
     plt.figure()
     #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
+    plt.xlabel("$ |\\vec{\mathrm{MET}}| $")
     plt.ylabel("Response")
     heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('NN_LongZ')], getResponse('NN_LongZ'),  bins=[25,25],
                                              range=[[150,200],
@@ -3202,15 +3223,14 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.colorbar(HM)
     plt.legend()
     plt.savefig("%sHM_Response_NN_Delta_pT_150.png"%(plotsD), bbox_inches="tight")
-    '''
+
 
     print("low pt range 33 percent of data", np.percentile(DFName[Target_Pt],0.3333*100))
     print("mid pt range 33 percent of data", np.percentile(DFName[Target_Pt],0.6666*100))
     print("high pt range 33 percent of data", np.percentile(DFName[Target_Pt],100))
 
 
-
-
+    '''
     print('PF: Wie viele negative Responses', np.sum(DFName['recoilpatpfPUMET_LongZ']<0))
     #print('GBRT: Wie viele negative Responses', np.sum(DFName['LongZCorrectedRecoil_LongZ']<0))
     print('NN: Wie viele negative Responses', np.sum(DFName['NN_LongZ']<0))
@@ -3225,12 +3245,12 @@ if __name__ == "__main__":
     if PhysicsProcess == 'Tau':
         Target_Pt = 'genMet_Pt'
         Target_Phi = 'genMet_Phi'
-        DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
+        DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode)
     else:
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
-        DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
-    DFName=DFName_plain[DFName_plain[Target_Pt]<=200]
+        DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode)
+    DFName=DFName_plain[DFName_plain[Target_Pt]<200]
     DFName=DFName[DFName[Target_Pt]>0]
     DFName=DFName[DFName['NVertex']<=50]
     DFName=DFName[DFName['NVertex']>=0]

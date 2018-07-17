@@ -63,8 +63,6 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
 
 
     predictions = model.predict(Inputs[:])
-    print('len(Targets)', len(Targets))
-    print('len(predictions)', len(predictions))
     print("predictions in apply NN ", predictions	)
     dset = NN_Output_applied.create_dataset("MET_Predictions", dtype='f', data=predictions)
     dset2 = NN_Output_applied.create_dataset("MET_GroundTruth", dtype='f', data=Targets)

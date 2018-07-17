@@ -40,7 +40,7 @@ def div0( a, b ):
 
 
 
-def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess):
+def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode):
     '''
     tfile = ROOT.TFile(rootInput)
     for key in tfile.GetListOfKeys():
@@ -64,9 +64,7 @@ def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, Physi
                 arrayNameNN=rnp.root2array(fName, treename='tree', branches=['NN_LongZ', 'NN_PerpZ', 'NN_Phi', 'NN_Pt'  ],)
             else:
     '''
-    NN_MVA = h5py.File("%sNN_MVA_%s.h5"%(filesDir,NN_mode), "r+")
-    DFNameInput = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
-    #Ind = (DFNameInput[Target_Pt]>0) & (DFNameInput[Target_Pt]<200) & (DFNameInput['NVertex']<=50)
+    NN_MVA = h5py.File("%s/NN_MVA_%s.h5"%(filesDir,NN_mode), "r+")
     print("Keys: %s" % NN_MVA.keys())
     DFNameNN = pd.DataFrame()
     keys = NN_MVA.keys()
@@ -77,7 +75,11 @@ def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, Physi
 
 
 
-
+    DFNameInput = loadData(rootInput, Target_Pt, Target_Phi)
+    if Target_Pt == 'genMet_Pt':
+        DFNameInput['recoilslimmedMETs_LongZ'] = np.cos(DFNameInput['recoilslimmedMETs_Phi']-DFNameInput[Target_Phi])*DFNameInput['recoilslimmedMETs_Pt']
+        DFNameInput['recoilslimmedMETs_PerpZ'] = np.sin(DFNameInput['recoilslimmedMETs_Phi']-DFNameInput[Target_Phi])*DFNameInput['recoilslimmedMETs_Pt']
+        #DFNameNN = pd.DataFrame.from_records(arrayNameNN.view(np.recarray))
     DFName = pd.concat([DFNameInput, DFNameNN], axis=1, join_axes=[DFNameInput.index])
     return(DFName)
 
@@ -493,11 +495,11 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
         LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     else:
         LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \\tau \\tau  \\rightarrow \ \mu \mu }$'
-    pTRangeString_Err = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString_low= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
-    pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
-    pTRangeString_high= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.6666*100))
+    pTRangeString_Err = '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString= '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString_low= '$0\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
+    pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
+    pTRangeString_high= '$%8.2f\ \mathrm{GeV} < |\\vec{\mathrm{MET}}| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.6666*100))
     pTRangeStringNVertex = pTRangeString
     LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     colors = ['blue','green','red','cyan','magenta','yellow']
@@ -714,7 +716,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle U_{\parallel} - p_T^Z \\rangle$ in GeV')
+    plt.ylabel('$\\langle U_{\parallel} - \mathrm{MET} \\rangle$ in GeV')
     #plt.title('Mean Deviation $U_{\parallel}-p_T^Z$')
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
@@ -809,7 +811,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ U_{\parallel} - p_T^Z  $ in GeV')
+    plt.xlabel('$ U_{\parallel} - \mathrm{MET}  $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
     #plt.title('Deviation Histogram parallel')
     #plt.text('$p_T$ range restriction')
@@ -842,7 +844,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ |\\vec{U}| - |-\\vec{p}_T^Z|  $ in GeV')
+    plt.xlabel('$ |\\vec{U}| - |\\vec{\mathrm{MET}}|  $ in GeV')
     plt.xlim(HistLimMin,HistLimMax)
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
     #plt.title('Deviation Histogram norm')
@@ -869,7 +871,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ |-\\vec{p}_T^Z|   $ in GeV')
+    plt.xlabel('$ |\\vec{\mathrm{MET}}|   $ in GeV')
     plt.xlim(0,75)
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
     #plt.title('Deviation Histogram norm')
@@ -1069,7 +1071,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.ylabel('Counts')
-    plt.xlabel('$ U_{\parallel} - p_T^Z  $ in GeV')
+    plt.xlabel('$ U_{\parallel} - \mathrm{MET}  $ in GeV')
     plt.xlim(HistLimMin,HistLimMax)
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
     #plt.title('Deviation Histogram parallel')
@@ -1171,8 +1173,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
-    plt.ylabel('$\\langle  U_{\parallel} - p_T^Z \\rangle$')
-    plt.xlabel('$p_T^Z $ in GeV')
+    plt.ylabel('$\\langle  U_{\parallel} - \mathrm{MET} \\rangle$')
+    plt.xlabel('$\mathrm{MET} $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
     #plt.title('parallel deviation over $p_T^Z$')
     #plt.text('$p_T$ and $\# PV$ range restriction')
@@ -1198,7 +1200,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
     plt.ylabel('$\\langle  U_{\perp} \\rangle$')
-    plt.xlabel('$ p_T^Z $ in GeV')
+    plt.xlabel('$ \mathrm{MET} $ in GeV')
     #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
     #plt.title('perpendicular deviation over $p_T^Z$')
     #plt.text('$p_T$ and $\# PV$ range restriction')
@@ -1223,7 +1225,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     handles, labels = ax.get_legend_handles_labels()
     handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
 
-    plt.ylabel('$\\langle  U_{\parallel} - p_T^Z \\rangle$')
+    plt.ylabel('$\\langle  U_{\parallel} - \mathrm{MET} \\rangle$')
     plt.xlabel('\#PV')
     #plt.title('parallel deviation over \#PV')
     #plt.text('$p_T$ and $\# PV$ range restriction')
@@ -1271,13 +1273,13 @@ if __name__ == "__main__":
     rootInput = sys.argv[5]
     NN_mode = sys.argv[6]
     if PhysicsProcess == 'Tau':
-        Target_Pt = 'Boson_Pt'
-        Target_Phi = 'Boson_Phi'
-        DFName_plain = loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
+        Target_Pt = 'genMet_Pt'
+        Target_Phi = 'genMet_Phi'
+        DFName_plain = loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode)
     else:
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
-        DFName_plain = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
+        DFName_plain = loadData(rootInput, Target_Pt, Target_Phi)
     print(plotDir)
     DFName=DFName_plain[DFName_plain[Target_Pt]<=200]
     DFName=DFName[DFName[Target_Pt]>0]
