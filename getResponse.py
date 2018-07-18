@@ -624,7 +624,7 @@ def Histogram_Response(branchString, labelName, bin, ScaleErr):
     Std = np.std(np.divide(-(DFName[branchString]),DFName[Target_Pt].values))
     Reso = np.divide(-(DFName[branchString]),DFName[Target_Pt].values)
     #n, _ = np.histogram(-(DFName[branchString])-DFName[Target_Pt].values, bins=nbinsHistBin)
-    plt.hist(Reso[~np.isnan(Reso)], bins=nbinsHistBin,  label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors2[bin])
+    plt.hist(Reso[~np.isnan(Reso)], bins=nbinsHistBin, range=[ResponseMin, ResponseMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors2[bin])
 
 
 
@@ -910,14 +910,14 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ScaleErr = 1
     NPlotsLines = 6
     MVA_NPlotsLines = 3
-    pTRangeString_Err = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$ \\ Error scaled: '+str(ScaleErr)
-    pTRangeString= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString_Err = '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$ \\ Error scaled: '+str(ScaleErr)
+    pTRangeString= '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     pTRangeString_low= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
     pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
-    pTRangeString_high= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.6666*100))
+    pTRangeString_high= '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     ptMin_low, ptMax_low = 0, np.percentile(DFName[Target_Pt], 33.3333)
     ptMin_mid, ptMax_mid = np.percentile(DFName[Target_Pt], 33.3333), np.percentile(DFName[Target_Pt], 66.6666)
-    ptMin_high, ptMax_high = np.percentile(DFName[Target_Pt], 66.6666), 200
+    ptMin_high, ptMax_high = 20, 200
 
 
     pTRangeString_Tresh = '$1\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
@@ -1306,7 +1306,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.close()
 
 
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -1357,7 +1357,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(0, ResponseMax)
     plt.savefig("%sResponse_PV_mid.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1486,6 +1486,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%spT_over_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -1532,7 +1533,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlim(0, 50)
     plt.savefig("%spT_over_PV_mid.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1564,7 +1565,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, 0, 200)
     Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr, 0, 200)
-    #Hist_Resolution_para('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
+    Hist_Resolution_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr, 0, 200)
     Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 0, 200)
 
     box = ax.get_position()
@@ -1583,7 +1584,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sHist_Resolution_para.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -1608,9 +1609,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlim(ResolutionParaMin, ResolutionParaMax )
     plt.savefig("%sHist_Resolution_para_low.png"%(plotsD), bbox_inches="tight")
     plt.close()
+    '''
 
-
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -1635,7 +1636,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlim(ResolutionParaMin, ResolutionParaMax )
     plt.savefig("%sHist_Resolution_para_mid.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
 
 
 
@@ -1742,7 +1743,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #Hist_Resolution_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5, ScaleErr, 0, 200)
+    Hist_Resolution_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, 0, 200)
     Hist_Resolution_perp('NN_PerpZ', 'NN', 6, ScaleErr, 0, 200)
     Hist_Resolution_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, 0, 200)
 
@@ -1762,12 +1763,12 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sHist_Resolution_perp.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #Hist_Resolution_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5, ScaleErr, ptMin_low, ptMax_low)
+    Hist_Resolution_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_low, ptMax_low)
     Hist_Resolution_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_low, ptMax_low)
     Hist_Resolution_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_low, ptMax_low)
 
@@ -1786,14 +1787,14 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlim(ResolutionPerpMin, ResolutionPerpMax )
     plt.savefig("%sHist_Resolution_perp_low.png"%(plotsD), bbox_inches="tight")
     plt.close()
+    '''
 
-
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #Hist_Resolution_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5, ScaleErr, ptMin_mid, ptMax_mid)
+    Hist_Resolution_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_mid, ptMax_mid)
     Hist_Resolution_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_mid, ptMax_mid)
     Hist_Resolution_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_mid, ptMax_mid)
 
@@ -1812,13 +1813,13 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlim(ResolutionPerpMin, ResolutionPerpMax )
     plt.savefig("%sHist_Resolution_perp_mid.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #Hist_Resolution_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5, ScaleErr, ptMin_high, ptMax_high)
+    Hist_Resolution_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_high, ptMax_high)
     Hist_Resolution_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_high, ptMax_high)
     Hist_Resolution_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_high, ptMax_high)
 
@@ -1870,7 +1871,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResolutionOverNVertex_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr, 0, 200)
     plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 6, ScaleErr, 0, 200)
     plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 0, 200)
 
@@ -1889,12 +1890,12 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sResolution_para_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResolutionOverNVertex_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr)
     plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 6, ScaleErr, ptMin_low, ptMax_low)
     plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_low, ptMax_low)
 
@@ -1918,7 +1919,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResolutionOverNVertex_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4,  ScaleErr, ptMin_mid, ptMax_mid)
     plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 6, ScaleErr, ptMin_mid, ptMax_mid)
     plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_mid, ptMax_mid)
 
@@ -1937,12 +1938,13 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sResolution_para_PV_mid.png"%(plotsD), bbox_inches="tight")
     plt.close()
+    '''
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResolutionOverNVertex_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 5, ScaleErr, ptMin_high, ptMax_high)
     plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 6, ScaleErr, ptMin_high, ptMax_high)
     plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_high, ptMax_high)
 
@@ -1967,9 +1969,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResolutionOverNVertex_woutError_perp('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResolutionOverNVertex_woutError_perp('NN_LongZ', 'NN', 6, ScaleErr, 0, 200)
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 0, 200)
+    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, 0, 200)
+    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 6, ScaleErr, 0, 200)
+    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, 0, 200)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -1986,7 +1988,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sResolution_perp_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -2015,9 +2017,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResolutionOverNVertex_woutError_perp('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResolutionOverNVertex_woutError_perp('NN_LongZ', 'NN', 6, ScaleErr, ptMin_mid, ptMax_mid)
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_mid, ptMax_mid)
+    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_mid, ptMax_mid)
+    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_mid, ptMax_mid)
+    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_mid, ptMax_mid)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -2034,14 +2036,14 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sResolution_perp_PV_mid.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResolutionOverNVertex_woutError_perp('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResolutionOverNVertex_woutError_perp('NN_LongZ', 'NN', 6, ScaleErr, ptMin_high, ptMax_high)
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_high, ptMax_high)
+    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_high, ptMax_high)
+    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_high, ptMax_high)
+    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_high, ptMax_high)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -2090,7 +2092,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResolutionOverpTZ_woutError_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5, ScaleErr)
+    plotMVAResolutionOverpTZ_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr)
     plotMVAResolutionOverpTZ_woutError_perp('NN_PerpZ', 'NN', 6, ScaleErr)
     plotMVAResolutionOverpTZ_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr)
 
@@ -2119,7 +2121,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResolutionOverNVertex_woutError_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5, ScaleErr)
+    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, 0, 200)
     plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 6, ScaleErr, 0, 200)
     plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, 0, 200)
 
@@ -2505,7 +2507,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    Histogram_Response('recoilslimmedMETsPuppi_LongZ', 'Puppi', 5, ScaleErr)
+    Histogram_Response('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr)
     Histogram_Response('NN_LongZ', 'NN', 6, ScaleErr)
     Histogram_Response('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
 
@@ -2780,7 +2782,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.rcParams['agg.path.chunksize'] = 10000
     plt.savefig("%sNN_Delta_Alpha_perfect_Guess_wErr.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
     plt.clf()
     plt.figure()
     #plt.suptitle('x-Korrektur Prediction-Target ')
@@ -2816,6 +2818,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.rcParams['agg.path.chunksize'] = 10000
     plt.savefig("%sNN_Delta_Alpha_perfect_Guess_wErr_mid.png"%(plotsD), bbox_inches="tight")
     plt.close()
+    '''
 
     plt.clf()
     plt.figure()
@@ -3223,15 +3226,15 @@ if __name__ == "__main__":
     PhysicsProcess = sys.argv[4]
     NN_mode = sys.argv[5]
     if PhysicsProcess == 'Tau':
-        Target_Pt = 'genMet_Pt'
-        Target_Phi = 'genMet_Phi'
+        Target_Pt = 'Boson_Pt'
+        Target_Phi = 'Boson_Phi'
         DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
     else:
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
         DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
     DFName=DFName_plain[DFName_plain[Target_Pt]<=200]
-    DFName=DFName[DFName[Target_Pt]>0]
+    DFName=DFName[DFName[Target_Pt]>20]
     DFName=DFName[DFName['NVertex']<=50]
     DFName=DFName[DFName['NVertex']>=0]
 

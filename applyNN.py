@@ -45,6 +45,11 @@ def loadTargets(inputD):
     Target =  InputsTargets['Target']
     return (np.transpose(Target))
 
+def loadBosonPt(inputD):
+    InputsTargets = h5py.File("%sNN_Input_apply_%s.h5" % (inputD, NN_mode), "r")
+    Target =  np.squeeze(InputsTargets['Boson_Pt'][:])
+    return (np.transpose(Target))
+
 def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     from keras.models import load_model
     from own_loss_functions import mean_squared_error_r, perp_long_error
@@ -66,8 +71,13 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     print('len(Targets)', len(Targets))
     print('len(predictions)', len(predictions))
     print("predictions in apply NN ", predictions	)
+    print('Mean x deviation', np.mean(np.subtract(predictions[:,0], Targets[:,0])))
+    print('Std x deviation', np.std(np.subtract(predictions[:,0], Targets[:,0])))
+    print('Mean y deviation', np.mean(np.subtract(predictions[:,1], Targets[:,1])))
+    print('Std y deviation', np.std(np.subtract(predictions[:,1], Targets[:,1])))    
     dset = NN_Output_applied.create_dataset("MET_Predictions", dtype='f', data=predictions)
     dset2 = NN_Output_applied.create_dataset("MET_GroundTruth", dtype='f', data=Targets)
+    dset3 = NN_Output_applied.create_dataset('Boson_Pt', dtype='f', data=loadBosonPt(outputD)[:])
     NN_Output_applied.close()
 
 

@@ -16,7 +16,7 @@ import h5py
 import sys
 
 
-fName ="/storage/b/tkopf/mvamet/skim/out.root"
+#fName ="/storage/b/tkopf/mvamet/skim/out.root"
 nbins = 10
 nbinsVertex = 5
 nbinsHist = 40
@@ -64,21 +64,29 @@ def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, Physi
                 arrayNameNN=rnp.root2array(fName, treename='tree', branches=['NN_LongZ', 'NN_PerpZ', 'NN_Phi', 'NN_Pt'  ],)
             else:
     '''
+
     NN_MVA = h5py.File("%sNN_MVA_%s.h5"%(filesDir,NN_mode), "r+")
+    print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Target Pt ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++', Target_Pt)
     DFNameInput = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
-    #Ind = (DFNameInput[Target_Pt]>0) & (DFNameInput[Target_Pt]<200) & (DFNameInput['NVertex']<=50)
+    print('len(DFNameInput[Target_Pt]', len(DFNameInput[Target_Pt]))
+    DFNameInput = DFNameInput[DFNameInput['Boson_Pt']>20]
+    DFNameInput = DFNameInput[DFNameInput['Boson_Pt']<=200]
+    DFNameInput = DFNameInput[DFNameInput['NVertex']<=50]
+    print('len(DFNameInput[Target_Pt]', len(DFNameInput[Target_Pt]))
+    Ind = (DFNameInput[Target_Pt]>20) & (DFNameInput[Target_Pt]<=200) & (DFNameInput['NVertex']<=50)
     print("Keys: %s" % NN_MVA.keys())
-    DFNameNN = pd.DataFrame()
+    DFNameNN = pd.DataFrame(index=DFNameInput.index)
     keys = NN_MVA.keys()
     values = [NN_MVA[k] for k in keys]
     for k, v in zip(keys, values):
+        print('k', k)
+        print('v', v)
         DFNameNN[k] = v
-                #DFNameNN = NN_MVA.create_dataset([('NN_LongZ', 'f8'), ('NN_PerpZ', 'f8'), ('NN_Pt', 'f8'), ('NN_Phi', 'f8')])
-
-
-
-
-    DFName = pd.concat([DFNameInput, DFNameNN], axis=1, join_axes=[DFNameInput.index])
+    #DFName = pd.merge(DFNameInput, DFNameNN, on='Boson_Pt', how='outer')
+    if not np.setdiff1d(DFNameInput['Boson_Pt'],DFNameNN['Boson_Pt']):
+        print('Fehler, Boson_Pts passen nicht zusammen')
+        DFName = pd.concat([DFNameInput, DFNameNN.drop(['Boson_Pt'],axis=1)], axis=1, join_axes=[DFNameInput.index])
+    print('len DFName', len(DFName['Boson_Pt']))
     return(DFName)
 
 
@@ -494,10 +502,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     else:
         LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \\tau \\tau  \\rightarrow \ \mu \mu }$'
     pTRangeString_Err = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString= '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     pTRangeString_low= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
     pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
-    pTRangeString_high= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.6666*100))
+    pTRangeString_high= '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     pTRangeStringNVertex = pTRangeString
     LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     colors = ['blue','green','red','cyan','magenta','yellow']
@@ -524,7 +532,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResponseOverpTZ_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
+    plotMVAResponseOverpTZ_woutError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 0)
     plotMVAResponseOverpTZ_woutError('NN_LongZ', 'NN', 2)
     plotMVAResponseOverpTZ_woutError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
@@ -1274,13 +1282,15 @@ if __name__ == "__main__":
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
         DFName_plain = loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
+        #DFName_plain = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
     else:
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
-        DFName_plain = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
+        DFName_plain = loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
+        #DFName_plain = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
     print(plotDir)
     DFName=DFName_plain[DFName_plain[Target_Pt]<=200]
-    DFName=DFName[DFName[Target_Pt]>0]
+    DFName=DFName[DFName[Target_Pt]>20]
     DFName=DFName[DFName['NVertex']<=50]
     DFName=DFName[DFName['NVertex']>=0]
 

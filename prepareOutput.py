@@ -50,6 +50,7 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
         mZ_x, mZ_y = (NN_Output['MET_GroundTruth'][:,0]), (NN_Output['MET_GroundTruth'][:,1])
         a_x, a_y = (NN_Output['MET_Predictions'][:,0]), (NN_Output['MET_Predictions'][:,1])
         mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
+        mZ_r = NN_Output['Boson_Pt'][:]
         a_r, a_phi = np.sqrt(a_x*a_x+a_y*a_y), np.arctan2(a_y, a_x)
     else:
         mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
@@ -83,13 +84,22 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     #ParaVx, ParaVy = div0(NN_LongZ*mZ_x, mZ_r), div0(NN_LongZ*mZ_y, mZ_r)
     #NN_PerpZ = np.sqrt( np.multiply(a_x-ParaVx, a_x-ParaVx) + np.multiply(a_y-ParaVy, a_y-ParaVy) )
     NN_LongZ, NN_PerpZ = -np.cos(angularrange(np.add(a_phi,-mZ_phi)))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
+    print('np.isnan(NN_LongZ)', sum(np.isnan(NN_LongZ)))
+    print('np.isnan(NN_PerpZ)', sum(np.isnan(NN_PerpZ)))
+    print('np.isnan(a_phi)', sum(np.isnan(a_phi)))
+    print('np.isnan(a_r)', sum(np.isnan(a_r)))
     #NN_LongZ, NN_PerpZ= pol2kar(a_r,angularrange(a_phi-mZ_phi))
     #NN_PerpZ[angularrange(a_phi-mZ_phi)<0]= -NN_PerpZ[angularrange(a_phi-mZ_phi)<0]
     #NN_LongZ = -NN_LongZ
     dset = NN_MVA.create_dataset("NN_LongZ", dtype='d', data=NN_LongZ)
-    dset = NN_MVA.create_dataset("NN_PerpZ", dtype='d', data=NN_PerpZ)
-    dset = NN_MVA.create_dataset("NN_Phi", dtype='d', data=a_phi)
-    dset = NN_MVA.create_dataset("NN_Pt", dtype='d', data=a_r)
+    dset1 = NN_MVA.create_dataset("NN_PerpZ", dtype='d', data=NN_PerpZ)
+    dset2 = NN_MVA.create_dataset("NN_Phi", dtype='d', data=a_phi)
+    dset3 = NN_MVA.create_dataset("NN_Pt", dtype='d', data=a_r)
+    dset4 = NN_MVA.create_dataset("Boson_Pt", dtype='d', data=mZ_r)
+    dset5 = NN_MVA.create_dataset("NN_x", dtype='d', data=a_x)
+    dset6 = NN_MVA.create_dataset("NN_y", dtype='d', data=a_y)
+    dset7 = NN_MVA.create_dataset("Boson_x", dtype='d', data=mZ_x)
+    dset8 = NN_MVA.create_dataset("Boson_y", dtype='d', data=mZ_y)
     NN_MVA.close()
 
     print('richtig, wenn auf a trainiert: -LongZ-pTZ', -NN_LongZ-mZ_r)
@@ -112,10 +122,19 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     plt.hist(mZ_x, bins=50, range=[np.percentile(mZ_x,5), np.percentile( mZ_x,95)], histtype='step' )
     plt.legend(["Prediction","Target"], loc='upper left')
     plt.savefig("%sHist_Pred_Tar_x.png"%(plotsD))
+
+
+    print('Mean x deviation', np.mean(np.subtract(a_x, mZ_x)))
+    print('Std x deviation', np.std(np.subtract(a_x, mZ_x)))
+    print('Mean y deviation', np.mean(np.subtract(a_y, mZ_y)))
+    print('Std y deviation', np.std(np.subtract(a_y, mZ_y)))
+
     print('Summe a_x enspricht prediction 0', np.sum(-a_x))
     print('Summe a_y enspricht prediction 0', np.sum(-a_y))
     print('Summe prediction 0', np.sum(NN_Output['MET_Predictions'][:,0]))
+    print('Summe isnan prediction 0', np.sum(np.isnan(NN_Output['MET_Predictions'][:,0])))
     print('Summe prediction 1', np.sum(NN_Output['MET_Predictions'][:,1]))
+    print('Summe isnan prediction 1', np.sum(np.isnan(NN_Output['MET_Predictions'][:,1])))
 
 
 

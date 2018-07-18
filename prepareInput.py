@@ -110,22 +110,101 @@ def loadData(fName, Target_Pt, Target_Phi, PhysicsProcess):
                     'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
                     'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ,
                     'recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ',
-                    'recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ', 
+                    'recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ',
                     'recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ',
                     'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ',
                     'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ',
                     'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ'],)
         DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
-    if PhysicsProcess=='Tau':
+    '''
+    if (PhysicsProcess=='Tau'):
         DFName['Boson_Pt'], DFName['Boson_Phi']=kar2pol(pol2kar_x(DFName[Target_Pt], DFName[Target_Phi])+
                                                         pol2kar_x(DFName['genMet_Pt'], DFName['genMet_Phi']),
                                                         pol2kar_y(DFName[Target_Pt], DFName[Target_Phi])+
                                                         pol2kar_y(DFName['genMet_Pt'], DFName['genMet_Phi']))
-
+        print('isnan Boson pt prepare Input', sum(np.isnan(DFName['Boson_Pt'])))
+        print('isnan Boson_Phi pt prepare Input', sum(np.isnan(DFName['Boson_Phi'])))
+    '''    
+    DFName = DFName[DFName[Target_Pt]>20]
+    DFName = DFName[DFName[Target_Pt]<=200]
+    DFName = DFName[DFName['NVertex']<=50]
 
     return(DFName)
 
 
+def loadData_training(fName, Target_Pt, Target_Phi, PhysicsProcess):
+    tfile = ROOT.TFile(fName)
+
+    for key in tfile.GetListOfKeys():
+            print('key.GetName()', key.GetName())
+            if key.GetName() == "MAPAnalyzer" and Target_Pt=='Boson_Pt':
+                tree = key.ReadObj()
+                print('tree', tree)
+                treeName = 't'
+                arrayName = rnp.root2array(fName,  branches=[Target_Pt, Target_Phi, 'NVertex' ,
+                    'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
+                    'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
+                    'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
+                    'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
+                    'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
+                    'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ,
+                    'recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ',
+                    'recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ',
+                    'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ',
+                    'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ'],)
+                DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
+            else:
+                print('Target_Pt', Target_Pt)
+                arrayName = rnp.root2array(fName, branches=[Target_Pt, Target_Phi, 'NVertex' ,
+                    'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
+                    'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
+                    'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
+                    'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
+                    'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
+                    'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ,
+                    'recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ',
+                    'recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ',
+                    'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ',
+                    'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ',
+                    'recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ',
+                    'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ'],)
+                DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
+    if not tfile.GetListOfKeys():
+        arrayName = rnp.root2array(fName, branches=[Target_Pt, Target_Phi, 'NVertex' ,
+                    'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
+                    'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
+                    'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
+                    'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
+                    'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
+                    'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ,
+                    'recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ',
+                    'recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ',
+                    'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ',
+                    'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ'
+                    'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ'],)
+        DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
+    if Target_Pt=='Boson_Pt':
+        arrayName = rnp.root2array(fName, branches=[Target_Pt, Target_Phi, 'NVertex' , 'genMet_Pt', 'genMet_Phi',
+                    'recoilslimmedMETsPuppi_Pt', 'recoilslimmedMETsPuppi_Phi', 'recoilslimmedMETsPuppi_sumEt',
+                    'recoilslimmedMETs_Pt', 'recoilslimmedMETs_Phi', 'recoilslimmedMETs_sumEt',
+                    'recoilpatpfNoPUMET_Pt','recoilpatpfNoPUMET_Phi', 'recoilpatpfNoPUMET_sumEt',
+                    'recoilpatpfPUCorrectedMET_Pt', 'recoilpatpfPUCorrectedMET_Phi', 'recoilpatpfPUCorrectedMET_sumEt',
+                    'recoilpatpfPUMET_Pt', 'recoilpatpfPUMET_Phi', 'recoilpatpfPUMET_sumEt',
+                    'recoilpatpfTrackMET_Pt', 'recoilpatpfTrackMET_Phi', 'recoilpatpfTrackMET_sumEt' ,
+                    'recoilslimmedMETs_LongZ', 'recoilslimmedMETs_PerpZ',
+                    'recoilpatpfTrackMET_LongZ', 'recoilpatpfTrackMET_PerpZ',
+                    'recoilpatpfNoPUMET_LongZ','recoilpatpfNoPUMET_PerpZ',
+                    'recoilpatpfPUCorrectedMET_LongZ', 'recoilpatpfPUCorrectedMET_PerpZ',
+                    'recoilpatpfPUMET_LongZ', 'recoilpatpfPUMET_PerpZ',
+                    'recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_PerpZ'],)
+        DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
+        print('isnan Boson pt prepare Input', sum(np.isnan(DFName['Boson_Pt'])))
+        print('isnan Boson_Phi pt prepare Input', sum(np.isnan(DFName['Boson_Phi'])))
+    DFName = DFName[DFName[Target_Pt]>20]
+    DFName = DFName[DFName[Target_Pt]<=200]
+    DFName = DFName[DFName['NVertex']<=50]
+
+    return(DFName)
 
 def loadData_proj(fName, Target_Pt, Target_Phi):
     treeName = 't'
@@ -135,8 +214,8 @@ def loadData_proj(fName, Target_Pt, Target_Phi):
 #Data settings
 
 def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
-    pTCut = 26
-    IdxpTCut = DataF['Boson_Pt']>pTCut
+    pTCut = 20
+    IdxpTCut = (DataF['Boson_Pt']>pTCut) & (DataF['Boson_Pt']<=200) & (DataF['NVertex']<=50)
     print('DataF[recoilslimmedMETs_Pt]', DataF['recoilslimmedMETs_Pt'].shape)
     dset_PF = dset.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]),
@@ -189,9 +268,14 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
 
 
 def getInputs_xy(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
-    IdxpTCut = (DataF['Boson_Pt']>0) & (DataF['Boson_Pt']<=200) & (DataF['NVertex']<=50)
+    pTCut = 20
+    IdxpTCut = (DataF['Boson_Pt']>pTCut) & (DataF['Boson_Pt']<=200) & (DataF['NVertex']<=50)
     print('sum(IdxpTCut)', IdxpTCut)
     print('DataF[recoilslimmedMETs_Pt]', DataF['recoilslimmedMETs_Pt'].shape)
+
+    set_BosonPt = dset.create_dataset("Boson_Pt",  dtype='f',
+        data=[ DataF['Boson_Pt'][IdxpTCut]])
+
     dset_PF = dset.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]),
         pol2kar_y(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut])] )
@@ -242,8 +326,9 @@ def getInputs_xy(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
 
 def getInputs(fName, fileName_apply, NN_mode, outputD, PhysicsProcess, Target_Pt, Target_Phi):
     if NN_mode == 'xy':
-            Data = loadData(fName,  Target_Pt, Target_Phi, PhysicsProcess)
+            Data = loadData_training(fName,  Target_Pt, Target_Phi, PhysicsProcess)
             Inputs = getInputs_xy_pTCut(Data, outputD, PhysicsProcess, Target_Pt, Target_Phi, writeInputs_training)
+
             Data_apply = loadData(fileName_apply,  Target_Pt, Target_Phi, PhysicsProcess)
             Inputs_apply = getInputs_xy(Data_apply, outputD, PhysicsProcess, Target_Pt, Target_Phi, writeInputs_apply)
 
