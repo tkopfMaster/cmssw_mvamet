@@ -51,9 +51,9 @@ fi
 #python $src_di/applyNN.py $applyFile $files_di $optimizer $loss $NN_mode
 
 #python $src_di/prepareOutput.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
-python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
+#python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
 #python $src_di/getPlotsInput.py $inputFile $plots_di $PhysicsProcess
-#python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode
+python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode
 #python $src_di/getResponse.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
 cp -r $plots_di /usr/users/tkopf/www/METplots/
 cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/

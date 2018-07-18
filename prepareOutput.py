@@ -51,7 +51,7 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
         a_x, a_y = (NN_Output['MET_Predictions'][:,0]), (NN_Output['MET_Predictions'][:,1])
         mZ_r, mZ_phi =  kar2pol(mZ_x, mZ_y)
         mZ_r = NN_Output['Boson_Pt'][:]
-        a_r, a_phi = np.sqrt(a_x*a_x+a_y*a_y), np.arctan2(a_y, a_x)
+        a_r, a_phi = kar2pol(a_x, a_y)
     else:
         mZ_x, mZ_y = NN_Output['MET_GroundTruth'][:,0], NN_Output['MET_GroundTruth'][:,1]
         a_x, a_y = NN_Output['MET_Predictions'][:,0], (NN_Output['MET_Predictions'][:,1])

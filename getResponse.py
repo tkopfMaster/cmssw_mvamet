@@ -1134,7 +1134,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sDelta_Alpha_pT_werr.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-
+    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -1160,7 +1160,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlim(ResponseMin, ResponseMax)
     plt.savefig("%sResponse.png"%(plotsD), bbox_inches="tight")
     plt.close()
-    '''
+
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1357,7 +1357,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(0, ResponseMax)
     plt.savefig("%sResponse_PV_mid.png"%(plotsD), bbox_inches="tight")
     plt.close()
-    '''
+
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1383,7 +1383,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(0, ResponseMax)
     plt.savefig("%sResponse_PV_high.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1434,7 +1434,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(ResponseMinErr, ResponseMaxErr)
     plt.savefig("%sResponse_PV_wErr.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
     ##########Resolutions #########
     ######## u para ########
     fig=plt.figure(figsize=(10,6))
@@ -1443,7 +1443,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     #plotMVAResolutionOverpTZ_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
     plotMVAResolutionOverpTZ_woutError_para('NN_LongZ', 'NN', 6, ScaleErr)
-    #plotMVAResolutionOverpTZ_woutError_para('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
+    plotMVAResolutionOverpTZ_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr)
     plotMVAResolutionOverpTZ_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
 
     box = ax.get_position()
@@ -1938,7 +1938,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sResolution_para_PV_mid.png"%(plotsD), bbox_inches="tight")
     plt.close()
-    '''
+
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1963,7 +1963,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sResolution_para_PV_high.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
