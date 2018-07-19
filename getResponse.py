@@ -359,7 +359,7 @@ def plotMVAResponseOverNVertex_woutError(branchString, labelName, errbars_shift,
     std = np.sqrt(sy2/n - mean*mean)
     meanc=np.mean(getResponse(branchString))
     stdc=np.std(getResponse(branchString))
-    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
 
 def plotMVAResponseOverNVertex_woutError_Tresh(branchString, labelName, errbars_shift, ScaleErr):
     DFName_nVertex_Tresh = DFName_nVertex[DFName_nVertex[Target_Pt]>pTTresh]
@@ -498,7 +498,7 @@ def plotMVAResolutionOverNVertex_woutError_para(branchString, labelName, errbars
     sy2, _ = np.histogram(DF_Resolution_PV.NVertex, bins=nbinsVertex, weights=(DF_Resolution_PV[branchString]+DF_Resolution_PV[Target_Pt])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
 
 def MeanDeviation_Pt(branchString, labelName, errbars_shift, ScaleErr):
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
@@ -526,7 +526,7 @@ def plotMVAResolutionOverpTZ_woutError_perp(branchString, labelName, errbars_shi
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
 
 def plotMVAResolutionOverpTZ_woutError_perp_RC(branchString, labelName, errbars_shift, ScaleErr):
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
@@ -806,7 +806,7 @@ def plotMVAResolutionOverpTZ_woutError_perp(branchString, labelName, errbars_shi
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
 
 def plotMVAResolutionOverNVertex_woutError_perp(branchString, labelName, errbars_shift, ScaleErr, rangemin, rangemax):
     #IdxRange = (DFName_nVertex[Target_Pt]>=rangemin) & (DFName_nVertex[Target_Pt]<rangemin)
@@ -817,7 +817,7 @@ def plotMVAResolutionOverNVertex_woutError_perp(branchString, labelName, errbars
     sy2, _ = np.histogram(DF_Resolution_pe_PV.NVertex, bins=nbinsVertex, weights=(DF_Resolution_pe_PV[branchString])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
 
 def plotMVAResolutionOverpTZ_woutError_perp_RC(branchString, labelName, errbars_shift, ScaleErr):
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
@@ -839,7 +839,7 @@ def plotMVAResolutionOverNVertex_woutError_perp_RC(branchString, labelName, errb
     std = np.sqrt(sy2/n - mean*mean)
     sy_resp, _resp = np.histogram(DFName_nVertex[Target_Pt], bins=nbinsVertex, weights=-(DFName_nVertex[branchString]+DFName_nVertex[Target_Pt]))
     mean_resp = sy_resp / n
-    plt.errorbar((_[1:] + _[:-1])/2, div0(std,mean_resp), marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, div0(std,mean_resp), marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
 
 def Histogram_Deviation_perp(branchString, labelName, errbars_shift, ScaleErr):
     Mean = np.mean(DFName[branchString])
@@ -941,181 +941,16 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
 
 
-    '''
-
-    #NN_mode='kart'
-
-    ################################MVA Output ################################
-    nbinsVertex = 10
-    #########Response u_para/pTZ ###########
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVAResponseOverpTZ_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResponseOverpTZ_woutError('NN_LongZ', 'NN', 6, ScaleErr)
-    plotMVAResponseOverpTZ_woutError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-    #plotMVAResponseOverpTZ_woutError('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
-    plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.savefig("%sResponse_pT.png"%(plotsD), bbox_inches="tight")
-    plt.close()
 
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVANormOverpTZ('LongZCorrectedRecoil_Pt', 'GBRT', 5, ScaleErr)
-    plotMVANormOverpTZ('NN_LongZ', 'NN', 6, ScaleErr)
-    plotMVANormOverpTZ('recoilslimmedMETs_Pt', 'PF', 1, ScaleErr)
-    plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle \\frac{U}{|-\\vec{p}_T^Z|} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ResponseMin, ResponseMax)
-    plt.savefig("%sNorm_pT.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    METpT_NN = DFName[Target_Pt].values[getResponseIdx('NN_LongZ')]
-    #METpT_GBRT = DFName[Target_Pt].values[getResponseIdx('LongZCorrectedRecoil_LongZ')]
-    METpT_PF = DFName[Target_Pt].values[getResponseIdx('recoilslimmedMETs_LongZ')]
-    plt.hist(METpT_NN[np.abs(getResponse('NN_LongZ'))>10], bins=nbinsHist, range=[0, 200], label='NN', histtype='step', ec=colors_InOut[6], linewidth=1.5)
-    #plt.hist(METpT_GBRT[np.abs(getResponse('LongZCorrectedRecoil_LongZ'))>10], bins=nbinsHist, range=[0, 200], label='GBRT', histtype='step', ec=colors_InOut[5], linewidth=1)
-    plt.hist(METpT_PF[np.abs(getResponse('recoilslimmedMETs_LongZ'))>10], bins=nbinsHist, range=[0, 200], label='PF', histtype='step', ec=colors_InOut[1], linewidth=1)
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label='$ |Response|>10$'))
-
-    plt.xlabel('$ |p_T^Z|$')
-    plt.ylabel('Count')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(0, 200)
-    plt.savefig("%sResponse_Ausreisser.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    plt.hist(getAngle('NN_Phi'), bins=nbinsHist, range=[-np.pi, np.pi], label='NN', histtype='step', ec=colors_InOut[0], linewidth=1.5)
-    plt.hist(getAngle('recoilslimmedMETs_Phi'), bins=nbinsHist, range=[-np.pi, np.pi], label='GBRT', histtype='step', ec=colors_InOut[1], linewidth=1)
-    #plt.hist(getAngle('LongZCorrectedRecoil_Phi'), bins=nbinsHist, range=[-np.pi, np.pi], label='PF', histtype='step', ec=colors_InOut[2], linewidth=1)
-    PF_r, PF_phi = kar2pol(-DFName['recoilslimmedMETs_LongZ'], DFName['recoilslimmedMETs_PerpZ'])
-    NN_r, NN_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
-    #GBRT_r, GBRT_phi = kar2pol(-DFName['LongZCorrectedRecoil_LongZ'], DFName['LongZCorrectedRecoil_PerpZ'])
-    plt.hist(NN_phi, bins=nbinsHist, range=[-np.pi, np.pi], label='CC NN', histtype='step', ec=colors_InOut[3], linewidth=1.5)
-    plt.hist(PF_phi, bins=nbinsHist, range=[-np.pi, np.pi], label='CC GBRT', histtype='step', ec=colors_InOut[4], linewidth=1)
-    #plt.hist(GBRT_phi, bins=nbinsHist, range=[-np.pi, np.pi], label='CC PF', histtype='step', ec=colors_InOut[5], linewidth=1)
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.xlabel('$ \Delta \\alpha$')
-    plt.ylabel('Count')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ResponseMin, ResponseMax)
-    plt.savefig("%sCrosscheck_Delta_Alpha.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVANormOverpTZ_wErr('LongZCorrectedRecoil_Pt', 'GBRT', 5, ScaleErr)
-    plotMVANormOverpTZ_wErr('NN_LongZ', 'NN', 6, ScaleErr)
-    plotMVANormOverpTZ_wErr('recoilslimmedMETs_Pt', 'PF', 1, ScaleErr)
-    plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_Err))
-
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle \\frac{U}{|-\\vec{p}_T^Z|} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ResponseMin, ResponseMax)
-    plt.savefig("%sNorm_pT_werr.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVAAngularOverpTZ('LongZCorrectedRecoil_Phi', 'GBRT', 5, ScaleErr)
-    plotMVAAngularOverpTZ('NN_Phi', 'NN', 6, ScaleErr)
-    plotMVAAngularOverpTZ('recoilslimmedMETs_Phi', 'PF', 1, ScaleErr)
-    plt.plot([0, 200], [0, 0], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle \Delta \\alpha \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ResponseMin, ResponseMax)
-    plt.savefig("%sDelta_Alpha_pT.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVAAngularOverpTZ_wErr('LongZCorrectedRecoil_Phi', 'GBRT', 5, ScaleErr)
-    plotMVAAngularOverpTZ_wErr('NN_Phi', 'NN', 6, ScaleErr)
     plotMVAAngularOverpTZ_wErr('recoilslimmedMETs_Phi','PF', 1, ScaleErr)
+    plotMVAAngularOverpTZ_wErr('recoilslimmedMETsPuppi_Phi', 'GBRT', 5, ScaleErr)
+    plotMVAAngularOverpTZ_wErr('NN_Phi', 'NN', 6, ScaleErr)
+
     plt.plot([0, 200], [0, 0], color='k', linestyle='--', linewidth=1)
 
 
@@ -1134,120 +969,6 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sDelta_Alpha_pT_werr.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Hist_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, 0, 200)
-    Hist_Response('NN_LongZ', 'NN', 6, ScaleErr, 0, 200)
-    Hist_Response('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 0, 200)
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.xlabel('$\\frac{U_{\parallel}}{p_T^Z}$')
-    plt.ylabel('Counts')
-    plt.xlim(ResponseMin, ResponseMax)
-    #plt.ylim(0, 90000)
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResponseMin, ResponseMax)
-    plt.savefig("%sResponse.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Hist_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, ptMin_low, ptMax_low)
-    Hist_Response('NN_LongZ', 'NN', 6, ScaleErr, ptMin_low, ptMax_low)
-    Hist_Response('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_low, ptMax_low)
-    #Hist_Response('ScaledNN_LongZ', 'NN', 0, ScaleErr)
-    #plt.plot([1, 1], [0, 90000], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
-
-    plt.xlabel('$\\frac{U_{\parallel}}{p_T^Z}$')
-    plt.ylabel('Counts')
-    plt.xlim(ResponseMin, ResponseMax)
-    #plt.ylim(0, 90000)
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResponseMin, ResponseMax)
-    plt.savefig("%sResponse_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Hist_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, ptMin_mid, ptMax_mid)
-    Hist_Response('NN_LongZ', 'NN', 6, ScaleErr, ptMin_mid, ptMax_mid)
-    Hist_Response('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_mid, ptMax_mid)
-    #Hist_Response('ScaledNN_LongZ', 'NN', 0, ScaleErr)
-    #plt.plot([1, 1], [0, 90000], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
-
-    plt.xlabel('$\\frac{U_{\parallel}}{p_T^Z}$')
-    plt.ylabel('Counts')
-    plt.xlim(ResponseMin, ResponseMax)
-    #plt.ylim(0, 90000)
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResponseMin, ResponseMax)
-    plt.savefig("%sResponse_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Hist_Response('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, ptMin_high, ptMax_high)
-    Hist_Response('NN_LongZ', 'NN', 6, ScaleErr, ptMin_high, ptMax_high)
-    Hist_Response('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_high, ptMax_high)
-    #Hist_Response('ScaledNN_LongZ', 'NN', 0, ScaleErr)
-    #plt.plot([1, 1], [0, 85000], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
-
-    plt.xlabel('$\\frac{U_{\parallel}}{p_T^Z}$')
-    plt.ylabel('Counts')
-    plt.xlim(ResponseMin, ResponseMax)
-    #plt.ylim(0, 85000)
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResponseMin, ResponseMax)
-    plt.savefig("%sResponse_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    '''
 
 
 
@@ -1259,7 +980,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    #plotMVAResponseOverpTZ_wError('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+    plotMVAResponseOverpTZ_wError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr)
     plotMVAResponseOverpTZ_wError('NN_LongZ', 'NN', 6, ScaleErr)
     plotMVAResponseOverpTZ_wError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
     plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
@@ -1284,9 +1005,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
     ScaleErr_Response_PV=1
-    #plotMVAResponseOverNVertex_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
+
     plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 6, ScaleErr_Response_PV, 0, 200)
-    #plotMVAResponseOverNVertex_woutError('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr_Response_PV)
+    plotMVAResponseOverNVertex_woutError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr_Response_PV, 0, 200)
     plotMVAResponseOverNVertex_woutError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr_Response_PV, 0, 200)
     plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -1305,258 +1026,6 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sResponse_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-    ScaleErr_Response_PV=1
-    #plotMVAResponseOverNVertex_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 6, ScaleErr_Response_PV, ptMin_low, ptMax_low)
-    #plotMVAResponseOverNVertex_woutError('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr_Response_PV)
-    plotMVAResponseOverNVertex_woutError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr_Response_PV, ptMin_low, ptMax_low)
-    plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(0, ResponseMax)
-    plt.savefig("%sResponse_PV_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVAResponseOverNVertex_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 6, ScaleErr_Response_PV, ptMin_mid, ptMax_mid)
-    #plotMVAResponseOverNVertex_woutError('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr_Response_PV)
-    plotMVAResponseOverNVertex_woutError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr_Response_PV, ptMin_mid, ptMax_mid)
-    plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(0, ResponseMax)
-    plt.savefig("%sResponse_PV_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVAResponseOverNVertex_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 6, ScaleErr_Response_PV, ptMin_high, ptMax_high)
-    #plotMVAResponseOverNVertex_woutError('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr_Response_PV)
-    plotMVAResponseOverNVertex_woutError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr_Response_PV, ptMin_high, ptMax_high)
-    plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(0, ResponseMax)
-    plt.savefig("%sResponse_PV_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVAResponseOverNVertex_woutError_Tresh('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResponseOverNVertex_woutError_Tresh('NN_LongZ', 'NN', 6, ScaleErr)
-    plotMVAResponseOverNVertex_woutError_Tresh('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-    plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_Tresh))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(0, ResponseMax)
-    plt.savefig("%sResponse_PV_Tresh.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVAResponseOverNVertex_wError('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResponseOverNVertex_wError('NN_LongZ', 'NN', 6, ScaleErr)
-    plotMVAResponseOverNVertex_wError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-    plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ResponseMinErr, ResponseMaxErr)
-    plt.savefig("%sResponse_PV_wErr.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-    ##########Resolutions #########
-    ######## u para ########
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVAResolutionOverpTZ_woutError_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResolutionOverpTZ_woutError_para('NN_LongZ', 'NN', 6, ScaleErr)
-    plotMVAResolutionOverpTZ_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr)
-    plotMVAResolutionOverpTZ_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\sigma \\left( U_{\parallel}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_para_pT.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-    ScaleErr_pTPV=0.1
-    pT_PVbins(Target_Pt, 'Target MET', 4, ScaleErr_pTPV, 0, 200)
-    plt.plot([0, 50], [np.mean(DFName_nVertex[Target_Pt]), np.mean(DFName_nVertex[Target_Pt])], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle |-\\vec{p}_T^Z| \\rangle$ in GeV ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.ylim(10, 30)
-    plt.xlim(0, 50)
-    plt.savefig("%spT_over_PV.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    pT_PVbins(Target_Pt, 'Target MET', 4, ScaleErr_pTPV, ptMin_low, ptMax_low)
-    plt.plot([0, 50], [np.mean(DFName_nVertex[Target_Pt]), np.mean(DFName_nVertex[Target_Pt])], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle |-\\vec{p}_T^Z| \\rangle$ in GeV ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.ylim(10, 30)
-    plt.xlim(0, 50)
-    plt.savefig("%spT_over_PV_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    pT_PVbins(Target_Pt, 'Target MET', 4, ScaleErr_pTPV, ptMin_mid, ptMax_mid)
-    plt.plot([0, 50], [np.mean(DFName_nVertex[Target_Pt]), np.mean(DFName_nVertex[Target_Pt])], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle |-\\vec{p}_T^Z| \\rangle$ in GeV ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.ylim(10, 30)
-    plt.xlim(0, 50)
-    plt.savefig("%spT_over_PV_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    pT_PVbins(Target_Pt, 'Target MET', 4, ScaleErr_pTPV, ptMin_high, ptMax_high)
-    plt.plot([0, 50], [np.mean(DFName_nVertex[Target_Pt]), np.mean(DFName_nVertex[Target_Pt])], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle |-\\vec{p}_T^Z| \\rangle$ in GeV ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.ylim(10, 30)
-    plt.xlim(0, 50)
-    plt.savefig("%spT_over_PV_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
 
 
     fig=plt.figure(figsize=(10,6))
@@ -1584,160 +1053,6 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sHist_Resolution_para.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, ptMin_low, ptMax_low)
-    Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr, ptMin_low, ptMax_low)
-    #Hist_Resolution_para('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
-    Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_low, ptMax_low)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
-
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
-    plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResolutionParaMin, ResolutionParaMax )
-    plt.savefig("%sHist_Resolution_para_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, ptMin_mid, ptMax_mid)
-    Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr, ptMin_mid, ptMax_mid)
-    #Hist_Resolution_para('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
-    Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_mid, ptMax_mid)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
-
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
-    plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResolutionParaMin, ResolutionParaMax )
-    plt.savefig("%sHist_Resolution_para_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, ptMin_high, ptMax_high)
-    Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr, ptMin_high, ptMax_high)
-    #Hist_Resolution_para('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
-    Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_high, ptMax_high)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
-
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
-    plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResolutionParaMin, ResolutionParaMax )
-    plt.savefig("%sHist_Resolution_para_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-    pTRangeString_0_100 = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 100\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    #Hist_Resolution_para_0_100('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    Hist_Resolution_para_0_100('NN_LongZ', 'NN', 6, ScaleErr)
-    #Hist_Resolution_para_0_100('ScaledNN_LongZ', 'NN scaled', 0, ScaleErr)
-    Hist_Resolution_para_0_100('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_0_100))
-
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
-    plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResolutionParaMin, ResolutionParaMax )
-    plt.savefig("%sHist_Resolution_para_0-100.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Hist_Resolution_para_100_150('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    Hist_Resolution_para_100_150('NN_LongZ', 'NN', 6, ScaleErr)
-    Hist_Resolution_para_100_150('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-    pTRangeString_100_150 = '$100\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 150\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_100_150))
-
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
-    plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResolutionParaMin, ResolutionParaMax )
-    plt.savefig("%sHist_Resolution_para_100-150.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-    pTRangeString_150_200 = '$150\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    #Hist_Resolution_para_150_200('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    Hist_Resolution_para_150_200('NN_LongZ', 'NN', 6, ScaleErr)
-    Hist_Resolution_para_150_200('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_150_200))
-
-    plt.xlabel('$U_{\parallel}-p_T^Z$')
-    plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResolutionParaMin, ResolutionParaMax )
-    plt.savefig("%sHist_Resolution_para_150-200.png"%(plotsD), bbox_inches="tight")
-    plt.close()
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
@@ -1763,110 +1078,6 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sHist_Resolution_perp.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    Hist_Resolution_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_low, ptMax_low)
-    Hist_Resolution_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_low, ptMax_low)
-    Hist_Resolution_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_low, ptMax_low)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
-
-    plt.xlabel('$U_{\perp}$ in GeV')
-    plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResolutionPerpMin, ResolutionPerpMax )
-    plt.savefig("%sHist_Resolution_perp_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    Hist_Resolution_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_mid, ptMax_mid)
-    Hist_Resolution_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_mid, ptMax_mid)
-    Hist_Resolution_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_mid, ptMax_mid)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
-
-    plt.xlabel('$U_{\perp}$ in GeV')
-    plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResolutionPerpMin, ResolutionPerpMax )
-    plt.savefig("%sHist_Resolution_perp_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    Hist_Resolution_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_high, ptMax_high)
-    Hist_Resolution_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_high, ptMax_high)
-    Hist_Resolution_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_high, ptMax_high)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
-
-    plt.xlabel('$U_{\perp}$ in GeV')
-    plt.ylabel('Counts')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    plt.xlim(ResolutionPerpMin, ResolutionPerpMax )
-    plt.savefig("%sHist_Resolution_perp_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-
-
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #MeanDeviation_Pt('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    MeanDeviation_Pt('NN_LongZ', 'NN', 6, ScaleErr)
-    MeanDeviation_Pt('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
-    plt.ylabel('$\\langle U_{\parallel}- |-\\vec{p}_T^Z| \\rangle$ in GeV')
-    #plt.title('Mean Deviation $U_{\parallel}-|-\\vec{p}_T^Z|$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(-20, 10)
-    plt.savefig("%sDelta_para_pT.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    '''
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
@@ -1890,202 +1101,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sResolution_para_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr)
-    plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 6, ScaleErr, ptMin_low, ptMax_low)
-    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_low, ptMax_low)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\parallel}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_para_PV_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4,  ScaleErr, ptMin_mid, ptMax_mid)
-    plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 6, ScaleErr, ptMin_mid, ptMax_mid)
-    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_mid, ptMax_mid)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\parallel}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_para_PV_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
 
 
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
 
-    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 5, ScaleErr, ptMin_high, ptMax_high)
-    plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 6, ScaleErr, ptMin_high, ptMax_high)
-    plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_high, ptMax_high)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\parallel}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_para_PV_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, 0, 200)
-    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 6, ScaleErr, 0, 200)
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, 0, 200)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\perp}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\perp}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_perp_PV.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #plotMVAResolutionOverNVertex_woutError_perp('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    plotMVAResolutionOverNVertex_woutError_perp('NN_LongZ', 'NN', 6, ScaleErr, ptMin_low, ptMax_low)
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, ptMin_low, ptMax_low)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_low))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\perp}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\perp}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_perp_PV_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_mid, ptMax_mid)
-    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_mid, ptMax_mid)
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_mid, ptMax_mid)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_mid))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\perp}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\perp}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_perp_PV_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, ptMin_high, ptMax_high)
-    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 6, ScaleErr, ptMin_high, ptMax_high)
-    plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, ptMin_high, ptMax_high)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\sigma \\left( U_{\perp}- |-\\vec{p}_T^Z| \\right) $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Resolution $U_{\perp}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sResolution_perp_PV_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #MeanDeviation_PV('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    MeanDeviation_PV('NN_LongZ', 'NN', 6, ScaleErr)
-    MeanDeviation_PV('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
-
-    plt.xlabel('#$ \mathrm{PV}$ ')
-    plt.ylabel('$\\langle U_{\parallel} - p_T^Z \\rangle$ in GeV')
-    #plt.title('Mean Deviation $U_{\parallel}-|-\\vec{p}_T^Z|$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(-20, 20)
-    plt.savefig("%sDelta_para_PV.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
 
     #######u perp ######
     fig=plt.figure(figsize=(10,6))
@@ -2143,56 +1161,15 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
 
 
-
-
-
-
-
-
-
-
-
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
 
-    Histogram_Deviation_para_PV('recoilpatpfNoPUMET_LongZ', 'No PU MET', 0, ScaleErr)
-    Histogram_Deviation_para_PV('recoilpatpfPUCorrectedMET_LongZ', 'PU corrected MET', 7, ScaleErr)
-    Histogram_Deviation_para_PV( 'recoilpatpfPUMET_LongZ', 'PU MET', 2, ScaleErr)
-    Histogram_Deviation_para_PV('recoilpatpfTrackMET_LongZ', 'Track MET', 3, ScaleErr)
-    Histogram_Deviation_para_PV('recoilslimmedMETsPuppi_LongZ', 'Puppi MET', 4, ScaleErr)
-    #Histogram_Deviation_para_PV('LongZCorrectedRecoil_LongZ', 'GBRT MET', 5, ScaleErr)
-    Histogram_Deviation_para_PV('recoilslimmedMETs_LongZ', 'PF MET', 1, ScaleErr)
-    Histogram_Deviation_para_PV('NN_LongZ', 'NN MET', 6, ScaleErr)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.ylabel('Counts')
-    plt.xlabel('$ U_{\parallel} - p_T^Z  $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Deviation Histogram parallel')
-    #plt.text('$p_T$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sHist_Delta_para.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-
-    Histogram_Norm_Comparison('recoilpatpfNoPUMET_Pt', 'No PU MET', 0, ScaleErr)
-    Histogram_Norm_Comparison('recoilpatpfPUCorrectedMET_Pt', 'PU corrected MET', 7, ScaleErr)
-    Histogram_Norm_Comparison( 'recoilpatpfPUMET_Pt',  'PU MET', 2, ScaleErr)
-    Histogram_Norm_Comparison('recoilpatpfTrackMET_Pt',  'Track MET', 3, ScaleErr)
+    #Histogram_Norm_Comparison('recoilpatpfNoPUMET_Pt', 'No PU MET', 0, ScaleErr)
+    #Histogram_Norm_Comparison('recoilpatpfPUCorrectedMET_Pt', 'PU corrected MET', 7, ScaleErr)
+    #Histogram_Norm_Comparison( 'recoilpatpfPUMET_Pt',  'PU MET', 2, ScaleErr)
+    #Histogram_Norm_Comparison('recoilpatpfTrackMET_Pt',  'Track MET', 3, ScaleErr)
     Histogram_Norm_Comparison('recoilslimmedMETsPuppi_Pt',  'Puppi MET', 4, ScaleErr)
     #Histogram_Norm_Comparison('LongZCorrectedRecoil_Pt',  'GBRT MET', 5, ScaleErr)
     Histogram_Norm_Comparison('recoilslimmedMETs_Pt',  'PF MET', 1, ScaleErr)
@@ -2223,14 +1200,15 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
 
-    Histogram_Norm('recoilpatpfNoPUMET_Pt', 'No PU MET', 0, ScaleErr)
-    Histogram_Norm('recoilpatpfPUCorrectedMET_Pt', 'PU corrected MET', 7, ScaleErr)
-    Histogram_Norm( 'recoilpatpfPUMET_Pt',  'PU MET', 2, ScaleErr)
-    Histogram_Norm('recoilpatpfTrackMET_Pt',  'Track MET', 3, ScaleErr)
+    #Histogram_Norm('recoilpatpfNoPUMET_Pt', 'No PU MET', 0, ScaleErr)
+    #Histogram_Norm('recoilpatpfPUCorrectedMET_Pt', 'PU corrected MET', 7, ScaleErr)
+    #Histogram_Norm( 'recoilpatpfPUMET_Pt',  'PU MET', 2, ScaleErr)
+    #Histogram_Norm('recoilpatpfTrackMET_Pt',  'Track MET', 3, ScaleErr)
     Histogram_Norm('recoilslimmedMETsPuppi_Pt',  'Puppi MET', 4, ScaleErr)
     #Histogram_Norm('LongZCorrectedRecoil_Pt',  'GBRT MET', 5, ScaleErr)
     Histogram_Norm('recoilslimmedMETs_Pt',  'PF MET', 1, ScaleErr)
     Histogram_Norm('NN_Pt', 'NN MET', 6, ScaleErr)
+    Hist_LongZ(Target_Pt, 'Target MET', 4, ScaleErr)
 
 
 
@@ -2294,10 +1272,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
 
-    Hist_LongZ('recoilpatpfNoPUMET_LongZ', 'No PU MET', 0, ScaleErr)
-    Hist_LongZ('recoilpatpfPUCorrectedMET_LongZ', 'PU corrected MET', 7, ScaleErr)
-    Hist_LongZ( 'recoilpatpfPUMET_LongZ', 'PU MET', 2, ScaleErr)
-    Hist_LongZ('recoilpatpfTrackMET_LongZ', 'Track MET', 3, ScaleErr)
+    #Hist_LongZ('recoilpatpfNoPUMET_LongZ', 'No PU MET', 0, ScaleErr)
+    #Hist_LongZ('recoilpatpfPUCorrectedMET_LongZ', 'PU corrected MET', 7, ScaleErr)
+    #Hist_LongZ( 'recoilpatpfPUMET_LongZ', 'PU MET', 2, ScaleErr)
+    #Hist_LongZ('recoilpatpfTrackMET_LongZ', 'Track MET', 3, ScaleErr)
     Hist_LongZ('recoilslimmedMETsPuppi_LongZ', 'Puppi MET',7, ScaleErr)
     #Hist_LongZ('LongZCorrectedRecoil_LongZ', 'GBRT MET', 5, ScaleErr)
     Hist_LongZ('recoilslimmedMETs_LongZ', 'PF MET', 1, ScaleErr)
@@ -2328,10 +1306,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
 
-    Hist_PerpZ('recoilpatpfNoPUMET_PerpZ', 'No PU MET', 0, ScaleErr)
-    Hist_PerpZ('recoilpatpfPUCorrectedMET_PerpZ', 'PU corrected MET', 7, ScaleErr)
-    Hist_PerpZ( 'recoilpatpfPUMET_PerpZ', 'PU MET', 2, ScaleErr)
-    Hist_PerpZ('recoilpatpfTrackMET_PerpZ', 'Track MET', 3, ScaleErr)
+    #Hist_PerpZ('recoilpatpfNoPUMET_PerpZ', 'No PU MET', 0, ScaleErr)
+    #Hist_PerpZ('recoilpatpfPUCorrectedMET_PerpZ', 'PU corrected MET', 7, ScaleErr)
+    #Hist_PerpZ( 'recoilpatpfPUMET_PerpZ', 'PU MET', 2, ScaleErr)
+    #Hist_PerpZ('recoilpatpfTrackMET_PerpZ', 'Track MET', 3, ScaleErr)
     Hist_PerpZ('recoilslimmedMETsPuppi_PerpZ', 'Puppi MET', 4, ScaleErr)
     #Hist_PerpZ('LongZCorrectedRecoil_PerpZ', 'GBRT MET', 5, ScaleErr)
     Hist_PerpZ('recoilslimmedMETs_PerpZ', 'PF MET', 1, ScaleErr)
@@ -2359,36 +1337,6 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
-    for Bin in range(0,nbins):
-            Histogram_Deviation_para_Bin('NN_LongZ', 'NN', Bin)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.ylabel('Counts')
-    plt.xlabel('$ U_{\parallel} - |-\\vec{p}_T^Z|  $ in GeV')
-    plt.xlim(HistLimMin,HistLimMax)
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('Response Histogram by Bin')
-    #plt.text('$p_T$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    ##plt.ylim(ylimResMVAMin, ylimResMax)
-    plt.savefig("%sOutput_Response_Hist_Bin.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-
-
-
 
     Histogram_Deviation_para_PV('recoilpatpfNoPUMET_LongZ', 'No PU MET', 0, ScaleErr)
     Histogram_Deviation_para_PV('recoilpatpfPUCorrectedMET_LongZ', 'PU corrected MET', 7, ScaleErr)
@@ -2417,7 +1365,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ##plt.ylim(ylimResMVAMin, ylimResMax)
     plt.savefig("%sHist_Delta_para.png"%(plotsD), bbox_inches="tight")
     plt.close()
-
+    '''
 
 
 
@@ -2433,10 +1381,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
 
 
-    Histogram_Angle_Dev('recoilpatpfNoPUMET_Phi', 'No PU MET', 0, ScaleErr)
-    Histogram_Angle_Dev('recoilpatpfPUCorrectedMET_Phi', 'PU corrected MET', 7, ScaleErr)
-    Histogram_Angle_Dev( 'recoilpatpfPUMET_Phi', 'PU MET', 2, ScaleErr)
-    Histogram_Angle_Dev('recoilpatpfTrackMET_Phi',  'Track MET', 3, ScaleErr)
+    #Histogram_Angle_Dev('recoilpatpfNoPUMET_Phi', 'No PU MET', 0, ScaleErr)
+    #Histogram_Angle_Dev('recoilpatpfPUCorrectedMET_Phi', 'PU corrected MET', 7, ScaleErr)
+    #Histogram_Angle_Dev( 'recoilpatpfPUMET_Phi', 'PU MET', 2, ScaleErr)
+    #Histogram_Angle_Dev('recoilpatpfTrackMET_Phi',  'Track MET', 3, ScaleErr)
     Histogram_Angle_Dev('recoilslimmedMETsPuppi_Phi',  'Puppi MET', 4, ScaleErr)
     #Histogram_Angle_Dev('LongZCorrectedRecoil_Phi',  'GBRT MET', 5, ScaleErr)
     Histogram_Angle_Dev('recoilslimmedMETs_Phi',  'PF MET', 1, ScaleErr)
@@ -2464,42 +1412,6 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     print('getResponse(NN_LongZ)', getResponse('NN_LongZ').shape)
     print('getResponse(recoilslimmedMETs_LongZ)', getResponse('recoilslimmedMETs_LongZ').shape)
 
-
-    '''
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-
-
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Mean_Std_Deviation_pTZ_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    Mean_Std_Deviation_pTZ_para('NN_LongZ', 'NN', 6, ScaleErr)
-    Mean_Std_Deviation_pTZ_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
-
-    plt.ylabel('$\\langle  U_{\parallel} - p_T^Z \\rangle$')
-    plt.xlabel('$p_T^Z $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('parallel deviation over $|-\\vec{p}_T^Z|$')
-    #plt.text('$p_T$ and $\# PV$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    ##plt.ylim(HistLimMin, HistLimMax)
-    plt.savefig("%sDelta_para_Std_para_pT.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
 
 
 
@@ -2529,208 +1441,6 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sHist_Response.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Mean_Std_Deviation_pTZ_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5, ScaleErr)
-    Mean_Std_Deviation_pTZ_perp('NN_PerpZ', 'NN', 6, ScaleErr)
-    Mean_Std_Deviation_pTZ_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr)
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
-
-    plt.ylabel('$\\langle  U_{\perp} \\rangle$')
-    plt.xlabel('$ p_T^Z $ in GeV')
-    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
-    #plt.title('perpendicular deviation over $|-\\vec{p}_T^Z|$')
-    #plt.text('$p_T$ and $\# PV$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    ##plt.ylim(HistLimMin, HistLimMax)
-    plt.savefig("%sDelta_perp_Std_perp_pT.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Mean_Std_Deviation_PV_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr)
-    Mean_Std_Deviation_PV_para('NN_LongZ', 'NN', 6, ScaleErr)
-    Mean_Std_Deviation_PV_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
-
-    plt.ylabel('$\\langle  U_{\parallel} - p_T^Z \\rangle$')
-    plt.xlabel('\#PV')
-    #plt.title('parallel deviation over \#PV')
-    #plt.text('$p_T$ and $\# PV$ range restriction')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    ##plt.ylim(HistLimMin, HistLimMax)
-    plt.savefig("%sDelta_para_Std_para_PV.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
-
-    #Mean_Std_Deviation_PV_perp('LongZCorrectedRecoil_PerpZ', 'GBRT', 5, ScaleErr)
-    Mean_Std_Deviation_PV_perp('NN_PerpZ', 'NN', 6, ScaleErr)
-    Mean_Std_Deviation_PV_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr)
-
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
-
-    plt.ylabel('$\\langle  U_{\perp} \\rangle$')
-    plt.xlabel('#PV')
-    #plt.title('parallel deviation over \#PV')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    ##plt.ylim(HistLimMin, HistLimMax)
-    plt.savefig("%sDelta_perp_Std_perp_PV.png"%(plotsD), bbox_inches="tight")
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.ylabel("$ \Delta \\alpha $")
-    plt.xlabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(   getResponse('NN_LongZ'), getAngle('NN_Phi')[getResponseIdx('NN_LongZ')], bins=50,
-                                             range=[[-1,3],
-                                                    [-np.pi,np.pi]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_NN_Delta_Alpha.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-    plt.clf()
-    plt.figure()
-    plt.suptitle(pTRangeString_low)
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    Angle, Response = getResponse_pTRange('NN_LongZ', ptMin_low, ptMax_low)
-    print("length   IdxAngle", len(Angle))
-    print("length   IdxResponse", len(Response))
-    heatmap, xedges, yedges = np.histogram2d(   Angle, Response, bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [-10,10]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_NN_Delta_Alpha_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    plt.clf()
-    plt.figure()
-    plt.suptitle(pTRangeString_mid)
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    Angle, Response = getResponse_pTRange('NN_LongZ', ptMin_mid, ptMax_mid)
-    heatmap, xedges, yedges = np.histogram2d(   Angle, Response, bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [-1.5,1.5]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_NN_Delta_Alpha_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    plt.clf()
-    plt.figure()
-    plt.suptitle(pTRangeString_high)
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    Angle, Response = getResponse_pTRange('NN_LongZ', ptMin_high, ptMax_high)
-    heatmap, xedges, yedges = np.histogram2d(   Angle, Response, bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [-1.5,1.5]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_NN_Delta_Alpha_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    plt.clf()
-    plt.figure()
-    plt.suptitle(pTRangeString_low)
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    Angle, Response = getResponse_pTRange('recoilslimmedMETs_LongZ', ptMin_low, ptMax_low)
-    heatmap, xedges, yedges = np.histogram2d(   Angle, Response, bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [-10,10]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_PF_Delta_Alpha_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    plt.clf()
-    plt.figure()
-    plt.suptitle(pTRangeString_mid)
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    Angle, Response = getResponse_pTRange('recoilslimmedMETs_LongZ', ptMin_mid, ptMax_mid)
-    heatmap, xedges, yedges = np.histogram2d(   Angle, Response, bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [-1.5,1.5]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_PF_Delta_Alpha_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    plt.clf()
-    plt.figure()
-    plt.suptitle(pTRangeString_high)
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    Angle, Response = getResponse_pTRange('recoilslimmedMETs_LongZ', ptMin_high, ptMax_high)
-    heatmap, xedges, yedges = np.histogram2d(   Angle, Response, bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [-1.5,1.5]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_PF_Delta_Alpha_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
 
     print("NN: Korrellationskoeffizient zwischen Response und Resolution para",np.corrcoef(-DFName['NN_LongZ']/DFName[Target_Pt], -DFName['NN_LongZ']-DFName[Target_Pt]))
     print("PF: Korrellationskoeffizient zwischen Response und Resolution para",np.corrcoef(-DFName['recoilslimmedMETs_LongZ']/DFName[Target_Pt], -DFName['recoilslimmedMETs_LongZ']-DFName[Target_Pt]))
@@ -2782,430 +1492,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.rcParams['agg.path.chunksize'] = 10000
     plt.savefig("%sNN_Delta_Alpha_perfect_Guess_wErr.png"%(plotsD), bbox_inches="tight")
     plt.close()
-    '''
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    dPhi = np.linspace(-np.pi, np.pi, 200)
-    Response_pTperfect = np.cos(dPhi)
-    mean_Response_wErr('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErrResponse, ptMin_low, ptMax_low, 20)
-    mean_Response_wErr('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErrResponse, ptMin_low, ptMax_low, 20)
-    mean_Response_wErr('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErrResponse, ptMin_low, ptMax_low, 20)
-    plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
-    plt.legend()
-    #plt.ylim(-8,5)
-    plt.grid()
-    plt.rcParams['agg.path.chunksize'] = 10000
-    plt.savefig("%sNN_Delta_Alpha_perfect_Guess_wErr_low.png"%(plotsD), bbox_inches="tight")
-    plt.close()
 
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    dPhi = np.linspace(-np.pi, np.pi, 200)
-    Response_pTperfect = np.cos(dPhi)
-    mean_Response_wErr('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErrResponse, ptMin_mid, ptMax_mid, 10)
-    mean_Response_wErr('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErrResponse, ptMin_mid, ptMax_mid, 10)
-    mean_Response_wErr('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErrResponse, ptMin_mid, ptMax_mid, 10)
-    plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
-    plt.legend()
-    #plt.ylim(-8,5)
-    plt.grid()
-    plt.rcParams['agg.path.chunksize'] = 10000
-    plt.savefig("%sNN_Delta_Alpha_perfect_Guess_wErr_mid.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    dPhi = np.linspace(-np.pi, np.pi, 200)
-    Response_pTperfect = np.cos(dPhi)
-    mean_Response_wErr('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErrResponse, ptMin_high, ptMax_high, 10)
-    mean_Response_wErr('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErrResponse, ptMin_high, ptMax_high, 10)
-    mean_Response_wErr('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErrResponse, ptMin_high, ptMax_high, 10)
-    plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
-    plt.legend()
-    #plt.ylim(-8,5)
-    plt.grid()
-    plt.rcParams['agg.path.chunksize'] = 10000
-    plt.savefig("%sNN_Delta_Alpha_perfect_Guess_wErr_high.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    dPhi = np.linspace(-np.pi/180*10, np.pi/180*10, 200)
-    Response_pTperfect = np.cos(dPhi)
-    mean_Response_CR('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErr)
-    mean_Response_CR('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErr)
-    plt.plot(np.linspace(-np.pi/180*10, np.pi/180*10, 2000), np.cos(np.linspace(-np.pi/180*10, np.pi/180*10, 2000)), linewidth=2, markersize=12, label='perfect guess $p_T$')
-    plt.ylim(0,5)
-    plt.grid()
-    plt.legend()
-    plt.savefig("%sResponse_NN_Delta_Alpha_CR.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-    '''
-    plt.clf()
-    plotHM(getAngle('recoilpatpfPUMET_Phi')[getResponseIdx('recoilpatpfPUMET_LongZ')],getResponse('recoilpatpfPUMET_LongZ'), "$ \Delta \\alpha $", "Response", -np.pi, np.pi ,-1, 3)
-    plt.savefig("%sHM_CC_Response_PF_Delta_Alpha.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    plt.clf()
-    plotHM(getAngle('NN_Phi')[getResponseIdx('NN_LongZ')],getResponse('NN_LongZ'), "$ \Delta \\alpha $", "Response", -np.pi, np.pi ,-1, 3)
-    plt.savefig("%sHM_CC_Response_NN_Delta_Alpha.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-    '''
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(  getAngle('recoilpatpfPUMET_Phi')[getResponseIdx('recoilpatpfPUMET_LongZ')], getResponse('recoilpatpfPUMET_LongZ'),  bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [0,2]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_PF_Delta_Alpha.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-
-
-
-    '''
-    plt.clf()
-    plt.figure()
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
-    PF_r, PF_phi = kar2pol(-DFName['recoilpatpfPUMET_LongZ'], DFName['recoilpatpfPUMET_PerpZ'])
-    Response = np.divide(-DFName['recoilpatpfPUMET_LongZ'], DFName[Target_Pt] )
-    x=PF_phi
-    y=DFName['recoilpatpfPUMET_Pt']-DFName[Target_Pt]
-    z=Response
-    x=np.unique(x)
-    y=np.unique(y)
-    X,Y = np.meshgrid(x,y)
-    Z=z.reshape(len(y),len(x))
-    plt.pcolormesh(X,Y,Z)
-    plt.show()
-    plt.legend()
-    plt.savefig("%sCM_PF_Response_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
-
-
-    plt.clf()
-    plt.figure()
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
-    PF_r, PF_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
-    Response = np.divide(-DFName['NN_LongZ'], DFName[Target_Pt] )
-    x=PF_phi
-    y=np.sqrt(np.multiply(DFName['NN_LongZ'], DFName['NN_LongZ'])+ np.multiply(DFName['NN_PerpZ'], DFName['NN_PerpZ']))-DFName[Target_Pt]
-    z=Response
-    x=np.unique(x)
-    y=np.unique(y)
-    X,Y = np.meshgrid(x,y)
-    Z=z.reshape(len(y),len(x))
-    plt.pcolormesh(X,Y,Z)
-    plt.show()
-    plt.legend()
-    plt.savefig("%sCM_NN_Response_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
-    '''
-    '''
-    plt.clf()
-    plt.figure()
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
-    y=np.sqrt(np.multiply(DFName['recoilslimmedMETs_LongZ'], DFName['recoilslimmedMETs_LongZ'])+ np.multiply(DFName['recoilslimmedMETs_PerpZ'], DFName['recoilslimmedMETs_PerpZ']))-DFName[Target_Pt]
-    delta_alpha=np.linspace(-np.pi,np.pi,201)
-    delta_pT=np.linspace(y.min(),y.max(),201)
-    PF_r, PF_phi = kar2pol(-DFName['recoilslimmedMETs_LongZ'], DFName['recoilslimmedMETs_PerpZ'])
-    Response = np.divide(-DFName['recoilslimmedMETs_LongZ'], DFName[Target_Pt] )
-    x=PF_phi
-    HM2=np.empty([200, 200])
-    for i in range(0,200):
-        for j in range(0,200):
-            HM2[i,j]=np.mean(Response[(PF_phi>=delta_alpha[i]) & (PF_phi<delta_alpha[i+1]) & (y>=delta_pT[j]) & (y<delta_pT[j+1])])
-    heatmap, xedges, yedges = HM2, delta_alpha, delta_pT
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=[-np.pi/2,np.pi/2, -50, 50], origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.xlim(-np.pi/2,np.pi/2)
-    plt.ylim(-50,50)
-    plt.show()
-    plt.legend()
-    plt.savefig("%sHM_PF_Response_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
-    '''
-    '''
-    plt.clf()
-    plt.figure()
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
-    delta_alpha=np.linspace(-np.pi,np.pi,201)
-    y=np.sqrt(np.multiply(DFName['NN_LongZ'], DFName['NN_LongZ'])+ np.multiply(DFName['NN_PerpZ'], DFName['NN_PerpZ']))-DFName[Target_Pt]
-    delta_pT=np.linspace(y.min(),y.max(),201)
-    PF_r, PF_phi = kar2pol(-DFName['NN_LongZ'], DFName['NN_PerpZ'])
-    Response = np.divide(-DFName['NN_LongZ'], DFName[Target_Pt] )
-    x=PF_phi
-    HM2=np.empty([200, 200])
-    for i in range(0,200):
-        for j in range(0,200):
-            HM2[i,j]=np.mean(Response[(PF_phi>=delta_alpha[i]) & (PF_phi<delta_alpha[i+1]) & (y>=delta_pT[j]) & (y<delta_pT[j+1])])
-    heatmap, xedges, yedges = HM2, delta_alpha, delta_pT
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.xlim(-np.pi/2,np.pi/2)
-    plt.ylim(-200,200)
-    plt.colorbar(HM)
-    plt.show()
-    plt.legend()
-    plt.savefig("%sHM_NN_Response_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
-    '''
-    '''
-    plt.clf()
-    plt.figure()
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
-    DeltapT = DFName['recoilpatpfPUMET_Pt'] - DFName[Target_Pt]
-    heatmap, xedges, yedges = np.histogram2d( getAngle('recoilpatpfPUMET_Phi'), DeltapT,  bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [-10,10]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_PF_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
-
-
-    plt.clf()
-    plt.figure()
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("$|U|-|p_T^Z|$")
-    heatmap, xedges, yedges = np.histogram2d(  angularrange(DFName['NN_Phi']+np.pi-DFName['NN_Phi']), DFName['NN_Pt'] - DFName[Target_Pt],  bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [-10,10]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_NN_Delta_Alpha_Delta_pT.png"%(plotsD), bbox_inches="tight")
-
-    plt.clf()
-    plt.figure()
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    Response = np.divide(-DFName['recoilpatpfPUMET_LongZ'], DFName[Target_Pt] )
-    Response = Response[~np.isnan(Response)]
-    heatmap, xedges, yedges = np.histogram2d(  angularrange(DFName['recoilpatpfPUMET_Phi']+np.pi-DFName[Target_Phi]), Response,  bins=50,
-                                             range=[[-np.pi,np.pi],
-                                                    [0,2]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_PF_Delta_Alpha_CO.png"%(plotsD), bbox_inches="tight")
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(  getAngle('recoilpatpfPUMET_Phi')[getResponseIdx('recoilpatpfPUMET_LongZ')], getResponse('recoilpatpfPUMET_LongZ'),  bins=[25,25],
-                                             range=[[-np.pi,np.pi],
-                                                    [0.75,1.25]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_PF_Delta_Alpha_CR.png"%(plotsD), bbox_inches="tight")
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(  getAngle('NN_Phi')[getResponseIdx('NN_LongZ')], getResponse('NN_LongZ'),  bins=[25,25],
-                                             range=[[-np.pi,np.pi],
-                                                    [0.75,1.25]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_NN_Delta_Alpha_CR.png"%(plotsD), bbox_inches="tight")
-    '''
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.ylabel("$ \Delta \\alpha $")
-    plt.xlabel("$p_T$")
-    heatmap, xedges, yedges = np.histogram2d(  DFName['NN_Pt'], getAngle('NN_Phi'),  bins=50,
-                                             range=[[0,200], [-np.pi,np.pi]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_NN_Delta_Alpha_pT.png"%(plotsD), bbox_inches="tight")
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.ylabel("$ \Delta \\alpha $")
-    plt.xlabel("$p_T$")
-    heatmap, xedges, yedges = np.histogram2d(  DFName['recoilpatpfPUMET_Pt'], getAngle('recoilpatpfPUMET_Phi'),  bins=50,
-                                             range=[[0,200], [-np.pi,np.pi]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_PF_Delta_Alpha_pT.png"%(plotsD), bbox_inches="tight")
-
-    '''
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.ylabel("$ \Delta \\alpha $")
-    plt.xlabel("$p_T$")
-    heatmap, xedges, yedges = np.histogram2d(  DFName['recoilpatpfPUMET_Pt'], getAngle('recoilpatpfPUMET_Phi'),  bins=50,
-                                             range=[[0,30], [-np.pi,np.pi]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_PF_Delta_Alpha_pT_CR.png"%(plotsD), bbox_inches="tight")
-
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.ylabel("$ \Delta \\alpha $")
-    plt.xlabel("$p_T$")
-    heatmap, xedges, yedges = np.histogram2d(  DFName['NN_Pt'], getAngle('NN_Phi'),  bins=50,
-                                             range=[[0,30], [-np.pi,np.pi]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_NN_Delta_Alpha_pT_CR.png"%(plotsD), bbox_inches="tight")
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
-    plt.ylabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('NN_LongZ')], getResponse('NN_LongZ'),  bins=[25,25],
-                                             range=[[0,10],
-                                                    [0,2]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_NN_Delta_pT_10.png"%(plotsD), bbox_inches="tight")
-
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
-    plt.ylabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('NN_LongZ')], getResponse('NN_LongZ'),  bins=[25,25],
-                                             range=[[0,200],
-                                                    [0,2]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_NN_Delta_pT_0_200.png"%(plotsD), bbox_inches="tight")
-
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ \Delta \\alpha $")
-    plt.ylabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt], getResponse('NN_LongZ'),  bins=[25,25],
-                                             range=[[0,10],
-                                                    [0,2]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_NN_Delta_pT_10.png"%(plotsD), bbox_inches="tight")
-
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
-    plt.ylabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('recoilpatpfPUMET_LongZ')], getResponse('recoilpatpfPUMET_LongZ'),  bins=[25,25],
-                                             range=[[0,10],
-                                                    [0,2]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_PF_Delta_pT_10.png"%(plotsD), bbox_inches="tight")
-    '''
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
-    plt.ylabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('recoilpatpfPUMET_LongZ')], getResponse('recoilpatpfPUMET_LongZ'),  bins=[25,25],
-                                             range=[[0,200],
-                                                    [0,2]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_PF_Delta_pT_0_200.png"%(plotsD), bbox_inches="tight")
-    '''
-    plt.clf()
-    plt.figure()
-    #plt.suptitle('x-Korrektur Prediction-Target ')
-    plt.xlabel("$ |-\\vec{p}_T^Z| $")
-    plt.ylabel("Response")
-    heatmap, xedges, yedges = np.histogram2d(  DFName[Target_Pt][getResponseIdx('NN_LongZ')], getResponse('NN_LongZ'),  bins=[25,25],
-                                             range=[[150,200],
-                                                    [0,2]])
-    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-    #plt.clf()
-    HM =plt.imshow(heatmap.T, extent=extent, origin='lower', norm=LogNorm(), aspect='auto')
-    plt.colorbar(HM)
-    plt.legend()
-    plt.savefig("%sHM_Response_NN_Delta_pT_150.png"%(plotsD), bbox_inches="tight")
-    '''
 
     print("low pt range 33 percent of data", np.percentile(DFName[Target_Pt],0.3333*100))
     print("mid pt range 33 percent of data", np.percentile(DFName[Target_Pt],0.6666*100))
@@ -3234,7 +1521,7 @@ if __name__ == "__main__":
         Target_Phi = 'Boson_Phi'
         DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
     DFName=DFName_plain[DFName_plain[Target_Pt]<=200]
-    DFName=DFName[DFName[Target_Pt]>20]
+    DFName=DFName[DFName[Target_Pt]>0]
     DFName=DFName[DFName['NVertex']<=50]
     DFName=DFName[DFName['NVertex']>=0]
 

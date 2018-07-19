@@ -124,8 +124,8 @@ def loadData(fName, Target_Pt, Target_Phi, PhysicsProcess):
                                                         pol2kar_y(DFName['genMet_Pt'], DFName['genMet_Phi']))
         print('isnan Boson pt prepare Input', sum(np.isnan(DFName['Boson_Pt'])))
         print('isnan Boson_Phi pt prepare Input', sum(np.isnan(DFName['Boson_Phi'])))
-    '''
-    DFName = DFName[DFName[Target_Pt]>0]
+    '''    
+    DFName = DFName[DFName[Target_Pt]>20]
     DFName = DFName[DFName[Target_Pt]<=200]
     DFName = DFName[DFName['NVertex']<=50]
 
@@ -200,7 +200,7 @@ def loadData_training(fName, Target_Pt, Target_Phi, PhysicsProcess):
         DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
         print('isnan Boson pt prepare Input', sum(np.isnan(DFName['Boson_Pt'])))
         print('isnan Boson_Phi pt prepare Input', sum(np.isnan(DFName['Boson_Phi'])))
-    DFName = DFName[DFName[Target_Pt]>0]
+    DFName = DFName[DFName[Target_Pt]>20]
     DFName = DFName[DFName[Target_Pt]<=200]
     DFName = DFName[DFName['NVertex']<=50]
 
@@ -214,7 +214,7 @@ def loadData_proj(fName, Target_Pt, Target_Phi):
 #Data settings
 
 def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
-    pTCut = 0
+    pTCut = 20
     IdxpTCut = (DataF['Boson_Pt']>pTCut) & (DataF['Boson_Pt']<=200) & (DataF['NVertex']<=50)
     print('DataF[recoilslimmedMETs_Pt]', DataF['recoilslimmedMETs_Pt'].shape)
     dset_PF = dset.create_dataset("PF",  dtype='f',
@@ -268,7 +268,7 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
 
 
 def getInputs_xy(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
-    pTCut = 0
+    pTCut = 20
     IdxpTCut = (DataF['Boson_Pt']>pTCut) & (DataF['Boson_Pt']<=200) & (DataF['NVertex']<=50)
     print('sum(IdxpTCut)', IdxpTCut)
     print('DataF[recoilslimmedMETs_Pt]', DataF['recoilslimmedMETs_Pt'].shape)

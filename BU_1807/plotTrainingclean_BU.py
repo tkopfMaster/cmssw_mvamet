@@ -1396,7 +1396,7 @@ if __name__ == "__main__":
         Target_Phi = 'Boson_Phi'
         Outputs = loadData_woutGBRT(outputDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
     #Outputs = Outputs[~np.isnan(Outputs)]
-    Outputs = Outputs[Outputs[Target_Pt]>0]
+    Outputs = Outputs[Outputs[Target_Pt]>20]
     Outputs = Outputs[Outputs[Target_Pt]<=200]
     Outputs = Outputs[Outputs['NVertex']<=50]
     print('len(Outputs)', len(Outputs))

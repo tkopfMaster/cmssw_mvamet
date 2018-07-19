@@ -69,11 +69,11 @@ def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, Physi
     print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Target Pt ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++', Target_Pt)
     DFNameInput = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
     print('len(DFNameInput[Target_Pt]', len(DFNameInput[Target_Pt]))
-    DFNameInput = DFNameInput[DFNameInput['Boson_Pt']>0]
+    DFNameInput = DFNameInput[DFNameInput['Boson_Pt']>20]
     DFNameInput = DFNameInput[DFNameInput['Boson_Pt']<=200]
     DFNameInput = DFNameInput[DFNameInput['NVertex']<=50]
     print('len(DFNameInput[Target_Pt]', len(DFNameInput[Target_Pt]))
-    Ind = (DFNameInput[Target_Pt]>0) & (DFNameInput[Target_Pt]<=200) & (DFNameInput['NVertex']<=50)
+    Ind = (DFNameInput[Target_Pt]>20) & (DFNameInput[Target_Pt]<=200) & (DFNameInput['NVertex']<=50)
     print("Keys: %s" % NN_MVA.keys())
     DFNameNN = pd.DataFrame(index=DFNameInput.index)
     keys = NN_MVA.keys()
@@ -97,7 +97,7 @@ def plotMVAResponseOverpTZ_woutError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString]/DFName[Target_Pt])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResponseOverNVertex_woutError(branchString, labelName, errbars_shift):
     binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
@@ -106,7 +106,7 @@ def plotMVAResponseOverNVertex_woutError(branchString, labelName, errbars_shift)
     sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString]/DFName_nVertex[Target_Pt])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResponseOverpTZ_wError(branchString, labelName, errbars_shift):
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
@@ -115,8 +115,8 @@ def plotMVAResponseOverpTZ_wError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString]/DFName[Target_Pt])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
-    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResponseOverNVertex_wError(branchString, labelName, errbars_shift):
     binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
@@ -125,10 +125,27 @@ def plotMVAResponseOverNVertex_wError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString]/DFName_nVertex[Target_Pt])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
-    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 
+def plotMVAResolutionOverpTZ_woutError_para(branchString, labelName, errbars_shift):
+    binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
+    n, _ = np.histogram(DFName[Target_Pt], bins=nbins)
+    sy, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=-(DFName[branchString]+DFName[Target_Pt]))
+    sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString]+DFName[Target_Pt])**2)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+
+def plotMVAResolutionOverNVertex_woutError_para(branchString, labelName, errbars_shift):
+    binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
+    n, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex)
+    sy, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=-(DFName_nVertex[branchString]+DFName_nVertex[Target_Pt]))
+    sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString]+DFName_nVertex[Target_Pt])**2)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def MeanDeviation_Pt(branchString, labelName, errbars_shift):
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
@@ -156,7 +173,7 @@ def plotMVAResolutionOverpTZ_woutError_perp(branchString, labelName, errbars_shi
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResolutionOverpTZ_woutError_perp_RC(branchString, labelName, errbars_shift):
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
@@ -329,9 +346,19 @@ def plotMVAResponseOverpTZ_wError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString]/DFName[Target_Pt])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
-    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
+def plotMVAResponseOverNVertex_wError(branchString, labelName, errbars_shift):
+    binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
+    n, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex)
+    sy, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(-(DFName_nVertex[branchString])/np.abs(DFName_nVertex[Target_Pt])))
+    sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString]/DFName_nVertex[Target_Pt])**2)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors[errbars_shift])
+    #plt.plot((_[1:] + _[:-1])/2, mean, marker='.', label=labelName, linestyle="None", color=MVAcolors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 
 def plotMVAResolutionOverpTZ_woutError_para(branchString, labelName, errbars_shift):
@@ -341,7 +368,7 @@ def plotMVAResolutionOverpTZ_woutError_para(branchString, labelName, errbars_shi
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString]+DFName[Target_Pt])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResolutionOverNVertex_woutError_para(branchString, labelName, errbars_shift):
     binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
@@ -350,7 +377,7 @@ def plotMVAResolutionOverNVertex_woutError_para(branchString, labelName, errbars
     sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString]+DFName_nVertex[Target_Pt])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResolutionOverpTZ_woutError_para_RC(branchString, labelName, errbars_shift):
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
@@ -361,7 +388,7 @@ def plotMVAResolutionOverpTZ_woutError_para_RC(branchString, labelName, errbars_
     std = np.sqrt(sy2/n - mean*mean)
     sy_resp, _resp = np.histogram(DFName[Target_Pt], bins=nbins, weights=-(DFName[branchString]+DFName[Target_Pt]))
     mean_resp = sy_resp / n
-    plt.errorbar((_[1:] + _[:-1])/2, div0(std,mean_resp), marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, div0(std,mean_resp), marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResolutionOverNVertex_woutError_para_RC(branchString, labelName, errbars_shift):
     binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
@@ -382,7 +409,7 @@ def plotMVAResolutionOverpTZ_woutError_perp(branchString, labelName, errbars_shi
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResolutionOverNVertex_woutError_perp(branchString, labelName, errbars_shift):
     binwidth = (DFName_nVertex.NVertex.values.max() - DFName_nVertex.NVertex.values.min())/(nbinsVertex) #5MET-Definitionen
@@ -391,7 +418,7 @@ def plotMVAResolutionOverNVertex_woutError_perp(branchString, labelName, errbars
     sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 def plotMVAResolutionOverpTZ_woutError_perp_RC(branchString, labelName, errbars_shift):
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
@@ -505,7 +532,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverpTZ_woutError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
+    plotMVAResponseOverpTZ_woutError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 0)
     plotMVAResponseOverpTZ_woutError('NN_LongZ', 'NN', 2)
     plotMVAResponseOverpTZ_woutError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
@@ -529,7 +556,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverpTZ_wError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
+    #plotMVAResponseOverpTZ_wError('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
     plotMVAResponseOverpTZ_wError('NN_LongZ', 'NN', 2)
     plotMVAResponseOverpTZ_wError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
@@ -554,7 +581,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverNVertex_woutError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
+    #plotMVAResponseOverNVertex_woutError('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
     plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 2)
     plotMVAResponseOverNVertex_woutError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
@@ -579,7 +606,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResponseOverNVertex_wError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
+    #plotMVAResponseOverNVertex_wError('LongZCorrectedRecoil_LongZ', 'GBRT', 0)
     plotMVAResponseOverNVertex_wError('NN_LongZ', 'NN', 2)
     plotMVAResponseOverNVertex_wError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
@@ -835,7 +862,7 @@ if __name__ == "__main__":
         #DFName_plain = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
     print(plotDir)
     DFName=DFName_plain[DFName_plain[Target_Pt]<=200]
-    DFName=DFName[DFName[Target_Pt]>0]
+    DFName=DFName[DFName[Target_Pt]>20]
     DFName=DFName[DFName['NVertex']<=50]
     DFName=DFName[DFName['NVertex']>=0]
 
