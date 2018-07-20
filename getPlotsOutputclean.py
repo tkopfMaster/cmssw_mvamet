@@ -16,18 +16,20 @@ import h5py
 import sys
 
 
+pTMin, pTMax = 0,20
+
 #fName ="/storage/b/tkopf/mvamet/skim/out.root"
 nbins = 10
 nbinsVertex = 5
 nbinsHist = 40
 nbinsHistBin = 40
 nbins_relR = 10
-colors = cm.brg(np.linspace(0, 1, 3))
+
 
 colors_InOut = cm.brg(np.linspace(0, 1, 8))
-colors2 = cm.brg(np.linspace(0, 1, nbins))
+colors2 = colors = colors_InOut
 HistLimMin, HistLimMax = -50, 50
-#Data settings
+ylimResMVAMin, ylimResMVAMax = 0, 35
 
 def div0( a, b ):
     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
@@ -69,11 +71,10 @@ def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, Physi
     print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Target Pt ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++', Target_Pt)
     DFNameInput = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
     print('len(DFNameInput[Target_Pt]', len(DFNameInput[Target_Pt]))
-    DFNameInput = DFNameInput[DFNameInput['Boson_Pt']>0]
-    DFNameInput = DFNameInput[DFNameInput['Boson_Pt']<=200]
+    DFNameInput = DFNameInput[DFNameInput['Boson_Pt']>pTMin]
+    DFNameInput = DFNameInput[DFNameInput['Boson_Pt']<=pTMax]
     DFNameInput = DFNameInput[DFNameInput['NVertex']<=50]
     print('len(DFNameInput[Target_Pt]', len(DFNameInput[Target_Pt]))
-    Ind = (DFNameInput[Target_Pt]>0) & (DFNameInput[Target_Pt]<=200) & (DFNameInput['NVertex']<=50)
     print("Keys: %s" % NN_MVA.keys())
     DFNameNN = pd.DataFrame(index=DFNameInput.index)
     keys = NN_MVA.keys()
@@ -125,7 +126,13 @@ def plotMVAResponseOverNVertex_wError(branchString, labelName, errbars_shift):
     sy2, _ = np.histogram(DFName_nVertex.NVertex, bins=nbinsVertex, weights=(DFName_nVertex[branchString]/DFName_nVertex[Target_Pt])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
+    if errbars_shift==4:
+        errbars_shift2=0
+    elif errbars_shift==6:
+        errbars_shift2=2
+    else:
+        errbars_shift2=errbars_shift
+    plt.errorbar((_[:-1]+(_[1:]-_[:-1])/3*errbars_shift2), mean, yerr=std, marker='', linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
 
 
@@ -475,14 +482,13 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     else:
         LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \\tau \\tau  \\rightarrow \ \mu \mu }$'
     pTRangeString_Err = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString= '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     pTRangeString_low= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
     pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
-    pTRangeString_high= '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeString_high= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     pTRangeStringNVertex = pTRangeString
     LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
-    colors = ['blue','green','red','cyan','magenta','yellow']
-    MVAcolors =  colors
+
     ylimResMin, ylimResMax = 7.5 , 50
     ylimResMVAMin, ylimResMax = 5 , 35
     ylimResMVAMin_RC, ylimResMax_RC = 0 , 50
@@ -490,10 +496,6 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ResponseMinErr, ResponseMaxErr = -0.5, 2.5
 
 
-
-
-    NPlotsLines=3
-    colors = cm.brg(np.linspace(0, 1, NPlotsLines))
 
 
     #NN_mode='kart'
@@ -506,7 +508,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
     plotMVAResponseOverpTZ_woutError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
-    plotMVAResponseOverpTZ_woutError('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverpTZ_woutError('NN_LongZ', 'NN', 6)
     plotMVAResponseOverpTZ_woutError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -525,29 +527,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sResponse_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-    fig=plt.figure(figsize=(10,6))
-    fig.patch.set_facecolor('white')
-    ax = plt.subplot(111)
 
-    plotMVAResponseOverpTZ_wError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
-    plotMVAResponseOverpTZ_wError('NN_LongZ', 'NN', 2)
-    plotMVAResponseOverpTZ_wError('recoilslimmedMETs_LongZ', 'PF', 1)
-    plt.plot([0, 200], [1, 1], color='k', linestyle='--', linewidth=1)
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
-    handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
-
-    plt.xlabel('$p_{T}^Z $ in GeV')
-    plt.ylabel('$\\langle \\frac{U_{\parallel}}{p_{T}^Z} \\rangle$ ')
-    #plt.title('Response $U_{\parallel}$')
-
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
-    plt.grid()
-    #plt.ylim(ResponseMinErr, ResponseMaxErr)
-    plt.savefig("%sResponse_pT_wErr.png"%(plotsD), bbox_inches="tight")
-    plt.close()
 
 
     fig=plt.figure(figsize=(10,6))
@@ -555,7 +535,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
     plotMVAResponseOverNVertex_woutError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
-    plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverNVertex_woutError('NN_LongZ', 'NN', 6)
     plotMVAResponseOverNVertex_woutError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -580,7 +560,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
     plotMVAResponseOverNVertex_wError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
-    plotMVAResponseOverNVertex_wError('NN_LongZ', 'NN', 2)
+    plotMVAResponseOverNVertex_wError('NN_LongZ', 'NN', 6)
     plotMVAResponseOverNVertex_wError('recoilslimmedMETs_LongZ', 'PF', 1)
     plt.plot([0, 50], [1, 1], color='k', linestyle='--', linewidth=1)
 
@@ -606,7 +586,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
     plotMVAResolutionOverpTZ_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
-    plotMVAResolutionOverpTZ_woutError_para('NN_LongZ', 'NN', 2)
+    plotMVAResolutionOverpTZ_woutError_para('NN_LongZ', 'NN', 6)
     plotMVAResolutionOverpTZ_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1)
 
     box = ax.get_position()
@@ -621,7 +601,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
+    ylimResMVAMin = 0
+    plt.ylim(ylimResMVAMin, ylimResMVAMax)
     plt.savefig("%sResolution_para_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -632,7 +613,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
     plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4)
-    plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 2)
+    plotMVAResolutionOverNVertex_woutError_para('NN_LongZ', 'NN', 6)
     plotMVAResolutionOverNVertex_woutError_para('recoilslimmedMETs_LongZ', 'PF', 1)
 
     box = ax.get_position()
@@ -647,7 +628,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
+    ylimResMVAMin = 0
+    plt.ylim(ylimResMVAMin, ylimResMVAMax)
     plt.savefig("%sResolution_para_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -659,7 +641,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
     plotMVAResolutionOverpTZ_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4)
-    plotMVAResolutionOverpTZ_woutError_perp('NN_PerpZ', 'NN', 2)
+    plotMVAResolutionOverpTZ_woutError_perp('NN_PerpZ', 'NN', 6)
     plotMVAResolutionOverpTZ_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1)
 
     box = ax.get_position()
@@ -674,7 +656,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
+    ylimResMVAMin = 0
+    plt.ylim(ylimResMVAMin, ylimResMVAMax)
     plt.savefig("%sResolution_perp_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -688,7 +671,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
     plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4)
-    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 2)
+    plotMVAResolutionOverNVertex_woutError_perp('NN_PerpZ', 'NN', 6)
     plotMVAResolutionOverNVertex_woutError_perp('recoilslimmedMETs_PerpZ', 'PF', 1)
 
     box = ax.get_position()
@@ -703,7 +686,8 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
+    ylimResMVAMin = 0
+    plt.ylim(ylimResMVAMin, ylimResMVAMax)
     plt.savefig("%sResolution_perp_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -748,7 +732,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
 
-    Histogram_Norm_Pt(Target_Pt, 'Target MET',7)
+    Histogram_Norm_Pt(Target_Pt, 'Target MET', 0)
 
 
     box = ax.get_position()
@@ -834,8 +818,8 @@ if __name__ == "__main__":
         DFName_plain = loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
         #DFName_plain = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
     print(plotDir)
-    DFName=DFName_plain[DFName_plain[Target_Pt]<=200]
-    DFName=DFName[DFName[Target_Pt]>0]
+    DFName=DFName_plain[DFName_plain[Target_Pt]<=pTMax]
+    DFName=DFName[DFName[Target_Pt]>pTMin]
     DFName=DFName[DFName['NVertex']<=50]
     DFName=DFName[DFName['NVertex']>=0]
 

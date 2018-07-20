@@ -13,9 +13,8 @@ import matplotlib.ticker as mtick
 import h5py
 import sys
 
+pTMin, pTMax = 0, 20
 
-
-colors = cm.brg(np.linspace(0, 1, 7))
 
 def div0( a, b , Target_Pt, Target_Phi):
     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
@@ -125,8 +124,8 @@ def loadData(fName, Target_Pt, Target_Phi, PhysicsProcess):
         print('isnan Boson pt prepare Input', sum(np.isnan(DFName['Boson_Pt'])))
         print('isnan Boson_Phi pt prepare Input', sum(np.isnan(DFName['Boson_Phi'])))
     '''
-    DFName = DFName[DFName[Target_Pt]>0]
-    DFName = DFName[DFName[Target_Pt]<=200]
+    DFName = DFName[DFName[Target_Pt]>pTMin]
+    DFName = DFName[DFName[Target_Pt]<=pTMax]
     DFName = DFName[DFName['NVertex']<=50]
 
     return(DFName)
@@ -200,8 +199,8 @@ def loadData_training(fName, Target_Pt, Target_Phi, PhysicsProcess):
         DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
         print('isnan Boson pt prepare Input', sum(np.isnan(DFName['Boson_Pt'])))
         print('isnan Boson_Phi pt prepare Input', sum(np.isnan(DFName['Boson_Phi'])))
-    DFName = DFName[DFName[Target_Pt]>0]
-    DFName = DFName[DFName[Target_Pt]<=200]
+    DFName = DFName[DFName[Target_Pt]>pTMin]
+    DFName = DFName[DFName[Target_Pt]<=pTMax]
     DFName = DFName[DFName['NVertex']<=50]
 
     return(DFName)
@@ -215,7 +214,7 @@ def loadData_proj(fName, Target_Pt, Target_Phi):
 
 def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
     pTCut = 0
-    IdxpTCut = (DataF['Boson_Pt']>pTCut) & (DataF['Boson_Pt']<=200) & (DataF['NVertex']<=50)
+    IdxpTCut = (DataF['Boson_Pt']>pTMin) & (DataF['Boson_Pt']<=pTMax) & (DataF['NVertex']<=50)
     print('DataF[recoilslimmedMETs_Pt]', DataF['recoilslimmedMETs_Pt'].shape)
     dset_PF = dset.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]),
@@ -269,7 +268,7 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
 
 def getInputs_xy(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
     pTCut = 0
-    IdxpTCut = (DataF['Boson_Pt']>pTCut) & (DataF['Boson_Pt']<=200) & (DataF['NVertex']<=50)
+    IdxpTCut = (DataF['Boson_Pt']>pTMin) & (DataF['Boson_Pt']<=pTMax) & (DataF['NVertex']<=50)
     print('sum(IdxpTCut)', IdxpTCut)
     print('DataF[recoilslimmedMETs_Pt]', DataF['recoilslimmedMETs_Pt'].shape)
 

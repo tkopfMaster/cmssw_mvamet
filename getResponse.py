@@ -20,7 +20,9 @@ import h5py
 import sys
 
 
-fName ="/storage/b/tkopf/mvamet/skim/out.root"
+pTMin, pTMax = 0,20
+
+
 nbins = 7
 binsAngle = 7
 nbinsVertex = 5
@@ -30,12 +32,13 @@ nbins_relR = 10
 colors = cm.brg(np.linspace(0, 1, 8))
 
 colors_InOut = cm.brg(np.linspace(0, 1, 8))
-colors2 = cm.brg(np.linspace(0, 1, nbins))
+colors2 = colors
 HistLimMin, HistLimMax = -50, 50
 ResponseMin, ResponseMax = -1,3
 ResolutionParaMin, ResolutionParaMax = -40, 40
 ResolutionPerpMin, ResolutionPerpMax = -40, 40
-
+ResponseMinErr, ResponseMaxErr = 0, 1.05
+ylimResMVAMin, ylimResMVAMax = 0, 35
 errbars_shift2 = 10
 
 pTTresh = 10
@@ -250,7 +253,7 @@ def plotHM(x,y, xlabel, ylabel, xmin, xmax, ymin, ymax):
 
 
 def plotMVAResponseOverpTZ_woutError(branchString, labelName, errbars_shift, ScaleErr):
-    binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
+
     n, _ = np.histogram(DFName[Target_Pt], bins=nbins)
     sy, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(getResponse(branchString)))
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString]/DFName[Target_Pt])**2)
@@ -310,7 +313,7 @@ def plotMVANormOverpTZ_wErr(branchString, labelName, errbars_shift, ScaleErr):
 def plotMVAAngularOverpTZ_wErr(branchStringPhi, labelName, errbars_shift, ScaleErr):
     nbins=1000
     ScaleErr=1
-    binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
+    #binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
     n, _ = np.histogram(DFName[Target_Pt], bins=nbins)
     sy, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(getAngle(branchStringPhi)))
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(getAngle(branchStringPhi))**2)
@@ -327,7 +330,7 @@ def plotMVAAngularOverpTZ_wErr(branchStringPhi, labelName, errbars_shift, ScaleE
     #print(indSmaller45Degrees)
     print('MET definition std under 45 degrees', labelName)
     print('pT bin Start with std under 45 degrees', _[indSmaller45Degrees[0:10]])
-    print('pT bin End with std under 45 degrees', _[indSmaller45Degrees[0:10]]+binwidth)
+    #print('pT bin End with std under 45 degrees', _[indSmaller45Degrees[0:10]]+binwidth)
     print('crosscheck std with std under 45 degrees', std[indSmaller45Degrees[0:10]])
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
     if errbars_shift==5: errbars_shift2 = 0
@@ -624,7 +627,7 @@ def Histogram_Response(branchString, labelName, bin, ScaleErr):
     Std = np.std(np.divide(-(DFName[branchString]),DFName[Target_Pt].values))
     Reso = np.divide(-(DFName[branchString]),DFName[Target_Pt].values)
     #n, _ = np.histogram(-(DFName[branchString])-DFName[Target_Pt].values, bins=nbinsHistBin)
-    plt.hist(Reso[~np.isnan(Reso)], bins=nbinsHistBin, range=[ResponseMin, ResponseMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors2[bin])
+    plt.hist(Reso[~np.isnan(Reso)], bins=nbinsHistBin, range=[ResponseMin, ResponseMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[bin])
 
 
 
@@ -910,14 +913,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ScaleErr = 1
     NPlotsLines = 6
     MVA_NPlotsLines = 3
-    pTRangeString_Err = '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$ \\ Error scaled: '+str(ScaleErr)
-    pTRangeString= '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString_low= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
-    pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
-    pTRangeString_high= '$20\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    ptMin_low, ptMax_low = 0, np.percentile(DFName[Target_Pt], 33.3333)
-    ptMin_mid, ptMax_mid = np.percentile(DFName[Target_Pt], 33.3333), np.percentile(DFName[Target_Pt], 66.6666)
-    ptMin_high, ptMax_high = 20, 200
+    pTRangeString_Err = '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$ \\ Error scaled: '%(pTMin,pTMax)+str(ScaleErr)
+    pTRangeString= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(pTMin,pTMax)
+    pTRangeString_low= pTRangeString_mid= pTRangeString_high= pTRangeString
+
 
 
     pTRangeString_Tresh = '$1\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
@@ -932,10 +931,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     colors = colors_InOut
     MVAcolors =  colors
     ylimResMin, ylimResMax = 7.5 , 50
-    ylimResMVAMin, ylimResMax = 5 , 35
     ylimResMVAMin_RC, ylimResMax_RC = 0 , 50
-    ResponseMin, ResponseMax = -1, 3
-    ResponseMinErr, ResponseMaxErr = -0.5, 2.5
 
     PF_Delta_pT, PF_Delta_Phi = kar2pol(DFName['recoilslimmedMETs_LongZ'],DFName['recoilslimmedMETs_PerpZ'])
 
@@ -948,10 +944,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
     plotMVAAngularOverpTZ_wErr('recoilslimmedMETs_Phi','PF', 1, ScaleErr)
-    plotMVAAngularOverpTZ_wErr('recoilslimmedMETsPuppi_Phi', 'GBRT', 5, ScaleErr)
+    plotMVAAngularOverpTZ_wErr('recoilslimmedMETsPuppi_Phi', 'GBRT', 4, ScaleErr)
     plotMVAAngularOverpTZ_wErr('NN_Phi', 'NN', 6, ScaleErr)
 
-    plt.plot([0, 200], [0, 0], color='k', linestyle='--', linewidth=1)
+    plt.plot([pTMin, pTMax], [0, 0], color='k', linestyle='--', linewidth=1)
 
 
     box = ax.get_position()
@@ -971,7 +967,30 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
 
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
 
+    plotMVAResponseOverpTZ_woutError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr)
+    plotMVAResponseOverpTZ_woutError('NN_LongZ', 'NN', 6, ScaleErr)
+    plotMVAResponseOverpTZ_woutError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
+    plt.plot([pTMin, pTMax], [1, 1], color='k', linestyle='--', linewidth=1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.ylim(ResponseMinErr, ResponseMaxErr)
+    plt.xlim(pTMin, pTMax)
+    plt.savefig("%sResponse_pT.png"%(plotsD), bbox_inches="tight")
+    plt.close()
 
 
 
@@ -996,7 +1015,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(ResponseMinErr, ResponseMaxErr)
+    plt.ylim(ResponseMinErr, ResponseMaxErr)
     plt.savefig("%sResponse_pT_wErr.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -1022,7 +1041,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(0, ResponseMax)
+    plt.ylim(ResponseMinErr, ResponseMaxErr)
     plt.savefig("%sResponse_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -1098,7 +1117,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.ylim(ylimResMVAMin, ylimResMVAMax)
     plt.savefig("%sResolution_para_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -1126,7 +1145,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.ylim(ylimResMVAMin, ylimResMVAMax)
     plt.savefig("%sResolution_perp_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -1155,7 +1174,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(ylimResMVAMin, ylimResMax)
+    plt.ylim(ylimResMVAMin, ylimResMVAMax)
     plt.savefig("%sResolution_perp_PV.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -1208,7 +1227,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #Histogram_Norm('LongZCorrectedRecoil_Pt',  'GBRT MET', 5, ScaleErr)
     Histogram_Norm('recoilslimmedMETs_Pt',  'PF MET', 1, ScaleErr)
     Histogram_Norm('NN_Pt', 'NN MET', 6, ScaleErr)
-    Hist_LongZ(Target_Pt, 'Target MET', 4, ScaleErr)
+    Hist_LongZ(Target_Pt, 'Target MET', 0, ScaleErr)
 
 
 
@@ -1276,10 +1295,10 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     #Hist_LongZ('recoilpatpfPUCorrectedMET_LongZ', 'PU corrected MET', 7, ScaleErr)
     #Hist_LongZ( 'recoilpatpfPUMET_LongZ', 'PU MET', 2, ScaleErr)
     #Hist_LongZ('recoilpatpfTrackMET_LongZ', 'Track MET', 3, ScaleErr)
-    Hist_LongZ('recoilslimmedMETsPuppi_LongZ', 'Puppi MET',7, ScaleErr)
+    Hist_LongZ('recoilslimmedMETsPuppi_LongZ', 'Puppi MET',4, ScaleErr)
     #Hist_LongZ('LongZCorrectedRecoil_LongZ', 'GBRT MET', 5, ScaleErr)
     Hist_LongZ('recoilslimmedMETs_LongZ', 'PF MET', 1, ScaleErr)
-    Hist_LongZ(Target_Pt, 'Target MET', 4, ScaleErr)
+    Hist_LongZ(Target_Pt, 'Target MET', 0, ScaleErr)
     Hist_LongZ('NN_LongZ', 'NN MET', 6, ScaleErr)
 
     box = ax.get_position()
@@ -1464,7 +1483,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     dPhi = np.linspace(-np.pi, np.pi, 200)
     Response_pTperfect = np.cos(dPhi)
     mean_Response('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErr)
-    mean_Response('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErr)
+    mean_Response('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 4, ScaleErr)
     mean_Response('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErr)
     plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
     plt.legend()
@@ -1481,9 +1500,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.ylabel("Response")
     dPhi = np.linspace(-np.pi, np.pi, 200)
     Response_pTperfect = np.cos(dPhi)
-    ScaleErrResponse = 1000
+    ScaleErrResponse = 10000
     mean_Response_wErr('NN_LongZ', 'NN_Phi', 'NN', 6, ScaleErrResponse, 0, 200, 20)
-    mean_Response_wErr('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 5, ScaleErrResponse, 0, 200, 20)
+    mean_Response_wErr('recoilslimmedMETsPuppi_LongZ', 'recoilslimmedMETsPuppi_Phi', 'Puppi', 4, ScaleErrResponse, 0, 200, 20)
     mean_Response_wErr('recoilslimmedMETs_LongZ', 'recoilslimmedMETs_Phi', 'PF', 1, ScaleErrResponse, 0, 200, 20)
     plt.plot(np.linspace(-np.pi, np.pi, 2000), np.cos(np.linspace(-np.pi, np.pi, 2000)), linewidth=2, markersize=12, label='$\cos \Delta \\alpha$')
     plt.legend()
@@ -1520,8 +1539,8 @@ if __name__ == "__main__":
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
         DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
-    DFName=DFName_plain[DFName_plain[Target_Pt]<=200]
-    DFName=DFName[DFName[Target_Pt]>0]
+    DFName=DFName_plain[DFName_plain[Target_Pt]<=pTMax]
+    DFName=DFName[DFName[Target_Pt]>pTMin]
     DFName=DFName[DFName['NVertex']<=50]
     DFName=DFName[DFName['NVertex']>=0]
 
