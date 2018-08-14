@@ -20,7 +20,7 @@ import h5py
 import sys
 
 
-pTMin, pTMax = 0,20
+pTMin, pTMax = 20,200
 
 
 nbins = 7
@@ -585,6 +585,16 @@ def Hist_Resolution_para(branchString, labelName, errbars_shift, ScaleErr, range
     Std = np.std((-(DFName[branchString][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)])-DFName[Target_Pt][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)]))
     plt.hist((-(DFName[branchString][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)])-DFName[Target_Pt][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)]), bins=nbinsHist, range=[ResolutionParaMin, ResolutionParaMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
 
+
+def Hist_Resolution_para_RC(branchString, labelName, errbars_shift, ScaleErr, rangemin, rangemax):
+    u_para = -(DFName[branchString][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)])
+    pZ = -DFName[Target_Pt][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)]
+    RC = np.divide((u_para-pZ),np.divide(u_para,pZ))
+    Mean = np.mean(RC)
+    Std = np.std(RC)
+    plt.hist(RC, bins=nbinsHist, range=[ResolutionParaMin, ResolutionParaMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+
+
 def Hist_Resolution_para_0_100(branchString, labelName, errbars_shift, ScaleErr):
     DFName_DC = DFName
     DFName_DC = DFName_DC[DFName_DC[Target_Pt]<=100]
@@ -685,7 +695,7 @@ def Hist_LongZ(branchString, labelName, errbars_shift, ScaleErr):
     if branchString == Target_Pt:
         Mean = np.mean((DFName_nVertex[branchString]))
         Std = np.std((DFName_nVertex[branchString]))
-        plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[HistLimMin, HistLimMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
+        plt.hist(((DFName_nVertex[branchString])), bins=nbinsHist, range=[0, 75], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift], linewidth=1.5)
 
     else:
         if branchString in ['NN_LongZ', 'recoilslimmedMETs_LongZ']:
@@ -920,7 +930,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
 
     pTRangeString_Tresh = '$1\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeStringNVertex = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
+    pTRangeStringNVertex = pTRangeString
     if Target_Pt=='Boson_Pt':
         LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     else:
@@ -1077,6 +1087,32 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
+    #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, 0, 200)
+    Hist_Resolution_para_RC('NN_LongZ', 'NN', 6, ScaleErr, 0, 200)
+    Hist_Resolution_para_RC('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr, 0, 200)
+    Hist_Resolution_para_RC('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 0, 200)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$\\frac{U_{\parallel}-p_T^Z}{\\frac{U_{\parallel}}{p_T^Z}}$')
+    plt.ylabel('Counts')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.xlim(ResolutionParaMin, ResolutionParaMax )
+    plt.savefig("%sHist_Resolution_para_RC.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
     Hist_Resolution_perp('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, 0, 200)
     Hist_Resolution_perp('NN_PerpZ', 'NN', 6, ScaleErr, 0, 200)
     Hist_Resolution_perp('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, 0, 200)
@@ -1150,7 +1186,29 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.close()
 
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
 
+    plotMVAResolutionOverpTZ_woutError_perp_RC('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr)
+    plotMVAResolutionOverpTZ_woutError_perp_RC('NN_PerpZ', 'NN', 6, ScaleErr)
+    plotMVAResolutionOverpTZ_woutError_perp_RC('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
+    plt.ylabel('$\\frac{\sigma \\left( U_{\perp} \\right)}{\\frac{U_{\parallel}}{p_T^Z}} $')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\perp}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.ylim(ylimResMVAMin, ylimResMVAMax)
+    plt.savefig("%sResolution_perp_pT_RC.png"%(plotsD), bbox_inches="tight")
+    plt.close()
 
 
 

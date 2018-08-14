@@ -14,7 +14,7 @@ from getResponse import getResponse, getResponseIdx
 from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
 
 
-pTMin, pTMax = 0,20
+pTMin, pTMax = 20,200
 
 nbinsHist = 400
 colors_InOut = cm.brg(np.linspace(0, 1, 8))
@@ -139,11 +139,11 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsP
     NN_Diff_x = np.subtract(Outputs['NN_x'], Outputs['Boson_x'])
     NN_Diff_y = np.subtract(Outputs['NN_y'], Outputs['Boson_y'])
 
-
+    '''
     NN_Output = h5py.File("%sNN_Output_%s.h5"%(outputD,NN_mode), "r")
     loss = NN_Output["loss"]
     val_loss = NN_Output["val_loss"]
-
+    '''
 
 
     if NN_mode == 'xy':

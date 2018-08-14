@@ -16,7 +16,7 @@ import h5py
 import sys
 
 
-pTMin, pTMax = 0,20
+pTMin, pTMax = 20,200
 
 #fName ="/storage/b/tkopf/mvamet/skim/out.root"
 nbins = 10
@@ -481,9 +481,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
         LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     else:
         LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \\tau \\tau  \\rightarrow \ \mu \mu }$'
-    pTRangeString_Err = '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
-    pTRangeString_low= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100))
+    pTRangeString_Err = '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(pTMin,pTMax)
+    pTRangeString= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(pTMin,pTMax)
+    pTRangeString_low= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f \ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(0, np.percentile(DFName[Target_Pt],0.3333*100))
     pTRangeString_mid= '$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(np.percentile(DFName[Target_Pt],0.3333*100), np.percentile(DFName[Target_Pt],0.6666*100))
     pTRangeString_high= '$0\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq 200\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'
     pTRangeStringNVertex = pTRangeString
@@ -606,7 +606,29 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sResolution_para_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
 
+    plotMVAResolutionOverpTZ_woutError_para_RC('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4)
+    plotMVAResolutionOverpTZ_woutError_para_RC('NN_PerpZ', 'NN', 6)
+    plotMVAResolutionOverpTZ_woutError_para_RC('recoilslimmedMETs_PerpZ', 'PF', 1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
+    plt.ylabel('$\\frac{\sigma \\left( U_{\perp} \\right)}{\\frac{U_{\parallel}}{p_T^Z}} $')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\perp}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.ylim(ylimResMVAMin, ylimResMVAMax)
+    plt.savefig("%sResolution_para_pT_RC.png"%(plotsD), bbox_inches="tight")
+    plt.close()
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')

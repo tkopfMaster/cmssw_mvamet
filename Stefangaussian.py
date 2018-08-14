@@ -13,7 +13,7 @@ import datetime
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
-#get_ipython().magic(u'matplotlib inline')
+get_ipython().magic(u'matplotlib inline')
 
 
 # ## Create the dataset
@@ -119,8 +119,7 @@ logits_val, f_val = model(batch_val[0], reuse=True)
 
 # In[7]:
 
-print('len len(batch_train[1])', batch_train[1])
-print('len logits_train', logits_train.shape)
+
 loss_train = tf.reduce_mean(
     tf.nn.sigmoid_cross_entropy_with_logits(labels=batch_train[1], logits=logits_train))
 minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)

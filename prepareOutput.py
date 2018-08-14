@@ -75,7 +75,8 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     print('Diff Test a_x, a_y', a_x2-a_x, a_y2-a_y)
     print("a_r,a_phi", a_r,a_phi)
     print('a_-a_r', a_-a_r)
-
+    print('len(a_x)', len(a_x))
+    print('len(mZ_x)', len(mZ_x))
     #Diff_phi = np.arccos(np.divide(np.add(np.multiply(a_x, mZ_x), np.multiply(a_y, mZ_y)), np.multiply(a_, mZ_r)))
     #NN_LongZ = np.divide(np.add(np.multiply(a_x, mZ_x), np.multiply(a_y, mZ_y)), mZ_r)
     #NN_PerpZ = np.sin(Diff_phi)*a_
@@ -109,8 +110,9 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     plt.figure()
     plt.suptitle('y: Prediction vs. Target ')
     plt.xlabel("$p_{T,y}^Z$")
-    plt.hist(a_y, bins=50, range=[np.percentile(a_y,5), np.percentile( a_y,95)], histtype='step' )
-    plt.hist(mZ_y, bins=50, range=[np.percentile(mZ_y,5), np.percentile( mZ_y,95)], histtype='step' )
+    plt.hist(a_y, bins=50,  range=[-30,30], histtype='step' )
+    plt.hist(mZ_y, bins=50, range=[-30,30], histtype='step' )
+    plt.xlim(-30,30)
     plt.legend(["Prediction","Target"], loc='upper left')
     plt.savefig("%sHist_Pred_Tar_y.png"%(plotsD))
 
@@ -118,8 +120,9 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD):
     plt.figure()
     plt.suptitle('x: Prediction vs. Target ')
     plt.xlabel("$p_{T,x}^Z$")
-    plt.hist(a_x, bins=50, range=[np.percentile(a_x,5), np.percentile( a_x,95)], histtype='step' )
-    plt.hist(mZ_x, bins=50, range=[np.percentile(mZ_x,5), np.percentile( mZ_x,95)], histtype='step' )
+    plt.hist(a_x, bins=50, range=[-30,30], histtype='step' )
+    plt.hist(mZ_x, bins=50,  range=[-30,30], histtype='step' )
+    plt.xlim(-30,30)
     plt.legend(["Prediction","Target"], loc='upper left')
     plt.savefig("%sHist_Pred_Tar_x.png"%(plotsD))
 
