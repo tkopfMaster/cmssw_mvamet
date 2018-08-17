@@ -1,16 +1,3 @@
-'''debug gpu usage
-import tensorflow as tf
-print("bla blubb", tf.test.is_built_with_cuda())
-
-import tensorflow
-from tensorflow.python.client import device_lib
-print("Auf der deepthought", device_lib.list_local_devices())
-
-print(tensorflow.__version__)
-sess = tensorflow.Session()
-print(" info gpu ", tensorflow.Session(config=tensorflow.ConfigProto(log_device_placement=True)))
-'''
-
 import numpy as np
 np.random.seed(1234)
 from sklearn.metrics import roc_curve, auc
@@ -185,7 +172,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     Boson_Pt = np.sqrt(np.square(Targets[:,0])+np.square(Targets[:,1]))
     num_events = Inputs.shape[0]
     print('Number of events in get model ', num_events)
-    train_test_splitter = 0.03
+    train_test_splitter = 0.3
     training_idx = np.random.choice(np.arange(Inputs.shape[0]), int(Inputs.shape[0]*train_test_splitter), replace=False)
     print('random training index length', training_idx.shape)
     print('inputs shape', Inputs.shape)
@@ -223,32 +210,66 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     labels_val = Targets_test
     weights_train = weights_train_
     weights_val = weights_val_
-
-    batchsize = 10000
-    x = tf.placeholder(tf.float32, shape=[batchsize, data_train.shape[1]])
-    y = tf.placeholder(tf.float32, shape=[batchsize, labels_train.shape[1]])
-    w = tf.placeholder(tf.float32, shape=[batchsize, weights_train.shape[1]])
-    x_ = tf.placeholder(tf.float32, shape=[batchsize, data_val.shape[1]])
-    y_ = tf.placeholder(tf.float32, shape=[batchsize, labels_val.shape[1]])
-    w_ = tf.placeholder(tf.float32, shape=[batchsize, weights_val.shape[1]])
-    #enqueue_train = queue_train.enqueue_many([x, y, w])
-    #enqueue_val = queue_val.enqueue_many([x, y, w])
-
-    print("tf.test.gpu_device_name()", tf.test.gpu_device_name())
+    '''
+    for i in range(1000):
+        data_train = np.vstack((data_train, Inputs_train_train))
+        labels_train = np.vstack((labels_train, Targets_train))
+        weights_train = np.vstack((weights_train, weights_train_))
+        data_val = np.vstack((data_val,Inputs_train_val))
+        labels_val = np.vstack((labels_val, Targets_test ))
+        weights_val = np.vstack((weights_val,weights_val_))
+    '''
 
 
+
+    # ## Load data to a queue
+    print('length data_train.shape[1]', data_train.shape[1])
+    print('length labels_train.shape[1]', labels_train.shape[1])
+    print('length data_train.shape[1], labels_train.shape[1]', [data_train.shape[1], labels_train.shape[1]])
+
+    queue_train = tf.RandomShuffleQueue(capacity=data_train.shape[0], min_after_dequeue=0,
+                                        dtypes=[tf.float32, tf.float32, tf.float32], shapes=[tf.TensorShape(data_train.shape[1]),tf.TensorShape(labels_train.shape[1]),tf.TensorShape(weights_train.shape[1])])
+
+    queue_val = tf.RandomShuffleQueue(capacity=data_val.shape[0], min_after_dequeue=0,
+                                      dtypes=[tf.float32, tf.float32, tf.float32], shapes=[tf.TensorShape(data_val.shape[1]),tf.TensorShape(labels_val.shape[1]),tf.TensorShape(weights_val.shape[1])])
+
+    x = tf.placeholder(tf.float32)
+    y = tf.placeholder(tf.float32)
+    w = tf.placeholder(tf.float32)
+    batch_size = 100
+    enqueue_train = queue_train.enqueue_many([x, y, w])
+    enqueue_val = queue_val.enqueue_many([x, y, w])
+    print("funktioniert bis hier")
+    qtrain = tf.FIFOQueue(capacity=100000, dtypes=[tf.float32, tf.float32, tf.float32], shapes=[tf.TensorShape(data_val.shape[1]),tf.TensorShape(labels_val.shape[1]),tf.TensorShape(weights_val.shape[1])])
+    enqueue_op_train = qtrain.enqueue_many([data_train, labels_train, weights_train])
+    print(enqueue_op_train)
+    qval = tf.FIFOQueue(capacity=100000,dtypes=[tf.float32, tf.float32, tf.float32], shapes=[tf.TensorShape(data_val.shape[1]),tf.TensorShape(labels_val.shape[1]),tf.TensorShape(weights_val.shape[1])])
+    enqueue_op_val = qval.enqueue_many([data_val, labels_val, weights_val])
+    print("enque op funktioniert")
     sess = tf.Session()
+    #sess.run(enqueue_train, feed_dict={x: data_train, y: labels_train, w: weights_train})
+    #sess.run(enqueue_val, feed_dict={x: data_val, y: labels_val, w: weights_val})
 
+    queue_runner_train = tf.train.QueueRunner(qtrain, [enqueue_op_train])
+    tf.train.add_queue_runner(queue_runner_train)
+    queue_runner_val = tf.train.QueueRunner(qval, [enqueue_op_val])
+    tf.train.add_queue_runner(queue_runner_val)
+    coordinator = tf.train.Coordinator()
+    threads_train = queue_runner_train.create_threads(sess, coord=coordinator, start=True)
+    threads_val = queue_runner_val.create_threads(sess, coord=coordinator, start=True)
     # ## Define the neural network architecture
-    batch_train = [data_train, labels_train, weights_train]
-    batch_val = [data_val, labels_val, weights_val]
 
+
+    batch_train = qtrain.dequeue_many(batch_size)
+    batch_val = qval.dequeue_many(batch_size)
     print('wichtig',data_train.shape[0], data_train.shape[1])
+
 
     logits_train, f_train= NNmodel(batch_train[0], reuse=False)
     logits_val, f_val= NNmodel(batch_val[0], reuse=True)
 
     # ## Add training operations to the graph
+    print('len len(batch_train[1])', batch_train[1])
     print('len logits_train', logits_train.shape)
 
     print("loss fct", loss_fct)
@@ -284,7 +305,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         loss_val = costExpectedRel(batch_val[1], logits_val, batch_val[2])
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Resolutions"):
-        print("Loss Function Resolutions: ", loss_fct)
+        print("Loss Function Angle_Response: ", loss_fct)
         loss_train = costResolutions(batch_train[1], logits_train, batch_train[2])
         loss_val = costResolutions(batch_val[1], logits_val, batch_val[2])
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
@@ -299,32 +320,37 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
 
 
+
+
     # ## Run the training
     sess.run(tf.global_variables_initializer())
+    sess.run(tf.local_variables_initializer())
 
     losses_train = []
     losses_val = []
     loss_response, loss_resolution_para, loss_resolution_perp, loss_mse = [], [], [], []
+
     summary_train = tf.summary.scalar("loss_train", loss_train)
     summary_val = tf.summary.scalar("loss_val", loss_val)
     writer = tf.summary.FileWriter("./logs/{}".format(
             datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), sess.graph)
     saver = tf.train.Saver()
-    saveStep = 10
-    print("StartTraining")
+    saveStep = 1000
+    print("training started")
     for i_step in range(10000):
         start_loop = time.time()
-        batch_train = np.random.choice(np.arange(data_train.shape[0]), int(data_train.shape[0]*train_val_splitter), replace=False)
-        batch_train_idx = batch_train[0:batchsize]
-        batch_val_idx =  np.setdiff1d(  np.arange(data_train.shape[0]), batch_train_idx)[0:batchsize]
 
-
-        summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss], feed_dict={x: data_train[batch_train_idx,:], y: sess.run(logits_train)[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
+        summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss])
+        #summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss], feed_dict={x: data_train, y: labels_train, w: weights_train})
         #summary_, loss_, loss_response_, loss_resolution_para_, loss_resolution_perp_, loss_mse_, _ = sess.run([summary_train, loss_train, minimize_loss])
         losses_train.append(loss_)
+        #loss_response.append(loss_response_)
+        #loss_resolution_para.append(loss_resolution_para_)
+        #loss_resolution_perp.append(loss_resolution_perp_)
+        #loss_mse.append(loss_mse_)
         writer.add_summary(summary_, i_step)
 
-        summary_, loss_ = sess.run([summary_val, loss_val], feed_dict={x_: data_val[batch_val_idx,:], y_: sess.run(logits_val)[batch_val_idx,:], w_: weights_val[batch_val_idx,:]})
+        summary_, loss_ = sess.run([summary_val, loss_val], feed_dict={x: data_val, y: labels_val, w: weights_val})
         losses_val.append(loss_)
         writer.add_summary(summary_, i_step)
         end_loop = time.time()
@@ -333,7 +359,9 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             print('gradient step No ', i_step)
             print("gradient step time {0} seconds".format(end_loop-start_loop))
 
-
+    coordinator.request_stop()
+    coordinator.join(threads_train)
+    coordinator.join(threads_val)
 
 
 
@@ -341,8 +369,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     #writer.flush()
 
 
-    plt.plot(range(1, len(moving_average(np.asarray(losses_train), 10))+1), moving_average(np.asarray(losses_train), 10), lw=3, label="Training loss")
-    plt.plot(range(1, len(moving_average(np.asarray(losses_val), 10))+1), moving_average(np.asarray(losses_val), 10), lw=3, label="Validation loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_train), 800))+1), moving_average(np.asarray(losses_train), 800), lw=3, label="Training loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_val), 800))+1), moving_average(np.asarray(losses_val), 800), lw=3, label="Validation loss")
     plt.xlabel("Gradient step"), plt.ylabel("loss")
     plt.legend()
     plt.savefig("%sLoss_ValLoss.png"%(plotsD))
@@ -359,8 +387,9 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         plt.savefig("%sLosses.png"%(plotsD))
         plt.close()
 
-
-
+    acc, acc_op = tf.metrics.accuracy(labels=logits_train,
+                                  predictions=batch_train[1],
+                                  weights=batch_train[2])
 
     dset = NN_Output.create_dataset("loss", dtype='f', data=losses_train)
     dset2 = NN_Output.create_dataset("val_loss", dtype='f', data=losses_val)
