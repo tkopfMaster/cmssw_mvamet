@@ -236,16 +236,13 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     x = tf.placeholder(tf.float32)
     y = tf.placeholder(tf.float32)
     w = tf.placeholder(tf.float32)
-    batch_size = 100
+    batch_size = 15000
     enqueue_train = queue_train.enqueue_many([x, y, w])
     enqueue_val = queue_val.enqueue_many([x, y, w])
-    print("funktioniert bis hier")
     qtrain = tf.FIFOQueue(capacity=100000, dtypes=[tf.float32, tf.float32, tf.float32], shapes=[tf.TensorShape(data_val.shape[1]),tf.TensorShape(labels_val.shape[1]),tf.TensorShape(weights_val.shape[1])])
     enqueue_op_train = qtrain.enqueue_many([data_train, labels_train, weights_train])
-    print(enqueue_op_train)
     qval = tf.FIFOQueue(capacity=100000,dtypes=[tf.float32, tf.float32, tf.float32], shapes=[tf.TensorShape(data_val.shape[1]),tf.TensorShape(labels_val.shape[1]),tf.TensorShape(weights_val.shape[1])])
     enqueue_op_val = qval.enqueue_many([data_val, labels_val, weights_val])
-    print("enque op funktioniert")
     sess = tf.Session()
     #sess.run(enqueue_train, feed_dict={x: data_train, y: labels_train, w: weights_train})
     #sess.run(enqueue_val, feed_dict={x: data_val, y: labels_val, w: weights_val})

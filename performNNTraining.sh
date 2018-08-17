@@ -47,13 +47,13 @@ if [ ! -d "trainings/$trainingname" ]; then
 fi
 #spaeter mal: config mit Art des Trainings festlegen
 #python $src_di/prepareInput.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
-#python $src_di/1training_BU1508.py $files_di $optimizer $loss $NN_mode $plots_di
-python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
+python $src_di/1training_BU1508.py $files_di $optimizer $loss $NN_mode $plots_di
+#python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
 
-python $src_di/prepareOutput.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
-python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
-python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode
-python $src_di/getResponse.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
+#python $src_di/prepareOutput.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
+#python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
+#python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode
+#python $src_di/getResponse.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
 
 cp $src_di/*.py $plots_di
 cp -r $plots_di /usr/users/tkopf/www/METplots/
