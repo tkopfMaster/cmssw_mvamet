@@ -276,10 +276,12 @@ if __name__ == "__main__":
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
         Outputs = loadData_woutGBRT(outputDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
+        Test_Idx = h5py.File("%sTest_Idx_%s.h5" % (outputDir, NN_mode), "r")
+        Outputs = DFName_plain2[Test_Idx]
     #Outputs = Outputs[~np.isnan(Outputs)]
-    Outputs = Outputs[Outputs[Target_Pt]>pTMin]
-    Outputs = Outputs[Outputs[Target_Pt]<=pTMax]
-    Outputs = Outputs[Outputs['NVertex']<=50]
+    #Outputs = Outputs[Outputs[Target_Pt]>pTMin]
+    #Outputs = Outputs[Outputs[Target_Pt]<=pTMax]
+    #Outputs = Outputs[Outputs['NVertex']<=50]
     print('len(Outputs)', len(Outputs))
     print('sum isnan Outputs', sum(np.isnan(Outputs['NN_LongZ'])))
     print('isnan Outputs', Outputs[np.isnan(Outputs['NN_LongZ'])])

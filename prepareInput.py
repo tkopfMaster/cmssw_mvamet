@@ -224,7 +224,7 @@ def WeightsOverPt(weights, BosonPt):
     sy, _ = np.histogram(BosonPt, bins=nBinspT, weights=weights)
     sy2, _ = np.histogram(BosonPt, bins=nBinspT, weights=(weights)**2)
     mean = sy / n
-    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color="red")
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label='Weights', linestyle="None", capsize=0,  color="red")
 
 
 def getweight(BosonPt):
@@ -260,15 +260,15 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
     handles, labels = ax.get_legend_handles_labels()
-    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
+    handles.insert(0,mpatches.Patch(color='none', label="$weight = \\frac{1}{\mathrm{counts}} $ \n with $p_T^Z$ nbins = %8.2f"%(nBinspT)))
 
     plt.xlabel('#$ p_T^Z$ ')
     plt.ylabel(' Weight ')
     #plt.title('Response $U_{\parallel}$')
-
+    LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    #plt.ylim(ResponseMinErr, ResponseMaxErr)
+    plt.xlim(pTMin, pTMax)
     plt.savefig("%sWeight_pT.png"%(plotsD), bbox_inches="tight")
     plt.close()
 

@@ -147,7 +147,7 @@ def costMSE(y_true,y_pred, weight):
 
 
 def NNmodel(x, reuse):
-    ndim = 100
+    ndim = 120
     with tf.variable_scope("model") as scope:
         if reuse:
             scope.reuse_variables()
@@ -190,7 +190,14 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     training_idx = np.random.choice(np.arange(Inputs.shape[0]), int(Inputs.shape[0]*train_test_splitter), replace=False)
     print('random training index length', training_idx.shape)
     print('inputs shape', Inputs.shape)
+    print('First 10 Training Idxs', training_idx[0:10])
+
+    #Write Test Idxs
     test_idx = np.setdiff1d(  np.arange(Inputs.shape[0]), training_idx)
+    dset = Test_Idx.create_dataset("Test_Idx",  dtype='f', data=test_idx)
+
+
+    # Test if something's not right if the shapes don't match
     if not (len(test_idx)+len(training_idx))==Inputs.shape[0]:
         print('len(test_idx)', len(test_idx))
         print('len(training_idx)', len(training_idx))
@@ -312,9 +319,9 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     writer = tf.summary.FileWriter("./logs/{}".format(
             datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), sess.graph)
     saver = tf.train.Saver()
-    saveStep = 1000
+    saveStep = 50
     print("StartTraining")
-    for i_step in range(10000):
+    for i_step in range(1000):
         start_loop = time.time()
         batch_train = np.random.choice(np.arange(data_train.shape[0]), int(data_train.shape[0]*train_val_splitter), replace=False)
         batch_train_idx = batch_train[0:batchsize]
@@ -379,4 +386,5 @@ if __name__ == "__main__":
     plotsD = sys.argv[5]
     print(outputDir)
     NN_Output = h5py.File("%sNN_Output_%s.h5"%(outputDir,NN_mode), "w")
+    Test_Idx = h5py.File("%sTest_Idx_%s.h5" % (outputDir, NN_mode), "w")
     getModel(outputDir, optim, loss_fct, NN_mode, plotsD)
