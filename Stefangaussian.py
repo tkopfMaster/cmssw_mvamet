@@ -111,8 +111,8 @@ batch_size = 32
 batch_train = queue_train.dequeue_many(batch_size)
 batch_val = queue_val.dequeue_many(batch_size)
 
-logits_train, f_train = model(batch_train[0], reuse=False)
-logits_val, f_val = model(batch_val[0], reuse=True)
+logits_train, f_train = model(x, reuse=False)
+logits_val, f_val = model(x, reuse=True)
 
 
 # ## Add training operations to the graph

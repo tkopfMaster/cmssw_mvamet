@@ -218,6 +218,14 @@ def find_interval(x, intervals):
             return i-1
     return -1
 
+def WeightsOverPt(weights, BosonPt):
+    binwidth = (BosonPt.max() - BosonPt.min())/(nBinspT) #5MET-Definitionen
+    n, _ = np.histogram(BosonPt, bins=nBinspT)
+    sy, _ = np.histogram(BosonPt, bins=nBinspT, weights=weights)
+    sy2, _ = np.histogram(BosonPt, bins=nBinspT, weights=(weights)**2)
+    mean = sy / n
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color="red")
+
 
 def getweight(BosonPt):
     n, interval = np.histogram(BosonPt, bins=nBinspT)
@@ -234,6 +242,37 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     IdxpTCut = (DataF['Boson_Pt']>pTMin) & (DataF['Boson_Pt']<=pTMax) & (DataF['NVertex']<=50)
     start_time = time.time()
     weights = getweight(DataF['Boson_Pt'][IdxpTCut])
+    plt.hist(weights, bins=nBinspT , lw=3, label="Training loss")
+    plt.xlabel("Weights"), plt.ylabel("Counts")
+    plt.legend()
+    plt.savefig("%sWeights.png"%(plotsD))
+    plt.close()
+
+
+
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    WeightsOverPt(weights, DataF['Boson_Pt'])
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeStringNVertex))
+
+    plt.xlabel('#$ p_T^Z$ ')
+    plt.ylabel(' Weight ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    #plt.ylim(ResponseMinErr, ResponseMaxErr)
+    plt.savefig("%sWeight_pT.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
     end_time = time.time()
     print("Gewichte bestimmen hat {0} Sekunden gedauert".format(end_time-start_time))
     print('DataF[recoilslimmedMETs_Pt]', DataF['recoilslimmedMETs_Pt'].shape)
