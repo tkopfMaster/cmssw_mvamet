@@ -1596,10 +1596,10 @@ if __name__ == "__main__":
     else:
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
-        DFName_plain2 = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
-        Test_Idx = h5py.File("%sTest_Idx_%s.h5" % (filesDir, NN_mode), "r")
-        DFName = DFName_plain2[Test_Idx]
-    #DFName=DFName_plain[DFName_plain[Target_Pt]<=pTMax]
+        DFName_plain = loadData_woutGBRT(filesDir, inputDir, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
+        #Test_Idx = h5py.File("%sTest_Idx_%s.h5" % (filesDir, NN_mode), "r")
+        #DFName = DFName_plain2[Test_Idx]
+    DFName=DFName_plain[DFName_plain[Target_Pt]<=pTMax]
     #DFName=DFName[DFName[Target_Pt]>pTMin]
     #DFName=DFName[DFName['NVertex']<=50]
     #DFName=DFName[DFName['NVertex']>=0]

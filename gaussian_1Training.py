@@ -319,7 +319,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     writer = tf.summary.FileWriter("./logs/{}".format(
             datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), sess.graph)
     saver = tf.train.Saver()
-    saveStep = 50
+    saveStep = 100
     print("StartTraining")
     for i_step in range(1000):
         start_loop = time.time()
