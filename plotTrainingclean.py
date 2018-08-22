@@ -110,7 +110,10 @@ def HM_Diff_norm(r,phi,pr,pphi, labelName, col):
     return norm
 
 
-def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsProcess, Target_Pt, Target_Phi):
+def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsProcess, Target_Pt, Target_Phi, Test_Idx):
+    IndTest = sorted([int(x) for x in Test_Idx])
+
+
     if PhysicsProcess=='Mu':
         LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
     else:
@@ -120,18 +123,21 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsP
     pTRangeString_low= pTRangeString_mid= pTRangeString_high= pTRangeString
 
 
-
+    print("Jetzt kommt NN_Output_applied")
     NN_Output_applied = h5py.File("%sNN_Output_applied_%s.h5"%(outputD,NN_mode), "r")
     #predictions=Outputs['NN_Pt'], Outputs['NN_Phi']
     predictions = NN_Output_applied["MET_Predictions"]
     Targets = NN_Output_applied["MET_GroundTruth"]
+    print("Jetzt kommt predictions")
+    #predictions = predictions2[Test_Idx,:]
+    #Targets = Targets2[Test_Idx,:]
     #print("Shape predictions", predictions)
     #print("Shape Targets", Targets)
 
     #print('np.subtract(Outputs[NN_Pt], Outputs[Target_Pt])', np.subtract(Outputs['NN_Pt'], Outputs[Target_Pt]))
     print(Outputs[Target_Pt][:].shape)
     print(NN_Output_applied["MET_GroundTruth"].shape)
-    print(Outputs[Target_Pt][:])
+    #print(Outputs[Target_Pt][:])
     print('np.mean(np.subtract(Outputs[NN_Pt], Outputs[Target_Pt]))', np.mean(np.subtract(Outputs['NN_Pt'], Outputs[Target_Pt])))
     #print('np.subtract(Outputs[NN_Phi], Outputs[Target_Phi])', np.subtract(Outputs['NN_Phi'], Outputs[Target_Phi]))
     print('np.mean(np.subtract(Outputs[NN_Pt], Outputs[Target_Pt]))', np.mean(np.subtract(Outputs['NN_Phi'], Outputs[Target_Phi])))
@@ -145,36 +151,49 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsP
     val_loss = NN_Output["val_loss"]
     '''
 
-
+    print("Jetzt kommt InputsTargets_hdf5")
     if NN_mode == 'xy':
         #Load Inputs and Targets with Name
+
         InputsTargets_hdf5 = h5py.File("%sNN_Input_apply_%s.h5" % (outputD,NN_mode), "r")
         print("Keys: %s" % InputsTargets_hdf5.keys())
         keys = InputsTargets_hdf5.keys()
-        values = [InputsTargets_hdf5[k] for k in keys]
-        print(values)
+        values = [InputsTargets_hdf5[k].value for k in keys]
+        #InputsTargets2 = pd.DataFrame(index=np.arange(NN_Output_applied["MET_GroundTruth"].shape))
+        print("length index", len(np.arange(len(InputsTargets_hdf5['Target'][0,:]))))
+        print("length values", len(InputsTargets_hdf5['Target'][0,:]))
+        InputsTargets = pd.Series()
         Norm_pT = np.sqrt(np.multiply(InputsTargets_hdf5['Target'][0,:], InputsTargets_hdf5['Target'][0,:]) + np.multiply(InputsTargets_hdf5['Target'][1,:], InputsTargets_hdf5['Target'][1,:]))
-
-
-        InputsTargets=InputsTargets_hdf5
+        print(np.sort(np.array(Test_Idx, dtype=np.int64), axis=None))
+        for k, v in zip(keys, values):
+                InputsTargets[k] = v
+                print(type(InputsTargets[k]))
+                print(k)
+        print(type(InputsTargets))
+        #boolInd = np.zeros(len(InputsTargets_hdf5['Target'][0,IndTest]))
+        #boolInd[int(np.asarray(Test_Idx))] = 1
+        #InputsTargets = [InputsTargets[k].loc[np.sort(np.array(Test_Idx, dtype=np.int64), axis=None)] for k in InputsTargets.index]
+        print("InputsTargets geschafft, Laenge", len(InputsTargets['Target'][0,IndTest]))
+        #InputsTargets = InputsTargets_hdf5[Test_Idx]
+        Targets = np.transpose(InputsTargets['Target'])
+        predictions = np.transpose([Outputs['NN_x'], Outputs['NN_y']])
+        print("Zeile 180")
         #print('InputsTargets', InputsTargets.shape())
-        #print('Outputs', Outputs.shape())
-
-
+        #print('Outputs', Output
         fig=plt.figure(figsize=(10,6))
         fig.patch.set_facecolor('white')
         ax = plt.subplot(111)
         nbinsHist = 40
 
-        #plt.hist(np.subtract(InputsTargets['Track'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='Track, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Track'][0,:], Targets[:,0])), np.std(np.subtract( InputsTargets['Track'][0,:] , Targets[:,0]))), histtype='step', ec=colors_InOut[0])
-        #plt.hist(np.subtract(InputsTargets['NoPU'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='NoPU, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['NoPU'][0,:], Targets[:,0])), np.std(np.subtract( InputsTargets['NoPU'][0,:] , Targets[:,0]))), histtype='step', ec=colors_InOut[2])
-        #plt.hist(np.subtract(InputsTargets['PUCorrected'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='PUCorrected, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PUCorrected'][0,:], Targets[:,0])), np.std(np.subtract(InputsTargets['PUCorrected'][0,:]  , Targets[:,0]))), histtype='step', ec=colors_InOut[3])
-        #plt.hist(np.subtract(InputsTargets['PU'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='PU, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PU'][0,:], Targets[:,0])), np.std(np.subtract(InputsTargets['PU'][0,:]  , Targets[:,0]))), histtype='step', ec=colors_InOut[4])
-        plt.hist(np.subtract(InputsTargets['Puppi'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Puppi'][0,:], Targets[:,0])), np.std(np.subtract(InputsTargets['Puppi'][0,:]  , Targets[:,0]))), histtype='step', ec=colors_InOut[4])
-        #plt.hist(np.subtract(pol2pol2kar_x(Outputs['LongZCorrectedRecoil_Pt'],Outputs['LongZCorrectedRecoil_Phi']), Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Puppi'][0,:], Targets[:,0])), np.std(np.subtract(InputsTargets['Puppi'][0,:]  , Targets[:,0]))), histtype='step', ec=colors_InOut[5])
+        #plt.hist(np.subtract(InputsTargets['Track'][0,IndTest], Targets[IndTest,0]), bins=nbinsHist, range=[-50, 50], label='Track, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Track'][0,IndTest], Targets[IndTest,0])), np.std(np.subtract( InputsTargets['Track'][0,IndTest] , Targets[IndTest,0]))), histtype='step', ec=colors_InOut[0])
+        #plt.hist(np.subtract(InputsTargets['NoPU'][0,IndTest], Targets[IndTest,0]), bins=nbinsHist, range=[-50, 50], label='NoPU, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['NoPU'][0,IndTest], Targets[IndTest,0])), np.std(np.subtract( InputsTargets['NoPU'][0,IndTest] , Targets[IndTest,0]))), histtype='step', ec=colors_InOut[2])
+        #plt.hist(np.subtract(InputsTargets['PUCorrected'][0,IndTest], Targets[IndTest,0]), bins=nbinsHist, range=[-50, 50], label='PUCorrected, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PUCorrected'][0,IndTest], Targets[IndTest,0])), np.std(np.subtract(InputsTargets['PUCorrected'][0,IndTest]  , Targets[IndTest,0]))), histtype='step', ec=colors_InOut[3])
+        #plt.hist(np.subtract(InputsTargets['PU'][0,IndTest], Targets[IndTest,0]), bins=nbinsHist, range=[-50, 50], label='PU, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PU'][0,IndTest], Targets[IndTest,0])), np.std(np.subtract(InputsTargets['PU'][0,IndTest]  , Targets[IndTest,0]))), histtype='step', ec=colors_InOut[4])
+        plt.hist(np.subtract(InputsTargets['Puppi'][0,IndTest], Targets[IndTest,0]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Puppi'][0,IndTest], Targets[IndTest,0])), np.std(np.subtract(InputsTargets['Puppi'][0,IndTest]  , Targets[IndTest,0]))), histtype='step', ec=colors_InOut[4])
+        #plt.hist(np.subtract(pol2pol2kar_x(Outputs['LongZCorrectedRecoil_Pt'],Outputs['LongZCorrectedRecoil_Phi']), Targets[IndTest,0]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Puppi'][0,IndTest], Targets[IndTest,0])), np.std(np.subtract(InputsTargets['Puppi'][0,IndTest]  , Targets[IndTest,0]))), histtype='step', ec=colors_InOut[5])
 
-        plt.hist(np.subtract(InputsTargets['PF'][0,:], Targets[:,0]), bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PF'][0,:], Targets[:,0])), np.std(np.subtract(InputsTargets['PF'][0,:]  , Targets[:,0]))), histtype='step', ec=colors_InOut[1], linewidth=1.5)
-        plt.hist(NN_Diff_x[:], bins=nbinsHist, range=[-50, 50], label='NN, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(predictions[:,0], Targets[:,0])), np.std(np.subtract(predictions[:,0]  , Targets[:,0]))), histtype='step', ec=colors_InOut[6], linewidth=1.5)
+        plt.hist(np.subtract(InputsTargets['PF'][0,IndTest], Targets[IndTest,0]), bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PF'][0,IndTest], Targets[IndTest,0])), np.std(np.subtract(InputsTargets['PF'][0,IndTest]  , Targets[IndTest,0]))), histtype='step', ec=colors_InOut[1], linewidth=1.5)
+        plt.hist(NN_Diff_x[:], bins=nbinsHist, range=[-50, 50], label='NN, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(predictions[:,0], Targets[IndTest,0])), np.std(np.subtract(predictions[:,0]  , Targets[IndTest,0]))), histtype='step', ec=colors_InOut[6], linewidth=1.5)
 
 
         box = ax.get_position()
@@ -195,21 +214,21 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsP
         plt.savefig("%sHist_Delta_x.png"%(plotsD), bbox_inches="tight")
         plt.close()
 
-
+        print("Zeile 217")
         fig=plt.figure(figsize=(10,6))
         fig.patch.set_facecolor('white')
         ax = plt.subplot(111)
         nbinsHist = 40
 
-        #plt.hist(np.subtract(InputsTargets['Track'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='Track, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Track'][1,:], Targets[:,1])), np.std(np.subtract( InputsTargets['Track'][1,:] , Targets[:,1]))), histtype='step', ec=colors_InOut[0])
-        #plt.hist(np.subtract(InputsTargets['NoPU'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='NoPU, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['NoPU'][1,:], Targets[:,1])), np.std(np.subtract( InputsTargets['NoPU'][1,:] , Targets[:,1]))), histtype='step', ec=colors_InOut[2])
-        #plt.hist(np.subtract(InputsTargets['PUCorrected'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='PUCorrected, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PUCorrected'][1,:], Targets[:,1])), np.std(np.subtract(InputsTargets['PUCorrected'][1,:]  , Targets[:,1]))), histtype='step', ec=colors_InOut[3])
-        #plt.hist(np.subtract(InputsTargets['PU'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='PU, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PU'][1,:], Targets[:,1])), np.std(np.subtract(InputsTargets['PU'][1,:]  , Targets[:,1]))), histtype='step', ec=colors_InOut[4])
-        plt.hist(np.subtract(InputsTargets['Puppi'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Puppi'][1,:], Targets[:,1])), np.std(np.subtract(InputsTargets['Puppi'][1,:]  , Targets[:,1]))), histtype='step', ec=colors_InOut[4])
-        #plt.hist(np.subtract(pol2pol2kar_x(Outputs['LongZCorrectedRecoil_Pt'],Outputs['LongZCorrectedRecoil_Phi']), Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Puppi'][1,:], Targets[:,1])), np.std(np.subtract(InputsTargets['Puppi'][1,:]  , Targets[:,1]))), histtype='step', ec=colors_InOut[5])
+        #plt.hist(np.subtract(InputsTargets['Track'][1,IndTest], Targets[IndTest,1]), bins=nbinsHist, range=[-50, 50], label='Track, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Track'][1,IndTest], Targets[IndTest,1])), np.std(np.subtract( InputsTargets['Track'][1,IndTest] , Targets[IndTest,1]))), histtype='step', ec=colors_InOut[0])
+        #plt.hist(np.subtract(InputsTargets['NoPU'][1,IndTest], Targets[IndTest,1]), bins=nbinsHist, range=[-50, 50], label='NoPU, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['NoPU'][1,IndTest], Targets[IndTest,1])), np.std(np.subtract( InputsTargets['NoPU'][1,IndTest] , Targets[IndTest,1]))), histtype='step', ec=colors_InOut[2])
+        #plt.hist(np.subtract(InputsTargets['PUCorrected'][1,IndTest], Targets[IndTest,1]), bins=nbinsHist, range=[-50, 50], label='PUCorrected, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PUCorrected'][1,IndTest], Targets[IndTest,1])), np.std(np.subtract(InputsTargets['PUCorrected'][1,IndTest]  , Targets[IndTest,1]))), histtype='step', ec=colors_InOut[3])
+        #plt.hist(np.subtract(InputsTargets['PU'][1,IndTest], Targets[IndTest,1]), bins=nbinsHist, range=[-50, 50], label='PU, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PU'][1,IndTest], Targets[IndTest,1])), np.std(np.subtract(InputsTargets['PU'][1,IndTest]  , Targets[IndTest,1]))), histtype='step', ec=colors_InOut[4])
+        plt.hist(np.subtract(InputsTargets['Puppi'][1,IndTest], Targets[IndTest,1]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Puppi'][1,IndTest], Targets[IndTest,1])), np.std(np.subtract(InputsTargets['Puppi'][1,IndTest]  , Targets[IndTest,1]))), histtype='step', ec=colors_InOut[4])
+        #plt.hist(np.subtract(pol2pol2kar_x(Outputs['LongZCorrectedRecoil_Pt'],Outputs['LongZCorrectedRecoil_Phi']), Targets[IndTest,1]), bins=nbinsHist, range=[-50, 50], label='Puppi, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['Puppi'][1,IndTest], Targets[IndTest,1])), np.std(np.subtract(InputsTargets['Puppi'][1,IndTest]  , Targets[IndTest,1]))), histtype='step', ec=colors_InOut[5])
 
-        plt.hist(np.subtract(InputsTargets['PF'][1,:], Targets[:,1]), bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PF'][1,:], Targets[:,1])), np.std(np.subtract(InputsTargets['PF'][1,:]  , Targets[:,1]))), histtype='step', ec=colors_InOut[1], linewidth=1.5)
-        plt.hist(NN_Diff_y[:], bins=nbinsHist, range=[-50, 50], label='NN, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(predictions[:,1], Targets[:,1])), np.std(np.subtract(predictions[:,1]  , Targets[:,1]))), histtype='step', ec=colors_InOut[6], linewidth=1.5)
+        plt.hist(np.subtract(InputsTargets['PF'][1,IndTest], Targets[IndTest,1]), bins=nbinsHist, range=[-50, 50], label='PF, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(InputsTargets['PF'][1,IndTest], Targets[IndTest,1])), np.std(np.subtract(InputsTargets['PF'][1,IndTest]  , Targets[IndTest,1]))), histtype='step', ec=colors_InOut[1], linewidth=1.5)
+        plt.hist(NN_Diff_y[:], bins=nbinsHist, range=[-50, 50], label='NN, mean=%.2f$\pm$%.2f'%(np.mean(np.subtract(predictions[:,1], Targets[IndTest,1])), np.std(np.subtract(predictions[:,1]  , Targets[IndTest,1]))), histtype='step', ec=colors_InOut[6], linewidth=1.5)
 
 
         box = ax.get_position()
@@ -235,9 +254,9 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsP
         ax = plt.subplot(111)
         nbinsHist = 40
 
-        PF_Diff_x, PF_Diff_y = np.subtract(InputsTargets['PF'][0,:], Targets[:,0]), np.subtract(InputsTargets['PF'][1,:], Targets[:,1])
+        PF_Diff_x, PF_Diff_y = np.subtract(InputsTargets['PF'][0,IndTest], Targets[IndTest,0]), np.subtract(InputsTargets['PF'][1,IndTest], Targets[IndTest,1])
         PF_Diff_norm = np.sqrt(np.multiply(PF_Diff_x,PF_Diff_x)+np.multiply(PF_Diff_y,PF_Diff_y))
-        Puppi_Diff_x, Puppi_Diff_y = np.subtract(InputsTargets['Puppi'][0,:], Targets[:,0]), np.subtract(InputsTargets['Puppi'][1,:], Targets[:,1])
+        Puppi_Diff_x, Puppi_Diff_y = np.subtract(InputsTargets['Puppi'][0,IndTest], Targets[IndTest,0]), np.subtract(InputsTargets['Puppi'][1,IndTest], Targets[IndTest,1])
         Puppi_Diff_norm = np.sqrt(np.multiply(Puppi_Diff_x,Puppi_Diff_x)+np.multiply(Puppi_Diff_y,Puppi_Diff_y))
 
         plt.hist(np.sqrt(np.multiply(Puppi_Diff_x, Puppi_Diff_x)+np.multiply(Puppi_Diff_y, Puppi_Diff_y)),  range=[0,100], label='Puppi, mean=%.2f $\pm$ %.2f'%(np.mean(np.sqrt(np.multiply(Puppi_Diff_x, Puppi_Diff_x)+np.multiply(Puppi_Diff_y, Puppi_Diff_y))), np.std(np.sqrt(np.multiply(Puppi_Diff_x, Puppi_Diff_x)+np.multiply(Puppi_Diff_y, Puppi_Diff_y)))), histtype='step', bins=nbinsHist, ec=colors_InOut[4])
@@ -275,9 +294,10 @@ if __name__ == "__main__":
     else:
         Target_Pt = 'Boson_Pt'
         Target_Phi = 'Boson_Phi'
-        Outputs = loadData_woutGBRT(outputDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
-        #Test_Idx = h5py.File("%sTest_Idx_%s.h5" % (outputDir, NN_mode), "r")
-        #Outputs = DFName_plain2[Test_Idx]
+        Outputs2 = loadData_woutGBRT(outputDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
+        Test_Idx2 = h5py.File("%sTest_Idx_%s.h5" % (outputDir, NN_mode), "r")
+        Test_Idx = Test_Idx2["Test_Idx"]
+        Outputs = Outputs2.iloc[Test_Idx]
     #Outputs = Outputs[~np.isnan(Outputs)]
     #Outputs = Outputs[Outputs[Target_Pt]>pTMin]
     #Outputs = Outputs[Outputs[Target_Pt]<=pTMax]
@@ -287,4 +307,4 @@ if __name__ == "__main__":
     print('isnan Outputs', Outputs[np.isnan(Outputs['NN_LongZ'])])
     DFName = Outputs
     print(outputDir)
-    plotTraining(outputDir, optim, loss_fct, NN_mode, plotsD, rootInput, PhysicsProcess, Target_Pt, Target_Phi)
+    plotTraining(outputDir, optim, loss_fct, NN_mode, plotsD, rootInput, PhysicsProcess, Target_Pt, Target_Phi, Test_Idx)

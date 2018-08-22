@@ -23,7 +23,7 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
 import time
 
-
+reweighting = True
 
 def loadInputsTargetsWeights(outputD):
     InputsTargets = h5py.File("%sNN_Input_training_%s.h5" % (outputD,NN_mode), "r")
@@ -59,7 +59,8 @@ def costResolution_perp(y_true,y_pred, weight):
     u_perp = tf.sin(alpha_diff)*a_
     u_long = tf.cos(alpha_diff)*a_
     u_perp_ = tf.square(u_perp)+tf.square(u_long-pZ)
-
+    if not reweighting:
+        weight = tf.keras.backend.repeat(1, tf.size(pZ))
     cost= tf.multiply(u_perp_,weight)
     return tf.reduce_mean(cost)
 
@@ -74,7 +75,8 @@ def costResolution_para(y_true,y_pred, weight):
     u_long = tf.cos(alpha_diff)*a_
     Response = tf.divide(u_long,pZ)
     Resolution_para = u_long-pZ
-
+    if not reweighting:
+        weight = tf.keras.backend.repeat(1, tf.size(pZ))
     cost = tf.multiply(tf.square(Resolution_para),weight)
     return tf.reduce_mean(cost)
 
@@ -89,8 +91,25 @@ def costExpected(y_true,y_pred, weight):
     u_long = tf.cos(alpha_diff)*a_
     Response = tf.divide(u_long,pZ)
     Resolution_para = u_long-pZ
-
+    if not reweighting:
+        weight = tf.keras.backend.repeat(1, tf.size(pZ))
     cost = tf.multiply(tf.square(Resolution_para)+tf.square(u_perp_),weight)
+    return tf.reduce_mean(cost)
+
+def cost10Expected(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_perp = tf.sin(alpha_diff)*a_
+    u_perp_ = tf.sin(alpha_diff)*pZ
+    u_long = tf.cos(alpha_diff)*a_
+    Response = tf.divide(u_long,pZ)
+    Resolution_para = u_long-pZ
+    if not reweighting:
+        weight = tf.keras.backend.repeat(1, tf.size(pZ))
+    cost = tf.multiply(40*tf.square(Resolution_para)+tf.square(u_perp_),weight)
     return tf.reduce_mean(cost)
 
 def costExpectedRel(y_true,y_pred, weight):
@@ -104,8 +123,24 @@ def costExpectedRel(y_true,y_pred, weight):
     u_long = tf.cos(alpha_diff)*a_
     Response = tf.divide(u_long,pZ)
     Resolution_para = u_long-pZ
-
+    if not reweighting:
+        weight = tf.keras.backend.repeat(1, tf.size(pZ))
     cost = tf.multiply(tf.square(Response-1)+tf.square(tf.sin(alpha_diff)),weight)
+    return tf.reduce_mean(cost)
+
+def costExpectedRelAbs(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_perp = tf.sin(alpha_diff)*a_
+    u_perp_ = tf.sin(alpha_diff)*pZ
+    u_long = tf.cos(alpha_diff)*a_
+    Response = tf.divide(u_long,pZ)
+    Resolution_para = u_long-pZ
+
+    cost = tf.multiply(tf.square(tf.divide(Resolution_para,pZ))+tf.square(tf.sin(alpha_diff)),weight)
     return tf.reduce_mean(cost)
 
 def costResolutions(y_true,y_pred, weight):
@@ -119,7 +154,8 @@ def costResolutions(y_true,y_pred, weight):
     u_long = tf.cos(alpha_diff)*a_
     Response = tf.divide(u_long,pZ)
     Resolution_para = u_long-pZ
-
+    if not reweighting:
+        weight = tf.keras.backend.repeat(1, tf.size(pZ))
     cost = tf.multiply(tf.square(Resolution_para)+tf.square(u_perp),weight)
     return tf.reduce_mean(cost)
 
@@ -133,7 +169,8 @@ def costResponse(y_true,y_pred, weight):
     u_perp = tf.sin(alpha_diff)*a_
     u_long = tf.cos(alpha_diff)*a_
     Response = tf.divide(u_long,pZ)
-
+    if not reweighting:
+        weight = tf.keras.backend.repeat(1, tf.size(pZ))
     cost= tf.multiply(tf.square(tf.multiply(Response-1,pZ)), weight)
     return tf.reduce_mean(cost)
 
@@ -141,13 +178,14 @@ def costResponse(y_true,y_pred, weight):
 def costMSE(y_true,y_pred, weight):
     MSE_x=tf.square(y_pred[:,0]-y_true[:,0])
     MSE_y = tf.square(y_pred[:,1]-y_true[:,1])
-
+    if not reweighting:
+        weight = tf.keras.backend.repeat(1, tf.size(pZ))
     cost = tf.multiply(MSE_x+MSE_y, weight)
     return tf.reduce_mean(cost)
 
 
 def NNmodel(x, reuse):
-    ndim = 120
+    ndim = 128
     with tf.variable_scope("model") as scope:
         if reuse:
             scope.reuse_variables()
@@ -159,6 +197,7 @@ def NNmodel(x, reuse):
                 initializer=tf.glorot_normal_initializer())
         b2 = tf.get_variable('b2', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
+
         w3 = tf.get_variable('w3', shape=(ndim, ndim), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
         b3 = tf.get_variable('b3', shape=(ndim), dtype=tf.float32,
@@ -167,22 +206,36 @@ def NNmodel(x, reuse):
                 initializer=tf.glorot_normal_initializer())
         b4 = tf.get_variable('b4', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
-        w5 = tf.get_variable('w5', shape=(ndim, 2), dtype=tf.float32,
+
+        w5 = tf.get_variable('w3', shape=(ndim, ndim), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
-        b5 = tf.get_variable('b5', shape=(2), dtype=tf.float32,
+        b5 = tf.get_variable('b3', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
+        w6 = tf.get_variable('w4', shape=(ndim, ndim), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b6 = tf.get_variable('b4', shape=(ndim), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+
+        w7 = tf.get_variable('w5', shape=(ndim, 2), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b7 = tf.get_variable('b5', shape=(2), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+
 
     l1 = tf.nn.relu(tf.add(b1, tf.matmul(x, w1)))
     l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
     l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
     l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
-    logits = tf.add(b5, tf.matmul(l4, w5), name='logits')
+    l5 = tf.nn.relu(tf.add(b5, tf.matmul(l4, w5)))
+    l6 = tf.nn.relu(tf.add(b6, tf.matmul(l5, w6)))
+    logits = tf.add(b7, tf.matmul(l6, w7), name='logits')
     return logits, logits
 
 
 def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     start = time.time()
     Inputs, Targets, Weights = loadInputsTargetsWeights(outputDir)
+
     Boson_Pt = np.sqrt(np.square(Targets[:,0])+np.square(Targets[:,1]))
     num_events = Inputs.shape[0]
     print('Number of events in get model ', num_events)
@@ -209,7 +262,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     Targets_train, Targets_test = Targets[training_idx,:], Targets[test_idx,:]
 
 
-    train_val_splitter = 0.8
+    train_val_splitter = 0.9
     train_train_idx_idx = np.random.choice(np.arange(training_idx.shape[0]), int(training_idx.shape[0]*train_val_splitter), replace=False)
     train_train_idx = training_idx[train_train_idx_idx]
     train_val_idx = training_idx[ np.setdiff1d(  np.arange(training_idx.shape[0]), train_train_idx_idx)]
@@ -232,13 +285,15 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     weights_train = weights_train_
     weights_val = weights_val_
 
-    batchsize = 10000
+    batchsize = 1000
+    batchsize_val = 10000
+    print("Validation set hat Groesse ", len(train_val_idx))
     x = tf.placeholder(tf.float32, shape=[batchsize, data_train.shape[1]])
     y = tf.placeholder(tf.float32, shape=[batchsize, labels_train.shape[1]])
     w = tf.placeholder(tf.float32, shape=[batchsize, weights_train.shape[1]])
-    x_ = tf.placeholder(tf.float32, shape=[batchsize, data_val.shape[1]])
-    y_ = tf.placeholder(tf.float32, shape=[batchsize, labels_val.shape[1]])
-    w_ = tf.placeholder(tf.float32, shape=[batchsize, weights_val.shape[1]])
+    x_ = tf.placeholder(tf.float32)
+    y_ = tf.placeholder(tf.float32)
+    w_ = tf.placeholder(tf.float32)
     #enqueue_train = queue_train.enqueue_many([x, y, w])
     #enqueue_val = queue_val.enqueue_many([x, y, w])
 
@@ -263,9 +318,9 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     print("loss fct", loss_fct)
     if (loss_fct=="mean_squared_error"):
         loss_train = tf.reduce_mean(
-            tf.losses.mean_squared_error(labels=batch_train[1], predictions=logits_train))
+            tf.losses.mean_squared_error(labels=y, predictions=logits_train))
         loss_val = tf.reduce_mean(
-            tf.losses.mean_squared_error(labels=batch_val[1], predictions=logits_val))
+            tf.losses.mean_squared_error(labels=y_, predictions=logits_val))
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Response"):
         print("Loss Function Response: ", loss_fct)
@@ -287,15 +342,30 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         loss_train = costExpected(y, logits_train, w)
         loss_val = costExpected(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="Angle_10Response"):
+        print("Loss Function 10Angle_Response: ", loss_fct)
+        loss_train = cost10Expected(y, logits_train, w)
+        loss_val = cost10Expected(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Angle_relResponse"):
         print("Loss Function Angle_Response rel: ", loss_fct)
         loss_train = costExpectedRel(y, logits_train, w)
         loss_val = costExpectedRel(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="Angle_relabsResponse"):
+        print("Loss Function Angle_Response rel abs: ", loss_fct)
+        loss_train = costExpectedRelAbs(y, logits_train, w)
+        loss_val = costExpectedRelAbs(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Resolutions"):
         print("Loss Function Resolutions: ", loss_fct)
         loss_train = costResolutions(y, logits_train, w)
         loss_val = costResolutions(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="MSE"):
+        print("Loss Function MSE: ", loss_fct)
+        loss_train = costMSE(y, logits_train, w)
+        loss_val = costMSE(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     else:
         factor_response, factor_res_para, factor_res_perp, factor_mse = 1,1,1,1
@@ -313,6 +383,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
     losses_train = []
     losses_val = []
+    min_valloss = [100000]
     loss_response, loss_resolution_para, loss_resolution_perp, loss_mse = [], [], [], []
     summary_train = tf.summary.scalar("loss_train", loss_train)
     summary_val = tf.summary.scalar("loss_val", loss_val)
@@ -320,8 +391,9 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")), sess.graph)
     saver = tf.train.Saver()
     saveStep = 100
+    early_stopping = 0
     print("StartTraining")
-    for i_step in range(1000):
+    for i_step in range(10000):
         start_loop = time.time()
         batch_train = np.random.choice(np.arange(data_train.shape[0]), int(data_train.shape[0]*train_val_splitter), replace=False)
         batch_train_idx = batch_train[0:batchsize]
@@ -332,14 +404,28 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         #summary_, loss_, loss_response_, loss_resolution_para_, loss_resolution_perp_, loss_mse_, _ = sess.run([summary_train, loss_train, minimize_loss])
         losses_train.append(loss_)
         writer.add_summary(summary_, i_step)
-
         summary_, loss_ = sess.run([summary_val, loss_val], feed_dict={x_: data_val[batch_val_idx,:], y_: labels_val[batch_val_idx,:], w_: weights_val[batch_val_idx,:]})
         losses_val.append(loss_)
         writer.add_summary(summary_, i_step)
         end_loop = time.time()
+
+
+
         if i_step % saveStep == 0:
-            saver.save(sess, "%sNNmodel"%outputDir, global_step=i_step)
+            batch_train_idx_100 = batch_train[0:batchsize_val]
+            batch_val_idx_100 =  np.setdiff1d(  np.arange(data_train.shape[0]), batch_train_idx_100)[0:batchsize_val]
+            loss_ = sess.run(loss_val, feed_dict={x_: data_val[batch_val_idx_100,:], y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
+            if loss_<min(min_valloss):
+                saver.save(sess, "%sNNmodel"%outputDir, global_step=i_step)
+                print("better val loss found at ", i_step)
+            else:
+                early_stopping += 1
+                print("increased early stopping to ", early_stopping)
+            if early_stopping == 3:
+                break
+            min_valloss.append(loss_)
             print('gradient step No ', i_step)
+            print("validation loss", loss_)
             print("gradient step time {0} seconds".format(end_loop-start_loop))
 
 
@@ -353,6 +439,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.plot(range(1, len(moving_average(np.asarray(losses_train), 10))+1), moving_average(np.asarray(losses_train), 10), lw=3, label="Training loss")
     plt.plot(range(1, len(moving_average(np.asarray(losses_val), 10))+1), moving_average(np.asarray(losses_val), 10), lw=3, label="Validation loss")
     plt.xlabel("Gradient step"), plt.ylabel("loss")
+    plt.yscale('log')
     plt.legend()
     plt.savefig("%sLoss_ValLoss.png"%(plotsD))
     plt.close()

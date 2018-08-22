@@ -8,7 +8,7 @@ PhysicsProcess="Mu"
 optimizer="Adam"
 loss="Angle_Response"
 NN_mode="xy"
-trainingname="TF_1000Batch_10000GS_20_200_6HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
+trainingname="TF_20000Batch_10000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
@@ -58,7 +58,7 @@ python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsPro
 python $src_di/getResponse.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
 
 cp $src_di/*.py $plots_di
-cp $src_di/*Training.sh $plots_di
+cp $src_di/*Training1.sh $plots_di
 cp -r $plots_di /usr/users/tkopf/www/METplots/
 cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/
 #python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
