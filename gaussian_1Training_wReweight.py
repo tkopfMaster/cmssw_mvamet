@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
 import time
+import sys
 
 reweighting = True
 
@@ -198,16 +199,7 @@ def NNmodel(x, reuse):
                 initializer=tf.glorot_normal_initializer())
         b4 = tf.get_variable('b4', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
-        '''
-        w5 = tf.get_variable('w5', shape=(ndim, ndim), dtype=tf.float32,
-                initializer=tf.glorot_normal_initializer())
-        b5 = tf.get_variable('b5', shape=(ndim), dtype=tf.float32,
-                initializer=tf.constant_initializer(0.0))
-        w6 = tf.get_variable('w6', shape=(ndim, ndim), dtype=tf.float32,
-                initializer=tf.glorot_normal_initializer())
-        b6 = tf.get_variable('b6', shape=(ndim), dtype=tf.float32,
-                initializer=tf.constant_initializer(0.0))
-        '''
+
         w5 = tf.get_variable('w5', shape=(ndim, 2), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
         b5 = tf.get_variable('b5', shape=(2), dtype=tf.float32,
@@ -218,8 +210,6 @@ def NNmodel(x, reuse):
     l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
     l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
     l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
-    #l5 = tf.nn.relu(tf.add(b5, tf.matmul(l4, w5)))
-    #l6 = tf.nn.relu(tf.add(b6, tf.matmul(l5, w6)))
     logits = tf.add(b5, tf.matmul(l4, w5), name='logits')
     return logits, logits
 
@@ -391,7 +381,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     saveStep = 100
     early_stopping = 0
     print("StartTraining")
-    for i_step in range(100000):
+    for i_step in range(10000):
         start_loop = time.time()
         batch_train = np.random.choice(np.arange(data_train.shape[0]), int(data_train.shape[0]*train_val_splitter), replace=False)
         batch_train_idx = batch_train[0:batchsize]
@@ -417,12 +407,12 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
                 saver.save(sess, "%sNNmodel"%outputDir, global_step=i_step)
                 writer.flush()
                 print("better val loss found at ", i_step)
-                early_stopping = 0
+
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 5:
-                break
+            #if early_stopping == 3:
+            #    break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
             print("validation loss", loss_)
@@ -433,7 +423,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
 
 
-
+    #writer.flush()
 
 
     plt.plot(range(1, len(moving_average(np.asarray(losses_train), 10))+1), moving_average(np.asarray(losses_train), 10), lw=3, label="Training loss")

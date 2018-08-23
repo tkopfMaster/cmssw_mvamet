@@ -32,7 +32,7 @@ def loadData(fName, NN_mode):
     return(DFName)
 
 def prepareOutput(outputD, inputD, NN_mode, plotsD, Test_Idx):
-    ScaleFactor = True
+    ScaleFactor = False
 
     NN_Output = h5py.File("%sNN_Output_applied_%s.h5"%(outputD,NN_mode), "r+")
     if NN_mode == 'xyr' or NN_mode == 'nr':

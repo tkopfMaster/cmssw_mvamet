@@ -229,7 +229,8 @@ def WeightsOverPt(weights, BosonPt):
 
 def getweight(BosonPt):
     n, interval = np.histogram(BosonPt, bins=nBinspT)
-    y = np.divide(1, np.multiply(1.0,n))
+    nmean = np.mean(n)
+    y = np.divide(nmean, np.multiply(1.0,n))
     weight=np.repeat(np.nan, len(BosonPt))
     for i in range(0,len(BosonPt)):
         weight[i]= y[find_interval(BosonPt.iloc[i], interval)]

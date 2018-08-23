@@ -23,7 +23,7 @@ import sys
 pTMin, pTMax = 20,200
 
 
-nbins = 7
+nbins = 30
 binsAngle = 7
 nbinsVertex = 5
 nbinsHist = 40
@@ -1088,6 +1088,56 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     ax = plt.subplot(111)
 
     #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, 0, 200)
+    Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr, 20, 40)
+    Hist_Resolution_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr, 20, 40)
+    Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 20, 40)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label='$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(20,40)))
+
+    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.ylabel('Counts')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.xlim(ResolutionParaMin, ResolutionParaMax )
+    plt.savefig("%sHist_Resolution_para_20_40.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, 0, 200)
+    Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr, 100, 200)
+    Hist_Resolution_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr, 100, 200)
+    Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 100, 200)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label='$%8.2f\ \mathrm{GeV} < |-\\vec{p}_T^Z| \leq %8.2f\ \mathrm{GeV}$ \n $\mathrm{\# Vertex} \leq 50$'%(100,200)))
+
+    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.ylabel('Counts')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.xlim(ResolutionParaMin, ResolutionParaMax )
+    plt.savefig("%sHist_Resolution_para_100_200.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, 0, 200)
     Hist_Resolution_para_RC('NN_LongZ', 'NN', 6, ScaleErr, 0, 200)
     Hist_Resolution_para_RC('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr, 0, 200)
     Hist_Resolution_para_RC('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 0, 200)
@@ -1206,7 +1256,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    plt.ylim(ylimResMVAMin, ylimResMVAMax)
+    #plt.ylim(ylimResMVAMin, ylimResMVAMax)
     plt.savefig("%sResolution_perp_pT_RC.png"%(plotsD), bbox_inches="tight")
     plt.close()
 

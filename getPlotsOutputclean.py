@@ -626,7 +626,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    plt.ylim(ylimResMVAMin, ylimResMVAMax)
+    #plt.ylim(ylimResMVAMin, ylimResMVAMax)
     plt.savefig("%sResolution_para_pT_RC.png"%(plotsD), bbox_inches="tight")
     plt.close()
 

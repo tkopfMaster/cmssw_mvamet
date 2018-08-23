@@ -62,7 +62,8 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     logits, f = NNmodel(x, reuse=False)
 
     checkpoint_path = tf.train.latest_checkpoint(outputD)
-    sess = tf.Session()
+    gpu_options = tf.GPUOptions(allow_growth=True)
+    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) 
     saver = tf.train.Saver()
     saver.restore(sess, checkpoint_path)
 
