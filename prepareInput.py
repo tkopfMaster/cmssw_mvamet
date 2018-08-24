@@ -14,7 +14,7 @@ import h5py
 import sys
 import time
 
-pTMin, pTMax = 20, 200
+pTMin, pTMax = 100, 200
 nBinspT = (pTMax-pTMin)*2
 
 def div0( a, b , Target_Pt, Target_Phi):
@@ -230,7 +230,11 @@ def WeightsOverPt(weights, BosonPt):
 def getweight(BosonPt):
     n, interval = np.histogram(BosonPt, bins=nBinspT)
     nmean = np.mean(n)
-    y = np.divide(nmean, np.multiply(1.0,n))
+    print("Mean Boson Pt bin population", nmean)
+    intervalmean = np.divide(interval[:-1]+interval[1:],2)
+    print("intervalmean 0:10", intervalmean[0:10])
+    #y = np.divide(1.0, n)
+    y = np.divide(1, np.multiply(n, np.square(intervalmean )))
     weight=np.repeat(np.nan, len(BosonPt))
     for i in range(0,len(BosonPt)):
         weight[i]= y[find_interval(BosonPt.iloc[i], interval)]

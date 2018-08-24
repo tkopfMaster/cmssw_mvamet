@@ -93,6 +93,21 @@ def costExpected(y_true,y_pred, weight):
     cost = tf.multiply(tf.square(Resolution_para)+tf.square(u_perp_),weight)
     return tf.reduce_mean(cost)
 
+def costExpectedrelrel(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_perp = tf.sin(alpha_diff)*a_
+    u_perp_ = tf.sin(alpha_diff)
+    u_long = tf.cos(alpha_diff)*a_
+    Response = tf.divide(u_long,pZ)
+    Resolution_para = tf.divide(u_long-pZ,pZ)
+
+    cost = tf.multiply(tf.square(Resolution_para)+tf.square(u_perp_),weight)
+    return tf.reduce_mean(cost)
+
 def cost10Expected(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
     pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
@@ -106,6 +121,20 @@ def cost10Expected(y_true,y_pred, weight):
     Resolution_para = u_long-pZ
 
     cost = tf.multiply(40*tf.square(Resolution_para)+tf.square(u_perp_),weight)
+
+def costExpected2Pz(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_perp = tf.sin(alpha_diff)*a_
+    u_perp_ = tf.sin(alpha_diff)*pZ
+    u_long = tf.cos(alpha_diff)*a_
+    Response = tf.divide(u_long,pZ)
+    Resolution_para = u_long-pZ
+
+    cost = tf.multiply(tf.square(tf.multiply(Resolution_para,tf.square(pZ)))+tf.square(u_perp_),weight)
     return tf.reduce_mean(cost)
 
 def costExpectedRel(y_true,y_pred, weight):
@@ -164,8 +193,9 @@ def costResponse(y_true,y_pred, weight):
     u_long = tf.cos(alpha_diff)*a_
     Response = tf.divide(u_long,pZ)
 
-    cost= tf.multiply(tf.square(tf.multiply(Response-1,pZ)), weight)
+    cost= tf.multiply(tf.square(tf.multiply(Response-1,100000.0)), weight)
     return tf.reduce_mean(cost)
+
 
 
 def costMSE(y_true,y_pred, weight):
@@ -284,7 +314,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     weights_train = weights_train_
     weights_val = weights_val_
     batchsize = 1000
-    batchsize_val = 10000
+    batchsize_val = 1000
     print("Validation set hat Groesse ", len(train_val_idx))
     x = tf.placeholder(tf.float32, shape=[batchsize, data_train.shape[1]])
     y = tf.placeholder(tf.float32, shape=[batchsize, labels_train.shape[1]])
@@ -322,8 +352,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Response"):
         print("Loss Function Response: ", loss_fct)
-        loss_train = costResponse(batch_train[1], logits_train, batch_train[2])
-        loss_val = costResponse(batch_val[1], logits_val, batch_val[2])
+        loss_train = costResponse(y, logits_train, w)
+        loss_val = costResponse(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Resolution_para"):
         print("Loss Function Resolution_para: ", loss_fct)
@@ -339,6 +369,16 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         print("Loss Function Angle_Response: ", loss_fct)
         loss_train = costExpected(y, logits_train, w)
         loss_val = costExpected(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="relAngle_relResponse"):
+        print("Loss Function relAngle_relResponse: ", loss_fct)
+        loss_train = costExpectedrelrel(y, logits_train, w)
+        loss_val = costExpectedrelrel(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="Angle_Response2Pz"):
+        print("Loss Function Angle_ResponsePz: ", loss_fct)
+        loss_train = costExpected2Pz(y, logits_train, w)
+        loss_val = costExpected2Pz(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Angle_10Response"):
         print("Loss Function 10Angle_Response: ", loss_fct)
@@ -381,7 +421,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
     losses_train = []
     losses_val = []
-    min_valloss = [100000]
+    min_valloss = [10000000]
     loss_response, loss_resolution_para, loss_resolution_perp, loss_mse = [], [], [], []
     summary_train = tf.summary.scalar("loss_train", loss_train)
     summary_val = tf.summary.scalar("loss_val", loss_val)

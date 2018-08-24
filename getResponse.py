@@ -20,7 +20,7 @@ import h5py
 import sys
 
 
-pTMin, pTMax = 20,200
+pTMin, pTMax = 100,200
 
 
 nbins = 30
@@ -531,16 +531,6 @@ def plotMVAResolutionOverpTZ_woutError_perp(branchString, labelName, errbars_shi
     std = np.sqrt(sy2/n - mean*mean)
     plt.errorbar((_[1:] + _[:-1])/2, std, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors_InOut[errbars_shift])
 
-def plotMVAResolutionOverpTZ_woutError_perp_RC(branchString, labelName, errbars_shift, ScaleErr):
-    binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
-    n, _ = np.histogram(DFName[Target_Pt], bins=nbins)
-    sy, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString]))
-    sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString])**2)
-    mean = sy / n
-    std = np.sqrt(sy2/n - mean*mean)
-    sy_resp, _resp = np.histogram(DFName[Target_Pt], bins=nbins, weights=-(DFName[branchString]+DFName[Target_Pt]))
-    mean_resp = sy_resp / n
-    plt.errorbar((_[1:] + _[:-1])/2, div0(std,mean_resp), marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 
 
@@ -588,8 +578,17 @@ def Hist_Resolution_para(branchString, labelName, errbars_shift, ScaleErr, range
 
 def Hist_Resolution_para_RC(branchString, labelName, errbars_shift, ScaleErr, rangemin, rangemax):
     u_para = -(DFName[branchString][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)])
-    pZ = -DFName[Target_Pt][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)]
+    pZ = DFName[Target_Pt][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)]
     RC = np.divide((u_para-pZ),np.divide(u_para,pZ))
+    Mean = np.mean(RC)
+    Std = np.std(RC)
+    plt.hist(RC, bins=nbinsHist, range=[ResolutionParaMin, ResolutionParaMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
+
+def Hist_Resolution_perp_RC(branchString, labelName, errbars_shift, ScaleErr, rangemin, rangemax):
+    u_para = -(DFName[branchString][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)])
+    u_perp = DFName[branchString][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)]
+    pZ = DFName[Target_Pt][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)]
+    RC = np.divide((u_perp),np.divide(u_para,pZ))
     Mean = np.mean(RC)
     Std = np.std(RC)
     plt.hist(RC, bins=nbinsHist, range=[ResolutionParaMin, ResolutionParaMax], label=labelName+', %8.2f $\pm$ %8.2f'%(Mean, Std), histtype='step', ec=colors_InOut[errbars_shift])
@@ -839,7 +838,7 @@ def plotMVAResolutionOverpTZ_woutError_perp_RC(branchString, labelName, errbars_
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString])**2)
     mean = sy / n
     std = np.sqrt(sy2/n - mean*mean)
-    sy_resp, _resp = np.histogram(DFName[Target_Pt], bins=nbins, weights=-(DFName[branchString]+DFName[Target_Pt]))
+    sy_resp, _resp = np.histogram(DFName[Target_Pt], bins=nbins, weights=-(DFName[branchString])/DFName[Target_Pt])
     mean_resp = sy_resp / n
     plt.errorbar((_[1:] + _[:-1])/2, div0(std,mean_resp), marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName, linestyle="None", capsize=0,  color=colors[errbars_shift])
 
@@ -1240,9 +1239,9 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plotMVAResolutionOverpTZ_woutError_perp_RC('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr)
-    plotMVAResolutionOverpTZ_woutError_perp_RC('NN_PerpZ', 'NN', 6, ScaleErr)
-    plotMVAResolutionOverpTZ_woutError_perp_RC('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr)
+    Hist_Resolution_perp_RC('recoilslimmedMETsPuppi_PerpZ', 'Puppi', 4, ScaleErr, 0, 200)
+    Hist_Resolution_perp_RC('NN_PerpZ', 'NN', 6, ScaleErr, 0, 200)
+    Hist_Resolution_perp_RC('recoilslimmedMETs_PerpZ', 'PF', 1, ScaleErr, 0, 200)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])

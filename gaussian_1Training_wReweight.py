@@ -94,6 +94,21 @@ def costExpected(y_true,y_pred, weight):
     cost = tf.multiply(tf.square(Resolution_para)+tf.square(u_perp_),weight)
     return tf.reduce_mean(cost)
 
+def costExpectedPz(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_perp = tf.sin(alpha_diff)*a_
+    u_perp_ = tf.sin(alpha_diff)*pZ
+    u_long = tf.cos(alpha_diff)*a_
+    Response = tf.divide(u_long,pZ)
+    Resolution_para = u_long-pZ
+
+    cost = tf.multiply(tf.square(tf.multiply(Resolution_para,pZ))+tf.square(u_perp_),weight)
+    return tf.reduce_mean(cost)
+
 def cost10Expected(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
     pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
@@ -167,6 +182,7 @@ def costResponse(y_true,y_pred, weight):
 
     cost= tf.multiply(tf.square(tf.multiply(Response-1,pZ)), weight)
     return tf.reduce_mean(cost)
+
 
 
 def costMSE(y_true,y_pred, weight):
@@ -329,6 +345,11 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         print("Loss Function Angle_Response: ", loss_fct)
         loss_train = costExpected(y, logits_train, w)
         loss_val = costExpected(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="Angle_ResponsePz"):
+        print("Loss Function Angle_ResponsePz: ", loss_fct)
+        loss_train = costExpectedPz(y, logits_train, w)
+        loss_val = costExpectedPz(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Angle_10Response"):
         print("Loss Function 10Angle_Response: ", loss_fct)
