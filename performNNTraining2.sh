@@ -6,9 +6,9 @@ echo "trainingname eingeben"
 #trainingname='xyrTargets'
 PhysicsProcess="Mu"
 optimizer="Adam"
-loss="Angle_Response2Pz"
+loss="Response"
 NN_mode="xy"
-trainingname="TF_10000uniformlossReweight_woutScale_1000Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
+trainingname="TF_5GeVuniformReweight_wSumEt_wScale_woutVertexReweight_1000Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
@@ -46,19 +46,19 @@ if [ ! -d "trainings/$trainingname" ]; then
 	echo "files_di"
 fi
 #spaeter mal: config mit Art des Trainings festlegen
-#python $src_di/prepareInput.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
+#python $src_di/prepareInput_wSumEt.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
 #python $src_di/gaussian_1Training.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/1training_BU1508.py $files_di $optimizer $loss $NN_mode $plots_di
-python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
+#python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
 
-python $src_di/prepareOutput_woutScale.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
+python $src_di/prepareOutput.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
 #python $src_di/MiniplotTraining.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
 python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
 python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode
 python $src_di/getResponse.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
 
 cp $src_di/*.py $plots_di
-cp $src_di/*Training2.sh $plots_di
+cp $src_di/*Training.sh $plots_di
 cp -r $plots_di /usr/users/tkopf/www/METplots/
 cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/
 #python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di

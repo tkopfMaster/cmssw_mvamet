@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-
 import h5py
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
 import root_numpy as rnp
 import sys
 import pandas as pd
@@ -14,6 +10,7 @@ from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 from rootpy.io import root_open
 from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
 import ROOT
+from gaussian_1Training import loadInputsTargetsWeights
 
 
 
@@ -33,6 +30,7 @@ def loadData(fName, NN_mode):
 
 def prepareOutput(outputD, inputD, NN_mode, plotsD, Test_Idx):
     ScaleFactor = False
+    WeightedScale = False
 
     NN_Output = h5py.File("%sNN_Output_applied_%s.h5"%(outputD,NN_mode), "r+")
     if NN_mode == 'xyr' or NN_mode == 'nr':
@@ -97,7 +95,15 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD, Test_Idx):
         a_, a_phi = kar2pol(a_x,a_y)
         NN_LongZ, NN_PerpZ = -np.cos(angularrange(np.add(a_phi,-mZ_phi)))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
         a_r = a_
-
+    elif WeightedScale:
+        Inputs, Targets, Weights = loadInputsTargetsWeights(outputD, NN_mode)
+        Training_Idx = np.setdiff1d(np.arange(len(mZ_r)), Test_Idx)
+        Response = np.divide(np.mean(np.divide(-np.multiply(NN_LongZ[Training_Idx],Weights[Training_Idx]),mZ_r[Training_Idx])), np.sum(Weights[Training_Idx]))
+        ScaleFactor = np.divide(1,Response)
+        a_x, a_y = np.multiply(a_x, ScaleFactor), np.multiply(a_y, ScaleFactor)
+        a_, a_phi = kar2pol(a_x,a_y)
+        NN_LongZ, NN_PerpZ = -np.cos(angularrange(np.add(a_phi,-mZ_phi)))*a_, np.sin(angularrange(a_phi-mZ_phi))*a_
+        a_r = a_
 
 
 
@@ -122,6 +128,11 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD, Test_Idx):
     print('richtig, wenn auf a trainiert: -LongZ-pTZ', -NN_LongZ-mZ_r)
     print('richtig, wenn auf Z trainiert: LongZ-pTZ', np.add(NN_LongZ,-mZ_r))
 
+
+
+    import matplotlib as mpl
+    mpl.use('Agg')
+    import matplotlib.pyplot as plt
     plt.clf()
     plt.figure()
     plt.suptitle('y: Prediction vs. Target ')

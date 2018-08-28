@@ -16,7 +16,7 @@ import h5py
 import sys
 
 
-pTMin, pTMax = 100,200
+pTMin, pTMax = 20,200
 
 #fName ="/storage/b/tkopf/mvamet/skim/out.root"
 nbins = 10

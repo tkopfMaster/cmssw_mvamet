@@ -20,10 +20,10 @@ import h5py
 import sys
 
 
-pTMin, pTMax = 100,200
+pTMin, pTMax = 20,200
 
 
-nbins = 30
+nbins = int((pTMax-pTMin)/20)
 binsAngle = 7
 nbinsVertex = 5
 nbinsHist = 40

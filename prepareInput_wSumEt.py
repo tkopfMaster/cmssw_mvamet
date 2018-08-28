@@ -16,7 +16,7 @@ import time
 
 VertexReweight=True
 pTMin, pTMax = 20, 200
-nBinspT = int((pTMax-pTMin)/5)
+nBinspT = int((pTMax-pTMin)*2)
 VertexMax = 50
 nBinsVertex = int((VertexMax)/5)
 
@@ -253,14 +253,15 @@ def getweight(BosonPt):
     for i in range(0,len(BosonPt)):
         weight[i]= y[find_interval(BosonPt.iloc[i], interval)]
         if i%100000==0:
-            print("Weight No. ",i)
+            print(i)
     if not (len(BosonPt)==len(weight)) or np.any(np.isnan(weight)):
         raise EXCEPTION("Weights not same length as Boson Pt")
     return weight
 
+
+
 def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
     pTCut = 0
-
     IdxpTCut = (DataF['Boson_Pt']>pTMin) & (DataF['Boson_Pt']<=pTMax) & (DataF['NVertex']<=VertexMax)
     start_time = time.time()
     if VertexReweight:
@@ -288,6 +289,7 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
           plt.close()
     else:
         weights = getweight(DataF['Boson_Pt'][IdxpTCut])
+    print("get weights hat funktioniert")
     plt.hist(weights, bins=nBinspT , lw=3, label="Training loss")
     plt.xlabel("Weights"), plt.ylabel("Counts")
     plt.legend()
@@ -324,42 +326,38 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     print('DataF[recoilslimmedMETs_Pt]', DataF['recoilslimmedMETs_Pt'].shape)
     dset_PF = dset.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]) ])
-    ''' ,
-        DataF['recoilslimmedMETs_sumEt'][IdxpTCut],
-        DataF['NVertex'][IdxpTCut]])
-    '''
+        pol2kar_y(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]),
+        DataF['recoilslimmedMETs_sumEt'][IdxpTCut]])
 
     dset_Track = dset.create_dataset("Track",  dtype='f',
         data=[ pol2kar_x(DataF['recoilpatpfTrackMET_Pt'][IdxpTCut], DataF['recoilpatpfTrackMET_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilpatpfTrackMET_Pt'][IdxpTCut], DataF['recoilpatpfTrackMET_Phi'][IdxpTCut])])
-    ''',
+        pol2kar_y(DataF['recoilpatpfTrackMET_Pt'][IdxpTCut], DataF['recoilpatpfTrackMET_Phi'][IdxpTCut]),
         DataF['recoilpatpfTrackMET_sumEt'][IdxpTCut]])
-    '''
+
 
     dset_NoPU = dset.create_dataset("NoPU",  dtype='f',
         data=[pol2kar_x(DataF['recoilpatpfNoPUMET_Pt'][IdxpTCut], DataF['recoilpatpfNoPUMET_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilpatpfNoPUMET_Pt'][IdxpTCut], DataF['recoilpatpfNoPUMET_Phi'][IdxpTCut])])
-    ''',
-        DataF['recoilpatpfNoPUMET_sumEt'][IdxpTCut]])'''
+        pol2kar_y(DataF['recoilpatpfNoPUMET_Pt'][IdxpTCut], DataF['recoilpatpfNoPUMET_Phi'][IdxpTCut]),
+        DataF['recoilpatpfNoPUMET_sumEt'][IdxpTCut]])
+
 
     dset_PUCorrected = dset.create_dataset("PUCorrected",  dtype='f',
         data=[pol2kar_x(DataF['recoilpatpfPUCorrectedMET_Pt'][IdxpTCut], DataF['recoilpatpfPUCorrectedMET_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilpatpfPUCorrectedMET_Pt'][IdxpTCut], DataF['recoilpatpfPUCorrectedMET_Phi'][IdxpTCut])])
-    ''',
-        DataF['recoilpatpfPUCorrectedMET_sumEt'][IdxpTCut]])'''
+        pol2kar_y(DataF['recoilpatpfPUCorrectedMET_Pt'][IdxpTCut], DataF['recoilpatpfPUCorrectedMET_Phi'][IdxpTCut]),
+        DataF['recoilpatpfPUCorrectedMET_sumEt'][IdxpTCut]])
+
 
     dset_PU = dset.create_dataset("PU",  dtype='f',
         data=[pol2kar_x(DataF['recoilpatpfPUMET_Pt'][IdxpTCut], DataF['recoilpatpfPUMET_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilpatpfPUMET_Pt'][IdxpTCut], DataF['recoilpatpfPUMET_Phi'][IdxpTCut])])
-    ''',
-        DataF['recoilpatpfPUMET_sumEt'][IdxpTCut]])'''
+        pol2kar_y(DataF['recoilpatpfPUMET_Pt'][IdxpTCut], DataF['recoilpatpfPUMET_Phi'][IdxpTCut]),
+        DataF['recoilpatpfPUMET_sumEt'][IdxpTCut]])
+
 
     dset_Puppi = dset.create_dataset("Puppi",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETsPuppi_Pt'][IdxpTCut], DataF['recoilslimmedMETsPuppi_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'][IdxpTCut], DataF['recoilslimmedMETsPuppi_Phi'][IdxpTCut])])
-    ''',
-        DataF['recoilslimmedMETsPuppi_sumEt'][IdxpTCut]])'''
+        pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'][IdxpTCut], DataF['recoilslimmedMETsPuppi_Phi'][IdxpTCut]),
+        DataF['recoilslimmedMETsPuppi_sumEt'][IdxpTCut]])
+
     dset_NoPV = dset.create_dataset("NVertex",  dtype='f',data=[DataF['NVertex'][IdxpTCut]] )
 
 
@@ -431,42 +429,34 @@ def getInputs_xy(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
 
     dset_PF = dset.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut])] )
-    ''' ,
-        DataF['recoilslimmedMETs_sumEt'][IdxpTCut],
-        DataF['NVertex'][IdxpTCut]][IdxpTCut])
-    '''
+        pol2kar_y(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]),
+        DataF['recoilslimmedMETs_sumEt'][IdxpTCut]])
 
     dset_Track = dset.create_dataset("Track",  dtype='f',
         data=[ pol2kar_x(DataF['recoilpatpfTrackMET_Pt'][IdxpTCut], DataF['recoilpatpfTrackMET_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilpatpfTrackMET_Pt'][IdxpTCut], DataF['recoilpatpfTrackMET_Phi'][IdxpTCut])])
-    ''',
-        DataF['recoilpatpfTrackMET_sumEt'][IdxpTCut]][IdxpTCut])
-    '''
+        pol2kar_y(DataF['recoilpatpfTrackMET_Pt'][IdxpTCut], DataF['recoilpatpfTrackMET_Phi'][IdxpTCut]),
+        DataF['recoilpatpfTrackMET_sumEt'][IdxpTCut]])
 
     dset_NoPU = dset.create_dataset("NoPU",  dtype='f',
         data=[pol2kar_x(DataF['recoilpatpfNoPUMET_Pt'][IdxpTCut], DataF['recoilpatpfNoPUMET_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilpatpfNoPUMET_Pt'][IdxpTCut], DataF['recoilpatpfNoPUMET_Phi'][IdxpTCut])])
-    ''',
-        DataF['recoilpatpfNoPUMET_sumEt'][IdxpTCut]][IdxpTCut])'''
+        pol2kar_y(DataF['recoilpatpfNoPUMET_Pt'][IdxpTCut], DataF['recoilpatpfNoPUMET_Phi'][IdxpTCut]),
+        DataF['recoilpatpfNoPUMET_sumEt'][IdxpTCut]])
 
     dset_PUCorrected = dset.create_dataset("PUCorrected",  dtype='f',
         data=[pol2kar_x(DataF['recoilpatpfPUCorrectedMET_Pt'][IdxpTCut], DataF['recoilpatpfPUCorrectedMET_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilpatpfPUCorrectedMET_Pt'][IdxpTCut], DataF['recoilpatpfPUCorrectedMET_Phi'][IdxpTCut])])
-    ''',
-        DataF['recoilpatpfPUCorrectedMET_sumEt'][IdxpTCut]][IdxpTCut])'''
+        pol2kar_y(DataF['recoilpatpfPUCorrectedMET_Pt'][IdxpTCut], DataF['recoilpatpfPUCorrectedMET_Phi'][IdxpTCut]),
+        DataF['recoilpatpfPUCorrectedMET_sumEt'][IdxpTCut]])
 
     dset_PU = dset.create_dataset("PU",  dtype='f',
         data=[pol2kar_x(DataF['recoilpatpfPUMET_Pt'][IdxpTCut], DataF['recoilpatpfPUMET_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilpatpfPUMET_Pt'][IdxpTCut], DataF['recoilpatpfPUMET_Phi'][IdxpTCut])])
-    ''',
-        DataF['recoilpatpfPUMET_sumEt'][IdxpTCut]][IdxpTCut])'''
+        pol2kar_y(DataF['recoilpatpfPUMET_Pt'][IdxpTCut], DataF['recoilpatpfPUMET_Phi'][IdxpTCut]),
+        DataF['recoilpatpfPUMET_sumEt'][IdxpTCut]])
 
     dset_Puppi = dset.create_dataset("Puppi",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETsPuppi_Pt'][IdxpTCut], DataF['recoilslimmedMETsPuppi_Phi'][IdxpTCut]),
-        pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'][IdxpTCut], DataF['recoilslimmedMETsPuppi_Phi'][IdxpTCut])])
-    ''',
-        DataF['recoilslimmedMETsPuppi_sumEt'][IdxpTCut]][IdxpTCut])'''
+        pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'][IdxpTCut], DataF['recoilslimmedMETsPuppi_Phi'][IdxpTCut]),
+        DataF['recoilslimmedMETsPuppi_sumEt'][IdxpTCut]])
+
     dset_NoPV = dset.create_dataset("NVertex",  dtype='f',data=[DataF['NVertex'][IdxpTCut]] )
 
 
@@ -527,12 +517,15 @@ def getInputs_xy_Test2(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
 
 def getInputs(fName, fileName_apply, NN_mode, outputD, PhysicsProcess, Target_Pt, Target_Phi):
     if NN_mode == 'xy':
+            print("funktioniert 1")
             Data = loadData_training(fName,  Target_Pt, Target_Phi, PhysicsProcess)
             #Inputs = getInputs_xy_Test(Data, outputD, PhysicsProcess, Target_Pt, Target_Phi, writeInputs_training)
+            print("funktioniert 2")
             Inputs = getInputs_xy_pTCut(Data, outputD, PhysicsProcess, Target_Pt, Target_Phi, writeInputs_training)
-
+            print("funktioniert 3")
             Data_apply = loadData(fileName_apply,  Target_Pt, Target_Phi, PhysicsProcess)
             #Inputs_apply = getInputs_xy_Test2(Data_apply, outputD, PhysicsProcess, Target_Pt, Target_Phi, writeInputs_apply)
+            print("funktioniert 4")
             Inputs_apply = getInputs_xy(Data_apply, outputD, PhysicsProcess, Target_Pt, Target_Phi, writeInputs_apply)
 
 
