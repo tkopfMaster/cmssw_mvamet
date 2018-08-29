@@ -312,7 +312,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     Inputs_train_train, Inputs_train_val = Inputs[train_train_idx,:], Inputs[train_val_idx,:]
     Targets_train, Targets_test = Targets[train_train_idx,:], Targets[train_val_idx,:]
     if reweighting:
-        WeightFactor = int(np.divide(1.0,np.mean(Weights[train_train_idx,:])))
+        WeightFactor = int(np.divide(0.001,np.mean(Weights[train_train_idx,:])))
         weights_train_, weights_val_ = WeightFactor*Weights[train_train_idx,:], WeightFactor*Weights[train_val_idx,:]
     else:
         print("No reweighting")

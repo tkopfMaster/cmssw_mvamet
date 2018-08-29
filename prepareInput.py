@@ -1,5 +1,7 @@
 import numpy as np
 import root_numpy as rnp
+import scipy
+from scipy import optimize
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -14,7 +16,7 @@ import h5py
 import sys
 import time
 
-VertexReweight=True
+VertexReweight=False
 pTMin, pTMax = 20, 200
 nBinspT = int((pTMax-pTMin)/5)
 VertexMax = 50
@@ -43,6 +45,16 @@ def kar2pol(x, y):
     rho = np.sqrt(np.multiply(x,x) + np.multiply(y,y))
     phi = np.arctan2(y, x)
     return(rho, phi)
+
+
+
+def Spectrum(x, a, b):
+    return a * x * np.exp(-x/(2*b))
+
+def getCurceParameters(x_data, y_data):
+    params, params_covariance = optimize.curve_fit(Spectrum, x_data, y_data, p0=[2, 10000])
+    return(params)
+
 
 
 def angularrange(Winkel):
@@ -276,6 +288,7 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     pTCut = 0
     IdxpTCut = (DataF['Boson_Pt']>pTMin) & (DataF['Boson_Pt']<=pTMax) & (DataF['NVertex']<=VertexMax)
     start_time = time.time()
+    n, _ = np.histogram(DataF['Boson_Pt'][IdxpTCut], bins=10000)
     if VertexReweight:
           weightsPV = getweightNVertex(DataF['NVertex'][IdxpTCut])
           weightspT = getweightBosonPt(DataF['Boson_Pt'][IdxpTCut])
@@ -347,14 +360,27 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
 
 
     else:
-        weights = getweight(DataF['Boson_Pt'][IdxpTCut])
+        weights = np.divide(1.0, Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]))
     plt.hist(weights, bins=nBinspT , lw=3, label="Training loss")
     plt.xlabel("Weights"), plt.ylabel("Counts")
     plt.legend()
     plt.savefig("%sWeights.png"%(plotsD))
     plt.close()
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
 
+
+    plt.scatter((_[:-1]+_[1:])/2, n, label='Data')
+    plt.plot(np.arange(pTMin, pTMax, 0.01), Spectrum(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]),
+             label='Fitted function', color="r")
+
+    plt.xlabel("$p_T^Z$"), plt.ylabel("Counts")
+    plt.legend(loc='best')
+    plt.xlim(pTMin, pTMax)
+    plt.savefig("%sFittedFunction.png"%(plotsD), bbox_inches="tight")
+    plt.close()
 
 
     fig=plt.figure(figsize=(10,6))

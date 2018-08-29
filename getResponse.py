@@ -35,8 +35,8 @@ colors_InOut = cm.brg(np.linspace(0, 1, 8))
 colors2 = colors
 HistLimMin, HistLimMax = -50, 50
 ResponseMin, ResponseMax = -1,3
-ResolutionParaMin, ResolutionParaMax = -40, 40
-ResolutionPerpMin, ResolutionPerpMax = -40, 40
+ResolutionParaMin, ResolutionParaMax = -60, 60
+ResolutionPerpMin, ResolutionPerpMax = -60, 60
 ResponseMinErr, ResponseMaxErr = 0, 1.05
 ylimResMVAMin, ylimResMVAMax = 0, 35
 errbars_shift2 = 10
@@ -1081,6 +1081,80 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.savefig("%sHist_Resolution_para.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, 0, 200)
+    Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr, 128, 146)
+    Hist_Resolution_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr, 128, 146)
+    Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 128, 146)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.ylabel('Counts')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.xlim(-100, 100 )
+    plt.savefig("%sHist_Resolution_para_128_146.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, 0, 200)
+    Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr, 146, 164)
+    Hist_Resolution_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr, 146, 164)
+    Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 146, 164)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.ylabel('Counts')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.xlim(-100, 100 )
+    plt.savefig("%sHist_Resolution_para_146_164.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    #Hist_Resolution_para('LongZCorrectedRecoil_LongZ', 'GBRT', 5, ScaleErr, 0, 200)
+    Hist_Resolution_para('NN_LongZ', 'NN', 6, ScaleErr, 110, 128)
+    Hist_Resolution_para('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr, 110, 128)
+    Hist_Resolution_para('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr, 110, 128)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$U_{\parallel}-p_T^Z$')
+    plt.ylabel('Counts')
+    #plt.ylabel('$\sigma \\left( \\frac{u_{\parallel}}{|-\\vec{p}_T^Z|} \\right) $ in GeV')
+    #plt.title('Resolution $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.xlim(-100, 100 )
+    plt.savefig("%sHist_Resolution_para_110_128.png"%(plotsD), bbox_inches="tight")
+    plt.close()
 
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')

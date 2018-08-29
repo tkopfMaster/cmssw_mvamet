@@ -1,5 +1,6 @@
 import numpy as np
 import root_numpy as rnp
+from scipy import optimize
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -14,11 +15,11 @@ import h5py
 import sys
 import time
 
-VertexReweight=True
+VertexReweight=False
 pTMin, pTMax = 20, 200
 nBinspT = int((pTMax-pTMin)*2)
 VertexMax = 50
-nBinsVertex = int((VertexMax)/5)
+nBinsVertex = int((VertexMax)/10)
 
 def div0( a, b , Target_Pt, Target_Phi):
     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
@@ -52,6 +53,13 @@ def angularrange(Winkel):
     else:
         Winkel=((Winkel+np.pi)%(2*np.pi)-(np.pi))
     return(Winkel)
+
+def Spectrum(x, a, b):
+    return a * x * np.exp(-x/(2*b))
+
+def getCurceParameters(x_data, y_data):
+    params, params_covariance = optimize.curve_fit(Spectrum, x_data, y_data, p0=[2, 2])
+    return(params)
 
 def loadData(fName, Target_Pt, Target_Phi, PhysicsProcess):
     tfile = ROOT.TFile(fName)
@@ -281,6 +289,7 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     pTCut = 0
     IdxpTCut = (DataF['Boson_Pt']>pTMin) & (DataF['Boson_Pt']<=pTMax) & (DataF['NVertex']<=VertexMax)
     start_time = time.time()
+    n, _ = np.histogram(DataF['Boson_Pt'][IdxpTCut], bins=10000)
     if VertexReweight:
           weightsPV = getweightNVertex(DataF['NVertex'][IdxpTCut])
           weightspT = getweightBosonPt(DataF['Boson_Pt'][IdxpTCut])
@@ -373,14 +382,29 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
 
 
     else:
-        weights = getweight(DataF['Boson_Pt'][IdxpTCut])
-    print("get weights hat funktioniert")
+        weights = np.divide(1.0, np.multiply(Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]), np.square(DataF['Boson_Pt'][IdxpTCut])))
     plt.hist(weights, bins=nBinspT , lw=3, label="Training loss")
     plt.xlabel("Weights"), plt.ylabel("Counts")
     plt.legend()
     plt.savefig("%sWeights.png"%(plotsD))
     plt.close()
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plt.plot(np.arange(pTMin, pTMax, 0.01), Spectrum(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]),
+             label='Fitted function', color = "r")
+    plt.scatter((_[:-1]+_[1:])/2, n, label='Data', alpha=0.05, s=1)
+
+
+    plt.xlabel("$p_T^Z$"), plt.ylabel("Counts")
+    plt.legend(loc='best')
+    plt.xlim(pTMin, pTMax)
+    plt.savefig("%sFittedFunction.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+    print("Values of pT fitted Function", Spectrum(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]))
 
 
 
