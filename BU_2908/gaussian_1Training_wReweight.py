@@ -22,11 +22,11 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
 import time
+import sys
 
 reweighting = True
-ndimInputs = 18
 
-def loadInputsTargetsWeights(outputD, NN_mode):
+def loadInputsTargetsWeights(outputD):
     InputsTargets = h5py.File("%sNN_Input_training_%s.h5" % (outputD,NN_mode), "r")
     norm = np.sqrt(np.multiply(InputsTargets['Target'][:,0],InputsTargets['Target'][:,0]) + np.multiply(InputsTargets['Target'][:,1],InputsTargets['Target'][:,1]))
 
@@ -92,21 +92,21 @@ def costExpected(y_true,y_pred, weight):
     Resolution_para = u_long-pZ
 
     cost = tf.multiply(tf.square(Resolution_para)+tf.square(u_perp_),weight)
-    return tf.reduce_sum(cost)
+    return tf.reduce_mean(cost)
 
-def costExpectedrelrel(y_true,y_pred, weight):
+def costExpectedPz(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
     pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
     alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
     alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
     alpha_diff=tf.subtract(alpha_a,alpha_Z)
     u_perp = tf.sin(alpha_diff)*a_
-    u_perp_ = tf.sin(alpha_diff)
+    u_perp_ = tf.sin(alpha_diff)*pZ
     u_long = tf.cos(alpha_diff)*a_
     Response = tf.divide(u_long,pZ)
-    Resolution_para = tf.divide(u_long-pZ,pZ)
+    Resolution_para = u_long-pZ
 
-    cost = tf.multiply(tf.square(Resolution_para)+tf.square(u_perp_),weight)
+    cost = tf.multiply(tf.square(tf.multiply(Resolution_para,pZ))+tf.square(u_perp_),weight)
     return tf.reduce_mean(cost)
 
 def cost10Expected(y_true,y_pred, weight):
@@ -122,20 +122,6 @@ def cost10Expected(y_true,y_pred, weight):
     Resolution_para = u_long-pZ
 
     cost = tf.multiply(40*tf.square(Resolution_para)+tf.square(u_perp_),weight)
-
-def costExpected2Pz(y_true,y_pred, weight):
-    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
-    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
-    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
-    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
-    alpha_diff=tf.subtract(alpha_a,alpha_Z)
-    u_perp = tf.sin(alpha_diff)*a_
-    u_perp_ = tf.sin(alpha_diff)*pZ
-    u_long = tf.cos(alpha_diff)*a_
-    Response = tf.divide(u_long,pZ)
-    Resolution_para = u_long-pZ
-
-    cost = tf.multiply(tf.square(tf.multiply(Resolution_para,tf.square(pZ)))+tf.square(u_perp_),weight)
     return tf.reduce_mean(cost)
 
 def costExpectedRel(y_true,y_pred, weight):
@@ -197,18 +183,7 @@ def costResponse(y_true,y_pred, weight):
     cost= tf.multiply(tf.square(tf.multiply(Response-1,pZ)), weight)
     return tf.reduce_mean(cost)
 
-def costrelResponse(y_true,y_pred, weight):
-    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
-    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
-    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
-    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
-    alpha_diff=tf.subtract(alpha_a,alpha_Z)
-    u_perp = tf.sin(alpha_diff)*a_
-    u_long = tf.cos(alpha_diff)*a_
-    Response = tf.divide(u_long,pZ)
 
-    cost= tf.multiply(tf.square(u_long-pZ), weight)
-    return tf.reduce_mean(cost)
 
 def costMSE(y_true,y_pred, weight):
     MSE_x=tf.square(y_pred[:,0]-y_true[:,0])
@@ -223,7 +198,7 @@ def NNmodel(x, reuse):
     with tf.variable_scope("model") as scope:
         if reuse:
             scope.reuse_variables()
-        w1 = tf.get_variable('w1', shape=(ndimInputs,ndim), dtype=tf.float32,
+        w1 = tf.get_variable('w1', shape=(12,ndim), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
         b1 = tf.get_variable('b1', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
@@ -240,16 +215,7 @@ def NNmodel(x, reuse):
                 initializer=tf.glorot_normal_initializer())
         b4 = tf.get_variable('b4', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
-        '''
-        w5 = tf.get_variable('w5', shape=(ndim, ndim), dtype=tf.float32,
-                initializer=tf.glorot_normal_initializer())
-        b5 = tf.get_variable('b5', shape=(ndim), dtype=tf.float32,
-                initializer=tf.constant_initializer(0.0))
-        w6 = tf.get_variable('w6', shape=(ndim, ndim), dtype=tf.float32,
-                initializer=tf.glorot_normal_initializer())
-        b6 = tf.get_variable('b6', shape=(ndim), dtype=tf.float32,
-                initializer=tf.constant_initializer(0.0))
-        '''
+
         w5 = tf.get_variable('w5', shape=(ndim, 2), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
         b5 = tf.get_variable('b5', shape=(2), dtype=tf.float32,
@@ -260,15 +226,13 @@ def NNmodel(x, reuse):
     l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
     l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
     l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
-    #l5 = tf.nn.relu(tf.add(b5, tf.matmul(l4, w5)))
-    #l6 = tf.nn.relu(tf.add(b6, tf.matmul(l5, w6)))
     logits = tf.add(b5, tf.matmul(l4, w5), name='logits')
     return logits, logits
 
 
 def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     start = time.time()
-    Inputs, Targets, Weights = loadInputsTargetsWeights(outputDir, NN_mode)
+    Inputs, Targets, Weights = loadInputsTargetsWeights(outputDir)
 
     Boson_Pt = np.sqrt(np.square(Targets[:,0])+np.square(Targets[:,1]))
     num_events = Inputs.shape[0]
@@ -312,8 +276,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     Inputs_train_train, Inputs_train_val = Inputs[train_train_idx,:], Inputs[train_val_idx,:]
     Targets_train, Targets_test = Targets[train_train_idx,:], Targets[train_val_idx,:]
     if reweighting:
-        WeightFactor = int(np.divide(1.0,np.mean(Weights[train_train_idx,:])))
-        weights_train_, weights_val_ = WeightFactor*Weights[train_train_idx,:], WeightFactor*Weights[train_val_idx,:]
+        weights_train_, weights_val_ = Weights[train_train_idx,:], Weights[train_val_idx,:]
     else:
         print("No reweighting")
         weights_train_, weights_val_ = np.repeat(1., len(train_train_idx)) , np.repeat(1., len(train_val_idx))
@@ -365,13 +328,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Response"):
         print("Loss Function Response: ", loss_fct)
-        loss_train = costResponse(y, logits_train, w)
-        loss_val = costResponse(y_, logits_val, w_)
-        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
-    elif (loss_fct=="relResponse"):
-        print("Loss Function rel Response: ", loss_fct)
-        loss_train = costrelResponse(y, logits_train, w)
-        loss_val = costrelResponse(y_, logits_val, w_)
+        loss_train = costResponse(batch_train[1], logits_train, batch_train[2])
+        loss_val = costResponse(batch_val[1], logits_val, batch_val[2])
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Resolution_para"):
         print("Loss Function Resolution_para: ", loss_fct)
@@ -388,15 +346,10 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         loss_train = costExpected(y, logits_train, w)
         loss_val = costExpected(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
-    elif (loss_fct=="relAngle_relResponse"):
-        print("Loss Function relAngle_relResponse: ", loss_fct)
-        loss_train = costExpectedrelrel(y, logits_train, w)
-        loss_val = costExpectedrelrel(y_, logits_val, w_)
-        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
-    elif (loss_fct=="Angle_Response2Pz"):
+    elif (loss_fct=="Angle_ResponsePz"):
         print("Loss Function Angle_ResponsePz: ", loss_fct)
-        loss_train = costExpected2Pz(y, logits_train, w)
-        loss_val = costExpected2Pz(y_, logits_val, w_)
+        loss_train = costExpectedPz(y, logits_train, w)
+        loss_val = costExpectedPz(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Angle_10Response"):
         print("Loss Function 10Angle_Response: ", loss_fct)
@@ -439,7 +392,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
     losses_train = []
     losses_val = []
-    min_valloss = [10000000]
+    min_valloss = [100000]
     loss_response, loss_resolution_para, loss_resolution_perp, loss_mse = [], [], [], []
     summary_train = tf.summary.scalar("loss_train", loss_train)
     summary_val = tf.summary.scalar("loss_val", loss_val)
@@ -449,7 +402,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     saveStep = 100
     early_stopping = 0
     print("StartTraining")
-    for i_step in range(100000):
+    for i_step in range(10000):
         start_loop = time.time()
         batch_train = np.random.choice(np.arange(data_train.shape[0]), int(data_train.shape[0]*train_val_splitter), replace=False)
         batch_train_idx = batch_train[0:batchsize]
@@ -475,12 +428,12 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
                 saver.save(sess, "%sNNmodel"%outputDir, global_step=i_step)
                 writer.flush()
                 print("better val loss found at ", i_step)
-                early_stopping = 0
+
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 5:
-                break
+            #if early_stopping == 3:
+            #    break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
             print("validation loss", loss_)
@@ -491,7 +444,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
 
 
-
+    #writer.flush()
 
 
     plt.plot(range(1, len(moving_average(np.asarray(losses_train), 10))+1), moving_average(np.asarray(losses_train), 10), lw=3, label="Training loss")

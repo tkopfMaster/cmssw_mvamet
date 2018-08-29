@@ -238,7 +238,7 @@ def WeightsOverVertex(weights, BosonPt):
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label='Weights', linestyle="None", capsize=0,  color="red")
 
 
-def getweight(BosonPt):
+def getweightBosonPt(BosonPt):
     if BosonPt.max()>50:
         n, interval = np.histogram(BosonPt, bins=nBinspT)
     else:
@@ -253,24 +253,60 @@ def getweight(BosonPt):
     for i in range(0,len(BosonPt)):
         weight[i]= y[find_interval(BosonPt.iloc[i], interval)]
         if i%100000==0:
-            print("Weight No. ",i)
+            print(i)
     if not (len(BosonPt)==len(weight)) or np.any(np.isnan(weight)):
+        raise EXCEPTION("Weights not same length as Boson Pt")
+    return weight
+
+def getweightNVertex(NVertex):
+    n, interval = np.histogram(NVertex, bins=nBinsVertex)
+    nmean = np.mean(n)
+    print("Mean NVertex bin population", nmean)
+    y = np.divide(1.0, n)
+    weight=np.repeat(np.nan, len(NVertex))
+    for i in range(0,len(NVertex)):
+        weight[i]= y[find_interval(NVertex.iloc[i], interval)]
+        if i%100000==0:
+            print(i)
+    if not (len(NVertex)==len(weight)) or np.any(np.isnan(weight)):
         raise EXCEPTION("Weights not same length as Boson Pt")
     return weight
 
 def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, dset):
     pTCut = 0
-
     IdxpTCut = (DataF['Boson_Pt']>pTMin) & (DataF['Boson_Pt']<=pTMax) & (DataF['NVertex']<=VertexMax)
     start_time = time.time()
     if VertexReweight:
-          weights = np.multiply(getweight(DataF['Boson_Pt'][IdxpTCut]), getweight(DataF['NVertex'][IdxpTCut]))
+          weightsPV = getweightNVertex(DataF['NVertex'][IdxpTCut])
+          weightspT = getweightBosonPt(DataF['Boson_Pt'][IdxpTCut])
+          weights = np.multiply(weightspT, weightsPV)
 
           fig=plt.figure(figsize=(10,6))
           fig.patch.set_facecolor('white')
           ax = plt.subplot(111)
 
-          WeightsOverVertex(weights, DataF['NVertex'])
+          WeightsOverVertex(getweight(DataF['NVertex'][IdxpTCut]), DataF['NVertex'])
+
+          box = ax.get_position()
+          ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+          handles, labels = ax.get_legend_handles_labels()
+          handles.insert(0,mpatches.Patch(color='none', label="$weight = \\frac{1}{\mathrm{counts}} $ \n with $p_T^Z$ nbins = %8.2f"%(nBinspT)))
+
+          plt.xlabel('#Vertex ')
+          plt.ylabel(' Weight ')
+          #plt.title('Response $U_{\parallel}$')
+          LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
+          ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+          plt.grid()
+          plt.xlim(0, VertexMax)
+          plt.savefig("%sWeightPV_PV.png"%(plotsD), bbox_inches="tight")
+          plt.close()
+
+          fig=plt.figure(figsize=(10,6))
+          fig.patch.set_facecolor('white')
+          ax = plt.subplot(111)
+
+          WeightsOverVertex(getweight(DataF['NVertex'][IdxpTCut]), DataF['NVertex'])
 
           box = ax.get_position()
           ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
@@ -286,6 +322,30 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
           plt.xlim(0, VertexMax)
           plt.savefig("%sWeight_PV.png"%(plotsD), bbox_inches="tight")
           plt.close()
+
+
+          fig=plt.figure(figsize=(10,6))
+          fig.patch.set_facecolor('white')
+          ax = plt.subplot(111)
+
+          WeightsOverPt(weightspT, DataF['Boson_Pt'])
+
+          box = ax.get_position()
+          ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+          handles, labels = ax.get_legend_handles_labels()
+          handles.insert(0,mpatches.Patch(color='none', label="$weight = \\frac{1}{\mathrm{counts}} $ \n with $p_T^Z$ nbins = %8.2f"%(nBinspT)))
+
+          plt.xlabel('$ p_T^Z$ ')
+          plt.ylabel(' Weight ')
+          #plt.title('Response $U_{\parallel}$')
+          LegendTitle = '$\mathrm{Summer\ 17\ campaign}$' '\n'  '$\mathrm{Z \  \\rightarrow \ \mu \mu}$'
+          ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+          plt.grid()
+          plt.xlim(pTMin, pTMax)
+          plt.savefig("%sWeightpT_pT.png"%(plotsD), bbox_inches="tight")
+          plt.close()
+
+
     else:
         weights = getweight(DataF['Boson_Pt'][IdxpTCut])
     plt.hist(weights, bins=nBinspT , lw=3, label="Training loss")
