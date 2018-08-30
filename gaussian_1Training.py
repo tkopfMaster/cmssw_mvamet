@@ -23,7 +23,7 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
 import time
 
-reweighting = True
+reweighting = False
 ndimInputs = 18
 
 def loadInputsTargetsWeights(outputD, NN_mode):
@@ -448,11 +448,24 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     saver = tf.train.Saver()
     saveStep = 100
     early_stopping = 0
+    pT = np.sqrt(np.square(labels_train[:,0])+np.square(labels_train[:,1]))
+    pTbin = np.int(np.floor(data_train.shape[0]/(batchsize*4)))
     print("StartTraining")
     for i_step in range(100000):
         start_loop = time.time()
-        batch_train = np.random.choice(np.arange(data_train.shape[0]), int(data_train.shape[0]*train_val_splitter), replace=False)
-        batch_train_idx = batch_train[0:batchsize]
+        batch_train_idx = []
+        for batch_i in range(pTbin):
+            percentile_min = np.percentile(pT, batch_i*(0.01*pTbin))
+            percentile_max = np.percentile(pT, (batch_i+1)*(0.01*pTbin))
+            print(pTbin)
+            print(pTbin*0.01)
+            print("pT", pT,percentile_min, percentile_max )
+            Index_tuple = [e for e in np.where((pT>=percentile_min) & (pT<percentile_max))]
+            print("error ", Index_tuple)
+            print("error 2", np.random.choice(Index_tuple, 4, replace=False))
+            batch_train_idx = np.append(batch_train_idx, np.random.choice(Index_tuple, 4, replace=False))
+            #batch_train = np.random.choice(np.arange(data_train.shape[0]), int(data_train.shape[0]*train_val_splitter), replace=False)
+        batch_train = data_train[batch_train,:]
         batch_val_idx =  np.setdiff1d(  np.arange(data_train.shape[0]), batch_train_idx)[0:batchsize]
 
 

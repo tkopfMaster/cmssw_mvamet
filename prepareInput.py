@@ -360,7 +360,8 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
 
 
     else:
-        weights = np.divide(1.0, Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]))
+        #weights = np.divide(1.0, Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]))
+        weights = getweightBosonPt(DataF['Boson_Pt'][IdxpTCut])
     plt.hist(weights, bins=nBinspT , lw=3, label="Training loss")
     plt.xlabel("Weights"), plt.ylabel("Counts")
     plt.legend()
