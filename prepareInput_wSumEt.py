@@ -14,6 +14,7 @@ import matplotlib.ticker as mtick
 import h5py
 import sys
 import time
+from scipy.stats import chisquare
 
 VertexReweight=False
 pTMin, pTMax = 20, 200
@@ -55,10 +56,13 @@ def angularrange(Winkel):
     return(Winkel)
 
 def Spectrum(x, a, b):
-    return a * x * np.exp(-x/(2*b))
+    return a  * np.exp(x/(2*b))
+
+def Spectrum2(x, a, b, c, n):
+    return a * x * b**(b*n) * np.divide(np.exp(-n**2/2) , (b-n + np.divide(x,c))**(b*n) )
 
 def getCurceParameters(x_data, y_data):
-    params, params_covariance = optimize.curve_fit(Spectrum, x_data, y_data, p0=[2, 2])
+    params, params_covariance = optimize.curve_fit(Spectrum2, x_data, y_data, p0=[2, 2, 2, 2])
     return(params)
 
 def loadData(fName, Target_Pt, Target_Phi, PhysicsProcess):
@@ -260,8 +264,8 @@ def getweightBosonPt(BosonPt):
     print("Mean Boson Pt bin population", nmean)
     intervalmean = np.divide(interval[:-1]+interval[1:],2)
     print("intervalmean 0:10", intervalmean[0:10])
-    #y = np.divide(1.0, n)
-    y = np.divide(1, np.multiply(n, np.square(intervalmean )))
+    y = np.divide(1.0, n)
+    #y = np.divide(1, np.multiply(n, np.square(intervalmean )))
     weight=np.repeat(np.nan, len(BosonPt))
     for i in range(0,len(BosonPt)):
         weight[i]= y[find_interval(BosonPt.iloc[i], interval)]
@@ -382,8 +386,23 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
 
 
     else:
-        weights = np.divide(1.0, np.multiply(Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]), np.square(DataF['Boson_Pt'][IdxpTCut])))
-    plt.hist(weights, bins=nBinspT , lw=3, label="Training loss")
+        #weights = np.divide(1.0, np.multiply(Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]), np.square(DataF['Boson_Pt'][IdxpTCut])))
+        InvWeights = Spectrum2(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2], getCurceParameters((_[:-1]+_[1:])/2,n)[3])
+        InvWeights_n = np.divide(1.0, Spectrum2((_[:-1]+_[1:])/2, getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3]))
+        weights = np.divide(1.0, InvWeights)
+        #ScaleSpectrum= np.divide(len(DataF['Boson_Pt'][IdxpTCut]), np.sum(Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])))
+        #print("Scale Spectrum", ScaleSpectrum)
+        #weights = Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])
+        #weights = getweightBosonPt(DataF['Boson_Pt'][IdxpTCut])
+        print("Chi Square of Fit n observed", chisquare(n, f_exp=InvWeights_n))
+        print("Chi Square of Fit InvWeights_n observed", chisquare(InvWeights_n, f_exp=n))
+
+
+    #uniform = n * Spectrum((_[:-1]+_[1:])/2, getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])
+    uniform = n * InvWeights_n
+    plt.plot((_[:-1]+_[1:])/2, uniform, label="n*pf")
+    #plt.plot((_[:-1]+_[1:])/2, n*getweightBosonPt((_[:-1]+_[1:])/2), label="binned weight")
+    #plt.hist(weights, bins=nBinspT , lw=3, label="Training loss")
     plt.xlabel("Weights"), plt.ylabel("Counts")
     plt.legend()
     plt.savefig("%sWeights.png"%(plotsD))
@@ -393,9 +412,26 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plt.plot(np.arange(pTMin, pTMax, 0.01), Spectrum(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]),
+    plt.scatter((_[:-1]+_[1:])/2, np.divide(1,n), label='Data', alpha=0.2, s=1)
+    plt.plot(np.arange(pTMin, pTMax, 0.01), np.divide(1.0, Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])),
              label='Fitted function', color = "r")
-    plt.scatter((_[:-1]+_[1:])/2, n, label='Data', alpha=0.05, s=1)
+
+
+
+    plt.xlabel("$p_T^Z$"), plt.ylabel("1/Counts")
+    plt.legend(loc='best')
+    plt.xlim(pTMin, pTMax)
+    plt.savefig("%sFittedFunctionWeight.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plt.scatter((_[:-1]+_[1:])/2, n, label='Data', alpha=0.2, s=1)
+    plt.plot(np.arange(pTMin, pTMax, 0.01), Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3]),
+             label='Fitted function', color = "r")
+
 
 
     plt.xlabel("$p_T^Z$"), plt.ylabel("Counts")
@@ -404,7 +440,7 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     plt.savefig("%sFittedFunction.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-    print("Values of pT fitted Function", Spectrum(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1]))
+    print("Values of pT fitted Function", np.divide(1.0, Spectrum2(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])))
 
 
 

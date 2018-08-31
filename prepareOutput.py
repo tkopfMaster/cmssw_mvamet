@@ -29,8 +29,8 @@ def loadData(fName, NN_mode):
     return(DFName)
 
 def prepareOutput(outputD, inputD, NN_mode, plotsD, Test_Idx):
-    ScaleFactor = True
-    WeightedScale = False
+    ScaleFactor = False
+    WeightedScale = True
 
     NN_Output = h5py.File("%sNN_Output_applied_%s.h5"%(outputD,NN_mode), "r+")
     if NN_mode == 'xyr' or NN_mode == 'nr':
@@ -98,7 +98,8 @@ def prepareOutput(outputD, inputD, NN_mode, plotsD, Test_Idx):
     elif WeightedScale:
         Inputs, Targets, Weights = loadInputsTargetsWeights(outputD, NN_mode)
         Training_Idx = np.setdiff1d(np.arange(len(mZ_r)), Test_Idx)
-        Response = np.divide(np.mean(np.divide(-np.multiply(NN_LongZ[Training_Idx],Weights[Training_Idx]),mZ_r[Training_Idx])), np.sum(Weights[Training_Idx]))
+        weight_Response = np.divide(Weights[Training_Idx].flatten(), np.sum(Weights[Training_Idx].flatten()))
+        Response = np.sum(np.divide(-np.multiply(NN_LongZ[Training_Idx],weight_Response),mZ_r[Training_Idx]))
         ScaleFactor = np.divide(1,Response)
         a_x, a_y = np.multiply(a_x, ScaleFactor), np.multiply(a_y, ScaleFactor)
         a_, a_phi = kar2pol(a_x,a_y)

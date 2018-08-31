@@ -24,7 +24,7 @@ from mpl_toolkits.mplot3d import Axes3D as plt3d
 import time
 import sys
 
-reweighting = False
+reweighting = True
 
 def loadInputsTargetsWeights(outputD):
     InputsTargets = h5py.File("%sNN_Input_training_%s.h5" % (outputD,NN_mode), "r")
@@ -136,7 +136,7 @@ def costExpectedRel(y_true,y_pred, weight):
     Response = tf.divide(u_long,pZ)
     Resolution_para = u_long-pZ
 
-    cost = tf.multiply(tf.square(Response-1)+tf.square(tf.sin(alpha_diff)),weight)
+    cost = tf.square(Response-1)
     return tf.reduce_mean(cost)
 
 def costExpectedRelAbs(y_true,y_pred, weight):
@@ -356,7 +356,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         loss_train = cost10Expected(y, logits_train, w)
         loss_val = cost10Expected(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
-    elif (loss_fct=="Angle_relResponse"):
+    elif (loss_fct=="relResponse"):
         print("Loss Function Angle_Response rel: ", loss_fct)
         loss_train = costExpectedRel(y, logits_train, w)
         loss_val = costExpectedRel(y_, logits_val, w_)
@@ -402,14 +402,21 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     saveStep = 100
     early_stopping = 0
     print("StartTraining")
-    for i_step in range(10000):
+    batch_prob = weights_train.flatten() * 1 / (np.sum(weights_train.flatten()))
+    print(" shape batch_prob", batch_prob.shape)
+    print(" shape data_train", data_train.shape)
+    batch_prob_val = weights_val.flatten() * 1 / (np.sum( weights_val.flatten()))
+    pT = np.sqrt(np.square(labels_train[:,0]) + np.square(labels_train[:,1]))
+    for i_step in range(30000):
         start_loop = time.time()
-        batch_prob = weights_train.flatten() * 1 / (np.sum(weights_train.flatten()))
+
+        #p = map(lambda x: abs(np.random.uniform(min(pT),max(pT)) - x), pT)
+        #print(p)
+        #batch_train_idx = p.index(min(p))[:batchsize]
         batch_train_idx = np.random.choice(np.arange(data_train.shape[0]), batchsize, p=batch_prob, replace=False)
-
-        batch_prob_val = weights_val.flatten() * 1 / (np.sum(weights_val.flatten()))
+        #pval = map(lambda x: abs(np.random.uniform(min(pT),max(pT)) - x), pT)
+        #batch_val_idx = pval.index(min(pval))[:batchsize]
         batch_val_idx = np.random.choice(np.arange(data_val.shape[0]), batchsize, p=batch_prob_val, replace=False)
-
 
         summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss], feed_dict={x: data_train[batch_train_idx,:], y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
         #summary_, loss_, loss_response_, loss_resolution_para_, loss_resolution_perp_, loss_mse_, _ = sess.run([summary_train, loss_train, minimize_loss])
@@ -423,19 +430,21 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
 
         if i_step % saveStep == 0:
-            batch_train_idx_100 = batch_train[0:batchsize_val]
+            #pval_100 = map(lambda x: abs(np.random.uniform(min(pT),max(pT)) - x), pT)
+            #batch_val_idx_100 = pval_100.index(min(pval))[:batchsize_val]
             batch_val_idx_100 =  np.random.choice(np.arange(data_val.shape[0]), batchsize_val, p=batch_prob_val, replace=False)
             loss_ = sess.run(loss_val, feed_dict={x_: data_val[batch_val_idx_100,:], y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
             if loss_<min(min_valloss):
                 saver.save(sess, "%sNNmodel"%outputDir, global_step=i_step)
                 writer.flush()
                 early_stopping = 0
+                pT2 = np.sqrt(np.square(labels_train[batch_train_idx,0]) + np.square(labels_train[batch_train_idx,1]))
                 print("better val loss found at ", i_step)
 
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 10:
+            if early_stopping == 40:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
@@ -448,10 +457,19 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
 
     #writer.flush()
+    pT_woutWeight = np.sqrt(np.square(labels_train[:,0])+np.square(labels_train[:,1]))
+    #plt.hist(pT_woutWeight, bins=18, lw=3, label="train pT distr")
+    plt.hist(pT_woutWeight[np.random.choice(np.arange(data_train.shape[0]), batchsize, replace=True)], bins=18, lw=3, label="Input distribution", histtype="step")
+    plt.hist(pT2, bins=18, lw=3, label="weighted random choice", histtype="step")
+
+    plt.xlabel("$p_T^Z$"), plt.ylabel("Count")
+    plt.legend()
+    plt.savefig("%sBatch.png"%(plotsD))
+    plt.close()
 
 
-    plt.plot(range(1, len(moving_average(np.asarray(losses_train), 10))+1), moving_average(np.asarray(losses_train), 10), lw=3, label="Training loss")
-    plt.plot(range(1, len(moving_average(np.asarray(losses_val), 10))+1), moving_average(np.asarray(losses_val), 10), lw=3, label="Validation loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_train), 1500))+1), moving_average(np.asarray(losses_train), 1500), lw=3, label="Training loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_val), 1500))+1), moving_average(np.asarray(losses_val), 1500), lw=3, label="Validation loss")
     plt.xlabel("Gradient step"), plt.ylabel("loss")
     plt.yscale('log')
     plt.legend()
