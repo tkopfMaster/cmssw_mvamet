@@ -26,6 +26,9 @@ import sys
 
 reweighting = True
 
+def reject_outliers(data, m=2):
+    return data[abs(data - np.mean(data)) < m * np.std(data)]
+
 def loadInputsTargetsWeights(outputD):
     InputsTargets = h5py.File("%sNN_Input_training_%s.h5" % (outputD,NN_mode), "r")
     norm = np.sqrt(np.multiply(InputsTargets['Target'][:,0],InputsTargets['Target'][:,0]) + np.multiply(InputsTargets['Target'][:,1],InputsTargets['Target'][:,1]))
@@ -444,7 +447,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 40:
+            if early_stopping == 15:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
@@ -467,7 +470,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.savefig("%sBatch.png"%(plotsD))
     plt.close()
 
-
+    loss_oa = losses_train[np.abs(1 - (losses_train[:-1,1] / losses_train[1:,1])) <= 0.2]
+    valloss_oa =
     plt.plot(range(1, len(moving_average(np.asarray(losses_train), 1500))+1), moving_average(np.asarray(losses_train), 1500), lw=3, label="Training loss")
     plt.plot(range(1, len(moving_average(np.asarray(losses_val), 1500))+1), moving_average(np.asarray(losses_val), 1500), lw=3, label="Validation loss")
     plt.xlabel("Gradient step"), plt.ylabel("loss")

@@ -20,7 +20,7 @@ import h5py
 import sys
 
 
-pTMin, pTMax = 20,200
+pTMin, pTMax = 0,200
 
 
 nbins = int((pTMax-pTMin)/20)
@@ -1102,7 +1102,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    plt.xlim(-100, 100 )
+    plt.xlim(ResolutionParaMin, ResolutionParaMax )
     plt.savefig("%sHist_Resolution_para_128_146.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -1127,7 +1127,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    plt.xlim(-100, 100 )
+    plt.xlim(ResolutionParaMin, ResolutionParaMax )
     plt.savefig("%sHist_Resolution_para_146_164.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
@@ -1152,7 +1152,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
 
     ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
     plt.grid()
-    plt.xlim(-100, 100 )
+    plt.xlim(ResolutionParaMin, ResolutionParaMax )
     plt.savefig("%sHist_Resolution_para_110_128.png"%(plotsD), bbox_inches="tight")
     plt.close()
 

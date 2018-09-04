@@ -17,7 +17,7 @@ import time
 from scipy.stats import chisquare
 
 VertexReweight=False
-pTMin, pTMax = 20, 200
+pTMin, pTMax = 0, 200
 nBinspT = int((pTMax-pTMin)*2)
 VertexMax = 50
 nBinsVertex = int((VertexMax)/10)

@@ -14,7 +14,7 @@ from getResponse import getResponse, getResponseIdx
 from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
 
 
-pTMin, pTMax = 20,200
+pTMin, pTMax = 0,200
 
 nbinsHist = 400
 colors_InOut = cm.brg(np.linspace(0, 1, 8))
