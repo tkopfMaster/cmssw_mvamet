@@ -470,14 +470,23 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.savefig("%sBatch.png"%(plotsD))
     plt.close()
 
-    loss_oa = losses_train[np.abs(1 - (losses_train[:-1,1] / losses_train[1:,1])) <= 0.2]
-    valloss_oa =
+
     plt.plot(range(1, len(moving_average(np.asarray(losses_train), 1500))+1), moving_average(np.asarray(losses_train), 1500), lw=3, label="Training loss")
     plt.plot(range(1, len(moving_average(np.asarray(losses_val), 1500))+1), moving_average(np.asarray(losses_val), 1500), lw=3, label="Validation loss")
     plt.xlabel("Gradient step"), plt.ylabel("loss")
     plt.yscale('log')
     plt.legend()
     plt.savefig("%sLoss_ValLoss.png"%(plotsD))
+    plt.close()
+
+    loss_oa = reject_outliers(losses_train)
+    valloss_oa = reject_outliers(losses_val)
+    plt.plot(range(1, len(loss_oa)+1), loss_oa, lw=3, label="Training loss")
+    plt.plot(range(1, len(valloss_oa)+1), valloss_oa, lw=3, label="Validation loss")
+    plt.xlabel("Gradient step"), plt.ylabel("loss")
+    plt.yscale('log')
+    plt.legend()
+    plt.savefig("%sLoss_ValLoss_o.png"%(plotsD))
     plt.close()
 
     if loss_fct=="all":

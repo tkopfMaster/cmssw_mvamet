@@ -20,7 +20,7 @@ import h5py
 import sys
 
 
-pTMin, pTMax = 0,200
+pTMin, pTMax = 20,200
 
 
 nbins = int((pTMax-pTMin)/20)
