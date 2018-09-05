@@ -483,15 +483,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.savefig("%sLoss_ValLoss.png"%(plotsD))
     plt.close()
 
-    loss_oa = reject_outliers(losses_train)
-    valloss_oa = reject_outliers(losses_val)
-    plt.plot(range(1, len(loss_oa)+1), loss_oa, lw=3, label="Training loss")
-    plt.plot(range(1, len(valloss_oa)+1), valloss_oa, lw=3, label="Validation loss")
-    plt.xlabel("Gradient step"), plt.ylabel("loss")
-    plt.yscale('log')
-    plt.legend()
-    plt.savefig("%sLoss_ValLoss_o.png"%(plotsD))
-    plt.close()
+
 
     if loss_fct=="all":
         plt.plot(range(1, len(moving_average(np.asarray(loss_response), 800))+1), moving_average(np.asarray(losses_response), 800), lw=1.5, label="Response loss")
