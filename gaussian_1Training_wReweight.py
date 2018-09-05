@@ -296,7 +296,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     batchsize_val = 10000
     print("Validation set hat Groesse ", len(train_val_idx))
     x = tf.placeholder(tf.float32, shape=[batchsize, data_train.shape[1]])
-    y = tf.placeholder(tf.float32, shape=[batchsize, labels_train.shape[1]])
+    y = tf.placeholder(tf.float32, shape=[batchsize, labels_train.shape[1]], )
     w = tf.placeholder(tf.float32, shape=[batchsize, weights_train.shape[1]])
     x_ = tf.placeholder(tf.float32)
     y_ = tf.placeholder(tf.float32)
@@ -439,7 +439,11 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             loss_ = sess.run(loss_val, feed_dict={x_: data_val[batch_val_idx_100,:], y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
             if loss_<min(min_valloss):
                 saver.save(sess, "%sNNmodel"%outputDir, global_step=i_step)
-                writer.flush()
+                outputs = ["logits"] # names of output operations you want to use later
+                constant_graph = tf.graph_util.convert_variables_to_constants(
+                    sess, sess.graph.as_graph_def(), outputs)
+                tf.train.write_graph(constant_graph, outputDir, "constantgraph.pb", as_text=False)
+
                 early_stopping = 0
                 pT2 = np.sqrt(np.square(labels_train[batch_train_idx,0]) + np.square(labels_train[batch_train_idx,1]))
                 print("better val loss found at ", i_step)
