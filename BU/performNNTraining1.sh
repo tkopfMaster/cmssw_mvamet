@@ -8,7 +8,7 @@ PhysicsProcess="Mu"
 optimizer="Adam"
 loss="relResponse"
 NN_mode="xy"
-trainingname="TF_replaceTrue_woutReweight_uniformBatchpTtrainval_wSumEt_wWeightScale_woutVertexReweight_1000Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
+trainingname="TF_CrossValidation_woutReweight_uniformBatchpTtrainval_wSumEt_wWeightScale_woutVertexReweight_1000Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
@@ -48,6 +48,7 @@ fi
 #spaeter mal: config mit Art des Trainings festlegen
 python $src_di/prepareInput_wSumEt.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
 python $src_di/gaussian_1Training_wReweight.py $files_di $optimizer $loss $NN_mode $plots_di
+python $src_di/gaussian_1Training_wReweight_CV.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/1training_BU1508.py $files_di $optimizer $loss $NN_mode $plots_di
 python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
 

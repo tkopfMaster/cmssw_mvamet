@@ -8,7 +8,7 @@ PhysicsProcess="Mu"
 optimizer="Adam"
 loss="relResponse"
 NN_mode="xy"
-trainingname="TF_replaceTrue_woutReweight_uniformBatchpTtrainval_wSumEt_wWeightScale_woutVertexReweight_1000Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
+trainingname="TF_CrossValidation_woutReweight_uniformBatchpTtrainval_wSumEt_wWeightScale_woutVertexReweight_1000Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
@@ -30,6 +30,7 @@ if [ ! -d "trainings" ]; then
 fi
 if [ ! -d "$files_di$trainingname/" ]; then
 	mkdir $files_di$trainingname/
+  mkdir $files_di$trainingname/CV/
 fi
 files_di=$files_di$trainingname/
 if [ ! -d "$plots_di/$trainingname/" ]; then
@@ -47,15 +48,16 @@ if [ ! -d "trainings/$trainingname" ]; then
 fi
 #spaeter mal: config mit Art des Trainings festlegen
 #python $src_di/prepareInput_wSumEt.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
-python $src_di/gaussian_1Training_wReweight.py $files_di $optimizer $loss $NN_mode $plots_di
+#python $src_di/gaussian_1Training_wReweight.py $files_di $optimizer $loss $NN_mode $plots_di
+python $src_di/gaussian_1Training_wReweight_CV.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/1training_BU1508.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
 
 #python $src_di/prepareOutput.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
 #python $src_di/MiniplotTraining.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
-#python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
-#python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode
-#python $src_di/getResponse.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
+python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
+python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode
+python $src_di/getResponse.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
 
 cp $src_di/*.py $plots_di
 cp $src_di/*Training.sh $plots_di

@@ -180,4 +180,5 @@ if __name__ == "__main__":
     NN_MVA = h5py.File("%s/NN_MVA_%s.h5"%(outputDir,NN_mode), "w")
     Test_Idx2 = h5py.File("%sTest_Idx_%s.h5" % (outputDir, NN_mode), "r")
     Test_Idx = Test_Idx2["Test_Idx"].value
+
     prepareOutput(outputDir, inputDir, NN_mode, plotsD, Test_Idx)

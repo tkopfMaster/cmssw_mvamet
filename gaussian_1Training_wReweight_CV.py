@@ -240,8 +240,10 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     Boson_Pt = np.sqrt(np.square(Targets[:,0])+np.square(Targets[:,1]))
     num_events = Inputs.shape[0]
     print('Number of events in get model ', num_events)
-    train_test_splitter = 0.5
-    training_idx = np.random.choice(np.arange(Inputs.shape[0]), int(Inputs.shape[0]*train_test_splitter), replace=False)
+    Test_Idx2 = h5py.File("%sTest_Idx_%s.h5" % (outputDir, NN_mode), "r")
+    training_idx = (Test_Idx2["Test_Idx"].value).astype(int)
+    #train_test_splitter = 0.8
+    #training_idx = np.random.choice(np.arange(Inputs.shape[0]), int(Inputs.shape[0]*train_test_splitter), replace=False)
     print('random training index length', training_idx.shape)
     print('inputs shape', Inputs.shape)
     print('First 10 Training Idxs', training_idx[0:10])
@@ -438,7 +440,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             batch_val_idx_100 =  np.random.choice(np.arange(data_val.shape[0]), batchsize_val, p=batch_prob_val, replace=False)
             loss_ = sess.run(loss_val, feed_dict={x_: data_val[batch_val_idx_100,:], y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
             if loss_<min(min_valloss):
-                saver.save(sess, "%sNNmodel"%outputDir, global_step=i_step)
+                saver.save(sess, "%sCV/NNmodel_CV"%outputDir, global_step=i_step)
                 outputs = ["logits"] # names of output operations you want to use later
                 constant_graph = tf.graph_util.convert_variables_to_constants(
                     sess, sess.graph.as_graph_def(), outputs)
@@ -451,7 +453,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 22:
+            if early_stopping == 15:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
@@ -471,7 +473,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
     plt.xlabel("$p_T^Z$"), plt.ylabel("Count")
     plt.legend()
-    plt.savefig("%sBatch.png"%(plotsD))
+    plt.savefig("%sBatch_CV.png"%(plotsD))
     plt.close()
 
 
@@ -480,7 +482,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.xlabel("Gradient step"), plt.ylabel("loss")
     plt.yscale('log')
     plt.legend()
-    plt.savefig("%sLoss_ValLoss.png"%(plotsD))
+    plt.savefig("%sLoss_ValLoss_CV.png"%(plotsD))
     plt.close()
 
 
@@ -514,5 +516,5 @@ if __name__ == "__main__":
     plotsD = sys.argv[5]
     print(outputDir)
     NN_Output = h5py.File("%sNN_Output_%s.h5"%(outputDir,NN_mode), "w")
-    Test_Idx = h5py.File("%sTest_Idx_%s.h5" % (outputDir, NN_mode), "w")
+    Test_Idx = h5py.File("%sTest_Idx_CV_%s.h5" % (outputDir, NN_mode), "w")
     getModel(outputDir, optim, loss_fct, NN_mode, plotsD)

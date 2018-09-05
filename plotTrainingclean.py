@@ -111,7 +111,7 @@ def HM_Diff_norm(r,phi,pr,pphi, labelName, col):
 
 
 def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsProcess, Target_Pt, Target_Phi, Test_Idx):
-    IndTest = sorted([int(x) for x in Test_Idx])
+
 
 
     if PhysicsProcess=='Mu':
@@ -136,6 +136,7 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsP
 
     #print('np.subtract(Outputs[NN_Pt], Outputs[Target_Pt])', np.subtract(Outputs['NN_Pt'], Outputs[Target_Pt]))
     print(Outputs[Target_Pt][:].shape)
+
     print(NN_Output_applied["MET_GroundTruth"].shape)
     #print(Outputs[Target_Pt][:])
     print('np.mean(np.subtract(Outputs[NN_Pt], Outputs[Target_Pt]))', np.mean(np.subtract(Outputs['NN_Pt'], Outputs[Target_Pt])))
@@ -145,6 +146,8 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsP
     NN_Diff_x = np.subtract(Outputs['NN_x'], Outputs['Boson_x'])
     NN_Diff_y = np.subtract(Outputs['NN_y'], Outputs['Boson_y'])
 
+    #IndTest = sorted([int(x) for x in Test_Idx])
+    IndTest = np.arange(len(NN_Diff_x))
     '''
     NN_Output = h5py.File("%sNN_Output_%s.h5"%(outputD,NN_mode), "r")
     loss = NN_Output["loss"]
@@ -297,7 +300,8 @@ if __name__ == "__main__":
         Outputs2 = loadData_woutGBRT(outputDir, rootInput, Target_Pt, Target_Phi, NN_mode, PhysicsProcess)
         Test_Idx2 = h5py.File("%sTest_Idx_%s.h5" % (outputDir, NN_mode), "r")
         Test_Idx = Test_Idx2["Test_Idx"]
-        Outputs = Outputs2.iloc[Test_Idx]
+        Outputs = Outputs2
+        #Outputs = Outputs2.iloc[Test_Idx]
     #Outputs = Outputs[~np.isnan(Outputs)]
     #Outputs = Outputs[Outputs[Target_Pt]>pTMin]
     #Outputs = Outputs[Outputs[Target_Pt]<=pTMax]

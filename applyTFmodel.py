@@ -58,16 +58,33 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     program_starts = time.time()
     Inputs, Targets = loadInputsTargets(outputD)
 
+    #get prediction
     x = tf.placeholder(tf.float32)
     logits, f = NNmodel(x, reuse=False)
 
     checkpoint_path = tf.train.latest_checkpoint(outputD)
     gpu_options = tf.GPUOptions(allow_growth=True)
-    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) 
+    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
     saver = tf.train.Saver()
     saver.restore(sess, checkpoint_path)
 
     predictions = sess.run(f, {x: Inputs})
+
+    #get prediction CV
+    x_CV = tf.placeholder(tf.float32)
+    logits_CV, f_CV = NNmodel(x_CV, reuse=True)
+
+    checkpoint_path_CV = tf.train.latest_checkpoint(outputD+"CV/")
+    sess_CV = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+    saver = tf.train.Saver()
+    saver.restore(sess_CV, checkpoint_path_CV)
+
+    predictions_CV = sess.run(f_CV, {x_CV: Inputs})
+
+    #merge both predictions
+    Test_Idx2 = h5py.File("%sTest_Idx_CV_%s.h5" % (outputDir, NN_mode), "r")
+    Test_Idx = Test_Idx2["Test_Idx"].value.astype(int)
+    predictions[Test_Idx,:] = predictions_CV[Test_Idx,:]
 
 
     #predictions = model.predict(Inputs[:])
