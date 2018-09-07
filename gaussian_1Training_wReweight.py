@@ -15,14 +15,18 @@ import numpy as np
 np.random.seed(1234)
 from sklearn.metrics import roc_curve, auc
 import tensorflow as tf
+from tensorflow_derivative.inputs import Inputs as InputsDer
+from tensorflow_derivative.outputs import Outputs as OutputsDer
+from tensorflow_derivative.derivatives import Derivatives
 import datetime
-import sys
 import h5py
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
 import time
 import sys
+from sklearn.preprocessing import StandardScaler
+from collections import OrderedDict
 
 reweighting = True
 
@@ -41,7 +45,8 @@ def loadInputsTargetsWeights(outputD):
                 InputsTargets['NoPU'],
                 InputsTargets['PUCorrected'],
                 InputsTargets['PU'],
-                InputsTargets['Puppi']
+                InputsTargets['Puppi'],
+                InputsTargets['NVertex']
                 ))
     return (np.transpose(Input), np.transpose(Target), np.transpose(weight))
 
@@ -201,7 +206,7 @@ def NNmodel(x, reuse):
     with tf.variable_scope("model") as scope:
         if reuse:
             scope.reuse_variables()
-        w1 = tf.get_variable('w1', shape=(18,ndim), dtype=tf.float32,
+        w1 = tf.get_variable('w1', shape=(19,ndim), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
         b1 = tf.get_variable('b1', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
@@ -263,7 +268,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     Inputs_train, Inputs_test = Inputs[training_idx,:], Inputs[test_idx,:]
     Targets_train, Targets_test = Targets[training_idx,:], Targets[test_idx,:]
 
-
+    print("First 10 events of Input ", Inputs[0:10,:])
     train_val_splitter = 0.9
     train_train_idx_idx = np.random.choice(np.arange(training_idx.shape[0]), int(training_idx.shape[0]*train_val_splitter), replace=False)
     train_train_idx = training_idx[train_train_idx_idx]
@@ -292,17 +297,30 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     labels_val = Targets_test
     weights_train = weights_train_
     weights_val = weights_val_
-    batchsize = 1000
+    batchsize = 300
     batchsize_val = 10000
     print("Validation set hat Groesse ", len(train_val_idx))
-    x = tf.placeholder(tf.float32, shape=[batchsize, data_train.shape[1]])
-    y = tf.placeholder(tf.float32, shape=[batchsize, labels_train.shape[1]], )
+    MET_definitions = ['PF', 'Track', 'NoPU', 'PUCorrected', 'PU', 'Puppi']
+
+    Variables = ['x','y','SumEt']
+    Variables = [Variables[:] for _ in range(6)]
+    MET_definitions = np.repeat(MET_definitions,3)
+    Variables = [item for sublist in Variables for item in sublist]
+    Inputstring = [MET+'_'+Variable for MET,Variable in zip(MET_definitions,Variables)]
+    Inputstring = np.append(Inputstring, 'NVertex')
+    print("Shape of Inputstring", len(Inputstring))
+    print("Shape Inputstring", Inputstring)
+
+
+    xDer = InputsDer(Inputstring)
+    x = xDer.placeholders
+    #yDer = OutputsDer(['x','y'])
+    y = tf.placeholder(tf.float32, shape=[batchsize, labels_train.shape[1]])
     w = tf.placeholder(tf.float32, shape=[batchsize, weights_train.shape[1]])
     x_ = tf.placeholder(tf.float32)
     y_ = tf.placeholder(tf.float32)
     w_ = tf.placeholder(tf.float32)
-    #enqueue_train = queue_train.enqueue_many([x, y, w])
-    #enqueue_val = queue_val.enqueue_many([x, y, w])
+
 
     print("tf.test.gpu_device_name()", tf.test.gpu_device_name())
 
@@ -317,9 +335,15 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     print('wichtig',data_train.shape[0], data_train.shape[1])
 
     logits_train, f_train= NNmodel(x, reuse=False)
+    yDer = OutputsDer(logits_train, ['x','y'])
     logits_val, f_val= NNmodel(x_, reuse=True)
+    derivatives = Derivatives(xDer, yDer)
+    d={}
+    for i in range(0,len(Inputstring)):
+            Variable = Inputstring[i]
+            d["dxd"+Variable]=derivatives.get('x', [Variable])
+            d["dyd"+Variable]=derivatives.get('y', [Variable])
 
-    # ## Add training operations to the graph
     print('len logits_train', logits_train.shape)
 
     print("loss fct", loss_fct)
@@ -410,6 +434,11 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     print(" shape data_train", data_train.shape)
     batch_prob_val = weights_val.flatten() * 1 / (np.sum( weights_val.flatten()))
     pT = np.sqrt(np.square(labels_train[:,0]) + np.square(labels_train[:,1]))
+    preprocessing_input = StandardScaler()
+    preprocessing_input.fit(data_train)
+    list_derivates = []
+    #[rx_PF_x,rx_PF_y,rx_PF_SumEt,rx_Track_x,rx_Track_y,rx_Track_SumEtr,rx_NoPU_x,rx_NoPU_y,rx_NoPU_SumEt,rx_PUCorrected_x,rx_PUCorrected_y,rx_PUCorrected_SumEt,rx_PU_x,rx_PU_y,rx_PU_SumEt,rx_Puppi_x,rx_Puppi_y,rx_Puppi_SumEt,rx_NVertex]
+    list_derivatestensor = d.values()
     for i_step in range(30000):
         start_loop = time.time()
 
@@ -448,6 +477,10 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
                 pT2 = np.sqrt(np.square(labels_train[batch_train_idx,0]) + np.square(labels_train[batch_train_idx,1]))
                 print("better val loss found at ", i_step)
 
+                list_derivates = sess.run(
+                            d.values(),
+                            feed_dict={xDer.placeholders: preprocessing_input.transform(data_train[batch_train_idx,:])})
+
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
@@ -458,9 +491,26 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             print("validation loss", loss_)
             print("gradient step time {0} seconds".format(end_loop-start_loop))
 
+    ############ Derivate action #########
 
+    print("shape list_derivates", len(list_derivates))
+    #xderivates = {k:np.mean(np.abs(v)) for (k,v) in zip(d.keys(),list_derivates) if "dx" in k}
+    #yderivates = {k:np.mean(np.abs(v)) for (k,v) in zip(d.keys(),list_derivates) if "dy" in k}
+    xderivates = {k.replace("dxd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys(),list_derivates) if "dx" in k}
+    xderivates = OrderedDict(sorted(xderivates.items(), key=lambda t: t[0]))
+    yderivates = {k.replace("dyd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys(),list_derivates) if "dy" in k}
+    yderivates = OrderedDict(sorted(yderivates.items(), key=lambda t: t[0]))
+    print("xderivates keys", xderivates.keys())
+    print("yderivates keys", yderivates.keys())
 
-
+    X = np.arange(len(xderivates))
+    ax = plt.subplot(111)
+    ax.plot(X, xderivates.values(),  'bo')
+    ax.plot(X, yderivates.values(),  'gx')
+    ax.legend(('x','y'))
+    ax.set_ylabel("First order derivates")
+    plt.xticks(X, xderivates.keys(), rotation='vertical')
+    plt.savefig("%sFirstOrderDerivates.png"%(plotsD), bbox_inches="tight")
 
 
     #writer.flush()

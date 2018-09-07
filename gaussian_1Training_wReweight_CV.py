@@ -294,7 +294,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     labels_val = Targets_test
     weights_train = weights_train_
     weights_val = weights_val_
-    batchsize = 1000
+    batchsize = 300
     batchsize_val = 10000
     print("Validation set hat Groesse ", len(train_val_idx))
     x = tf.placeholder(tf.float32, shape=[batchsize, data_train.shape[1]])

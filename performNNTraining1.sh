@@ -8,7 +8,7 @@ PhysicsProcess="Mu"
 optimizer="Adam"
 loss="relResponse"
 NN_mode="xy"
-trainingname="TF_CrossValidation_woutReweight_uniformBatchpTtrainval_wSumEt_wWeightScale_woutVertexReweight_1000Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
+trainingname="TF_CrossValidation_woutReweight_uniformBatchpTtrainval_wSumEt_wWeightScale_woutVertexReweight_300Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"

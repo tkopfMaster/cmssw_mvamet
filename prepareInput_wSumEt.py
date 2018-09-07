@@ -22,7 +22,7 @@ nBinspT = int((pTMax-pTMin)*2)
 VertexMax = 50
 nBinsVertex = int((VertexMax)/10)
 
-def div0( a, b , Target_Pt, Target_Phi):
+def div0( a, b ):
     """ ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0] """
     with np.errstate(divide='ignore', invalid='ignore'):
         c = np.true_divide( a, b )
@@ -394,6 +394,7 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
         #print("Scale Spectrum", ScaleSpectrum)
         #weights = Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])
         #weights = getweightBosonPt(DataF['Boson_Pt'][IdxpTCut])
+        print("chi square  summe (counts-fitValue(ptz))/sqrt(counts)", np.sum(div0((n-InvWeights_n)**2,n)))
         print("Chi Square of Fit n observed", chisquare(n, f_exp=InvWeights_n))
         print("Chi Square of Fit InvWeights_n observed", chisquare(InvWeights_n, f_exp=n))
 
@@ -469,6 +470,9 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     end_time = time.time()
     print("Gewichte bestimmen hat {0} Sekunden gedauert".format(end_time-start_time))
     print('DataF[recoilslimmedMETs_Pt]', DataF['recoilslimmedMETs_Pt'].shape)
+    dset_NVertex = dset.create_dataset("NVertex",  dtype='f',
+        data=[DataF['NVertex'][IdxpTCut]])
+
     dset_PF = dset.create_dataset("PF",  dtype='f',
         data=[pol2kar_x(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]),
         pol2kar_y(DataF['recoilslimmedMETs_Pt'][IdxpTCut], DataF['recoilslimmedMETs_Phi'][IdxpTCut]),
@@ -503,7 +507,6 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
         pol2kar_y(DataF['recoilslimmedMETsPuppi_Pt'][IdxpTCut], DataF['recoilslimmedMETsPuppi_Phi'][IdxpTCut]),
         DataF['recoilslimmedMETsPuppi_sumEt'][IdxpTCut]])
 
-    dset_NoPV = dset.create_dataset("NVertex",  dtype='f',data=[DataF['NVertex'][IdxpTCut]] )
 
 
     dset_Target = dset.create_dataset("Target",  dtype='f',
