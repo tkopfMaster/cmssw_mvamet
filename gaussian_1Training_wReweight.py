@@ -27,6 +27,10 @@ import time
 import sys
 from sklearn.preprocessing import StandardScaler
 from collections import OrderedDict
+import pandas as pd
+from pandas import Series, MultiIndex, DataFrame
+import re
+import seaborn as sns
 
 reweighting = True
 
@@ -234,7 +238,7 @@ def NNmodel(x, reuse):
     l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
     l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
     l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
-    logits = tf.add(b5, tf.matmul(l4, w5), name='logits')
+    logits = tf.add(b5, tf.matmul(l4, w5), name='output')
     return logits, logits
 
 
@@ -339,10 +343,15 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     logits_val, f_val= NNmodel(x_, reuse=True)
     derivatives = Derivatives(xDer, yDer)
     d={}
+    dd={}
     for i in range(0,len(Inputstring)):
-            Variable = Inputstring[i]
-            d["dxd"+Variable]=derivatives.get('x', [Variable])
-            d["dyd"+Variable]=derivatives.get('y', [Variable])
+            Variable = sorted(Inputstring)[i]
+            d["1dxd"+Variable]=derivatives.get('x', [Variable])
+            d["1dyd"+Variable]=derivatives.get('y', [Variable])
+            for j in range(0,len(Inputstring)):
+                Variable2 = sorted(Inputstring)[j]
+                dd["2dxd"+Variable+"dxd2"+Variable2] = derivatives.get('x', [Variable, Variable2])
+                dd["2dyd"+Variable+"dyd2"+Variable2] = derivatives.get('y', [Variable, Variable2])
 
     print('len logits_train', logits_train.shape)
 
@@ -438,16 +447,13 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     preprocessing_input.fit(data_train)
     list_derivates = []
     #[rx_PF_x,rx_PF_y,rx_PF_SumEt,rx_Track_x,rx_Track_y,rx_Track_SumEtr,rx_NoPU_x,rx_NoPU_y,rx_NoPU_SumEt,rx_PUCorrected_x,rx_PUCorrected_y,rx_PUCorrected_SumEt,rx_PU_x,rx_PU_y,rx_PU_SumEt,rx_Puppi_x,rx_Puppi_y,rx_Puppi_SumEt,rx_NVertex]
-    list_derivatestensor = d.values()
+    list_derivatestensor = d.values() + dd.values()
+    print("list_derivatestensor", len(list_derivatestensor))
     for i_step in range(30000):
         start_loop = time.time()
 
-        #p = map(lambda x: abs(np.random.uniform(min(pT),max(pT)) - x), pT)
-        #print(p)
-        #batch_train_idx = p.index(min(p))[:batchsize]
         batch_train_idx = np.random.choice(np.arange(data_train.shape[0]), batchsize, p=batch_prob, replace=False)
-        #pval = map(lambda x: abs(np.random.uniform(min(pT),max(pT)) - x), pT)
-        #batch_val_idx = pval.index(min(pval))[:batchsize]
+
         batch_val_idx = np.random.choice(np.arange(data_val.shape[0]), batchsize, p=batch_prob_val, replace=False)
 
         summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss], feed_dict={x: data_train[batch_train_idx,:], y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
@@ -468,7 +474,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             loss_ = sess.run(loss_val, feed_dict={x_: data_val[batch_val_idx_100,:], y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
             if loss_<min(min_valloss):
                 saver.save(sess, "%sNNmodel"%outputDir, global_step=i_step)
-                outputs = ["logits"] # names of output operations you want to use later
+                outputs = ["output"]
                 constant_graph = tf.graph_util.convert_variables_to_constants(
                     sess, sess.graph.as_graph_def(), outputs)
                 tf.train.write_graph(constant_graph, outputDir, "constantgraph.pb", as_text=False)
@@ -478,7 +484,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
                 print("better val loss found at ", i_step)
 
                 list_derivates = sess.run(
-                            d.values(),
+                            list_derivatestensor,
                             feed_dict={xDer.placeholders: preprocessing_input.transform(data_train[batch_train_idx,:])})
 
             else:
@@ -494,11 +500,9 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     ############ Derivate action #########
 
     print("shape list_derivates", len(list_derivates))
-    #xderivates = {k:np.mean(np.abs(v)) for (k,v) in zip(d.keys(),list_derivates) if "dx" in k}
-    #yderivates = {k:np.mean(np.abs(v)) for (k,v) in zip(d.keys(),list_derivates) if "dy" in k}
-    xderivates = {k.replace("dxd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys(),list_derivates) if "dx" in k}
+    xderivates = {k.replace("1dxd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys() + dd.keys(),list_derivates) if "1dx" in k}
     xderivates = OrderedDict(sorted(xderivates.items(), key=lambda t: t[0]))
-    yderivates = {k.replace("dyd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys(),list_derivates) if "dy" in k}
+    yderivates = {k.replace("1dyd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys() + dd.keys(),list_derivates) if "1dy" in k}
     yderivates = OrderedDict(sorted(yderivates.items(), key=lambda t: t[0]))
     print("xderivates keys", xderivates.keys())
     print("yderivates keys", yderivates.keys())
@@ -506,14 +510,49 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     X = np.arange(len(xderivates))
     ax = plt.subplot(111)
     ax.plot(X, xderivates.values(),  'bo')
-    ax.plot(X, yderivates.values(),  'gx')
+    ax.plot(X, yderivates.values(),  'ro')
     ax.legend(('x','y'))
     ax.set_ylabel("First order derivates")
-    plt.xticks(X, xderivates.keys(), rotation='vertical')
+    plt.xticks(X, xderivates.keys(), rotation="vertical")
     plt.savefig("%sFirstOrderDerivates.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
+    from collections import defaultdict
+
+    x2derivates = defaultdict(lambda: defaultdict(dict))
+    y2derivates = defaultdict(lambda: defaultdict(dict))
+    for (a,v) in zip(d.keys() + dd.keys(),list_derivates):
+        if "2dxd" in a:
+            x2derivates[re.search('2dxd(.*)dxd', a).group(1)][re.search('dxd2(.*)', a).group(1)] = np.mean(np.abs(v))
+        elif "2dyd" in a:
+            y2derivates[re.search('2dyd(.*)dyd', a).group(1)][re.search('dyd2(.*)', a).group(1)] = np.mean(np.abs(v))
+        else:
+            continue
+
+    print("x2derivates 1",pd.DataFrame(x2derivates))
+
+    plt.figure()
+    sns_plot = sns.heatmap(pd.DataFrame(x2derivates), annot=True, vmin=0, linewidths=.5, cbar_kws={"orientation": "vertical"})
+    sns_plot.set_xticklabels(sns_plot.get_xticklabels(),rotation="vertical")
+    sns_plot.set_yticklabels(sns_plot.get_yticklabels(),rotation="horizontal")
+    plt.savefig("%sSecondOrderDerivates_xbla.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+    plt.figure()
+    sns_plot2 = sns.heatmap(pd.DataFrame(y2derivates), annot=True, vmin=0, linewidths=.5, cbar_kws={"orientation": "vertical"})
+    sns_plot2.set_xticklabels(sns_plot2.get_xticklabels(),rotation="vertical")
+    sns_plot2.set_yticklabels(sns_plot2.get_yticklabels(),rotation="horizontal")
+    plt.savefig("%sSecondOrderDerivates_ybla.png"%(plotsD), bbox_inches="tight")
+    plt.close()
+
+
+
+
 
 
     #writer.flush()
+    plt.figure()
     pT_woutWeight = np.sqrt(np.square(labels_train[:,0])+np.square(labels_train[:,1]))
     #plt.hist(pT_woutWeight, bins=18, lw=3, label="train pT distr")
     plt.hist(pT_woutWeight[np.random.choice(np.arange(data_train.shape[0]), batchsize, replace=True)], bins=18, lw=3, label="Input distribution", histtype="step")
@@ -524,7 +563,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.savefig("%sBatch.png"%(plotsD))
     plt.close()
 
-
+    plt.figure()
     plt.plot(range(1, len(moving_average(np.asarray(losses_train), 1500))+1), moving_average(np.asarray(losses_train), 1500), lw=3, label="Training loss")
     plt.plot(range(1, len(moving_average(np.asarray(losses_val), 1500))+1), moving_average(np.asarray(losses_val), 1500), lw=3, label="Validation loss")
     plt.xlabel("Gradient step"), plt.ylabel("loss")
