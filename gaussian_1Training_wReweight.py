@@ -31,6 +31,8 @@ import pandas as pd
 from pandas import Series, MultiIndex, DataFrame
 import re
 import seaborn as sns
+from collections import defaultdict
+
 
 reweighting = True
 
@@ -148,7 +150,7 @@ def costExpectedRel(y_true,y_pred, weight):
     Response = tf.divide(u_long,pZ)
     Resolution_para = u_long-pZ
 
-    cost = tf.square(Response-1)
+    cost = tf.contrib.distributions.percentile(tf.square(Response-1), 50.0)
     return tf.reduce_mean(cost)
 
 def costExpectedRelAbs(y_true,y_pred, weight):
@@ -204,6 +206,53 @@ def costMSE(y_true,y_pred, weight):
     cost = tf.multiply(MSE_x+MSE_y, weight)
     return tf.reduce_mean(cost)
 
+
+    ############ Derivate action #########
+def TaylorExpansion(d, dd, list_derivates, plotsD, gradienstep):
+    xderivates = {k.replace("1dxd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys() + dd.keys(),list_derivates) if "1dx" in k}
+    xderivates = OrderedDict(sorted(xderivates.items(), key=lambda t: t[0]))
+    yderivates = {k.replace("1dyd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys() + dd.keys(),list_derivates) if "1dy" in k}
+    yderivates = OrderedDict(sorted(yderivates.items(), key=lambda t: t[0]))
+
+
+    X = np.arange(len(xderivates))
+    ax = plt.subplot(111)
+    ax.plot(X, xderivates.values(),  'bo')
+    ax.plot(X, yderivates.values(),  'ro')
+    ax.legend(('x','y'))
+    ax.set_ylabel("First order derivates")
+    plt.xticks(X, xderivates.keys(), rotation="vertical")
+    plt.savefig("%sderivates/FirstOrderDerivates_GS%s.png"%(plotsD,str(gradienstep)), bbox_inches="tight")
+    plt.close()
+
+
+
+
+    x2derivates = defaultdict(lambda: defaultdict(dict))
+    y2derivates = defaultdict(lambda: defaultdict(dict))
+    for (a,v) in zip(d.keys() + dd.keys(),list_derivates):
+        if "2dxd" in a:
+            x2derivates[re.search('2dxd(.*)dxd', a).group(1)][re.search('dxd2(.*)', a).group(1)] = np.mean(np.abs(v))
+        elif "2dyd" in a:
+            y2derivates[re.search('2dyd(.*)dyd', a).group(1)][re.search('dyd2(.*)', a).group(1)] = np.mean(np.abs(v))
+        else:
+            continue
+
+    #print("x2derivates 1",pd.DataFrame(x2derivates))
+
+    plt.figure()
+    sns_plot = sns.heatmap(pd.DataFrame(x2derivates), annot=True, vmin=0, cmap="YlGnBu", linewidths=.5, cbar_kws={"orientation": "vertical"})
+    sns_plot.set_xticklabels(sns_plot.get_xticklabels(),rotation="vertical")
+    sns_plot.set_yticklabels(sns_plot.get_yticklabels(),rotation="horizontal")
+    plt.savefig("%sderivates/SecondOrderDerivates_x_GS%s.png"%(plotsD,str(gradienstep)), bbox_inches="tight")
+    plt.close()
+
+    plt.figure()
+    sns_plot2 = sns.heatmap(pd.DataFrame(y2derivates), annot=True, vmin=0, cmap="YlGnBu", linewidths=.5, cbar_kws={"orientation": "vertical"})
+    sns_plot2.set_xticklabels(sns_plot2.get_xticklabels(),rotation="vertical")
+    sns_plot2.set_yticklabels(sns_plot2.get_yticklabels(),rotation="horizontal")
+    plt.savefig("%sderivates/SecondOrderDerivates_y_GS%s.png"%(plotsD,str(gradienstep)), bbox_inches="tight")
+    plt.close()
 
 def NNmodel(x, reuse):
     ndim = 128
@@ -457,7 +506,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         batch_val_idx = np.random.choice(np.arange(data_val.shape[0]), batchsize, p=batch_prob_val, replace=False)
 
         summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss], feed_dict={x: data_train[batch_train_idx,:], y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
-        #summary_, loss_, loss_response_, loss_resolution_para_, loss_resolution_perp_, loss_mse_, _ = sess.run([summary_train, loss_train, minimize_loss])
+
         losses_train.append(loss_)
         writer.add_summary(summary_, i_step)
         summary_, loss_ = sess.run([summary_val, loss_val], feed_dict={x_: data_val[batch_val_idx,:], y_: labels_val[batch_val_idx,:], w_: weights_val[batch_val_idx,:]})
@@ -468,8 +517,6 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
 
         if i_step % saveStep == 0:
-            #pval_100 = map(lambda x: abs(np.random.uniform(min(pT),max(pT)) - x), pT)
-            #batch_val_idx_100 = pval_100.index(min(pval))[:batchsize_val]
             batch_val_idx_100 =  np.random.choice(np.arange(data_val.shape[0]), batchsize_val, p=batch_prob_val, replace=False)
             loss_ = sess.run(loss_val, feed_dict={x_: data_val[batch_val_idx_100,:], y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
             if loss_<min(min_valloss):
@@ -478,14 +525,10 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
                 constant_graph = tf.graph_util.convert_variables_to_constants(
                     sess, sess.graph.as_graph_def(), outputs)
                 tf.train.write_graph(constant_graph, outputDir, "constantgraph.pb", as_text=False)
-
-                early_stopping = 0
                 pT2 = np.sqrt(np.square(labels_train[batch_train_idx,0]) + np.square(labels_train[batch_train_idx,1]))
+                early_stopping = 0
                 print("better val loss found at ", i_step)
 
-                list_derivates = sess.run(
-                            list_derivatestensor,
-                            feed_dict={xDer.placeholders: preprocessing_input.transform(data_train[batch_train_idx,:])})
 
             else:
                 early_stopping += 1
@@ -497,54 +540,13 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             print("validation loss", loss_)
             print("gradient step time {0} seconds".format(end_loop-start_loop))
 
-    ############ Derivate action #########
+            list_derivates = sess.run(
+                        list_derivatestensor,
+                        feed_dict={xDer.placeholders: preprocessing_input.transform(data_train[batch_train_idx,:])})
 
-    print("shape list_derivates", len(list_derivates))
-    xderivates = {k.replace("1dxd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys() + dd.keys(),list_derivates) if "1dx" in k}
-    xderivates = OrderedDict(sorted(xderivates.items(), key=lambda t: t[0]))
-    yderivates = {k.replace("1dyd", ""):np.mean(np.abs(v)) for (k,v) in zip(d.keys() + dd.keys(),list_derivates) if "1dy" in k}
-    yderivates = OrderedDict(sorted(yderivates.items(), key=lambda t: t[0]))
-    print("xderivates keys", xderivates.keys())
-    print("yderivates keys", yderivates.keys())
-
-    X = np.arange(len(xderivates))
-    ax = plt.subplot(111)
-    ax.plot(X, xderivates.values(),  'bo')
-    ax.plot(X, yderivates.values(),  'ro')
-    ax.legend(('x','y'))
-    ax.set_ylabel("First order derivates")
-    plt.xticks(X, xderivates.keys(), rotation="vertical")
-    plt.savefig("%sFirstOrderDerivates.png"%(plotsD), bbox_inches="tight")
-    plt.close()
+            TaylorExpansion(d, dd, list_derivates, plotsD, i_step)
 
 
-    from collections import defaultdict
-
-    x2derivates = defaultdict(lambda: defaultdict(dict))
-    y2derivates = defaultdict(lambda: defaultdict(dict))
-    for (a,v) in zip(d.keys() + dd.keys(),list_derivates):
-        if "2dxd" in a:
-            x2derivates[re.search('2dxd(.*)dxd', a).group(1)][re.search('dxd2(.*)', a).group(1)] = np.mean(np.abs(v))
-        elif "2dyd" in a:
-            y2derivates[re.search('2dyd(.*)dyd', a).group(1)][re.search('dyd2(.*)', a).group(1)] = np.mean(np.abs(v))
-        else:
-            continue
-
-    print("x2derivates 1",pd.DataFrame(x2derivates))
-
-    plt.figure()
-    sns_plot = sns.heatmap(pd.DataFrame(x2derivates), annot=True, vmin=0, linewidths=.5, cbar_kws={"orientation": "vertical"})
-    sns_plot.set_xticklabels(sns_plot.get_xticklabels(),rotation="vertical")
-    sns_plot.set_yticklabels(sns_plot.get_yticklabels(),rotation="horizontal")
-    plt.savefig("%sSecondOrderDerivates_xbla.png"%(plotsD), bbox_inches="tight")
-    plt.close()
-
-    plt.figure()
-    sns_plot2 = sns.heatmap(pd.DataFrame(y2derivates), annot=True, vmin=0, linewidths=.5, cbar_kws={"orientation": "vertical"})
-    sns_plot2.set_xticklabels(sns_plot2.get_xticklabels(),rotation="vertical")
-    sns_plot2.set_yticklabels(sns_plot2.get_yticklabels(),rotation="horizontal")
-    plt.savefig("%sSecondOrderDerivates_ybla.png"%(plotsD), bbox_inches="tight")
-    plt.close()
 
 
 

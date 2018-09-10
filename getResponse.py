@@ -263,6 +263,17 @@ def plotMVAResponseOverpTZ_woutError(branchString, labelName, errbars_shift, Sca
     stdc = np.std((getResponse(branchString)))
     plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
 
+def plotMVAmedianResponseOverpTZ_woutError(branchString, labelName, errbars_shift, ScaleErr):
+
+    n, _ = np.histogram(DFName[Target_Pt], bins=nbins)
+    sy, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(getResponse(branchString)))
+    sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString]/DFName[Target_Pt])**2)
+    mean = sy / n
+    std = np.sqrt(sy2/n - mean*mean)
+    meanc = np.median((getResponse(branchString)))
+    stdc = np.std((getResponse(branchString)))
+    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
+
 
 def plotMVANormOverpTZ(branchString, labelName, errbars_shift, ScaleErr):
     binwidth = (DFName[Target_Pt].values.max() - DFName[Target_Pt].values.min())/(nbins) #5MET-Definitionen
@@ -1002,6 +1013,30 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.close()
 
 
+    fig=plt.figure(figsize=(10,6))
+    fig.patch.set_facecolor('white')
+    ax = plt.subplot(111)
+
+    plotMVAmedianResponseOverpTZ_woutError('recoilslimmedMETsPuppi_LongZ', 'Puppi', 4, ScaleErr)
+    plotMVAmedianResponseOverpTZ_woutError('recoilslimmedMETs_LongZ', 'PF', 1, ScaleErr)
+    plotMVAmedianResponseOverpTZ_woutError('NN_LongZ', 'NN', 6, ScaleErr)
+    plt.plot([pTMin, pTMax], [1, 1], color='k', linestyle='--', linewidth=1)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    handles.insert(0,mpatches.Patch(color='none', label=pTRangeString))
+
+    plt.xlabel('$|-\\vec{p}_T^Z| $ in GeV')
+    plt.ylabel('$\\langle \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|} \\rangle$ ')
+    #plt.title('Response $U_{\parallel}$')
+
+    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize='x-small', title=LegendTitle, numpoints=1	)
+    plt.grid()
+    plt.ylim(ResponseMinErr, ResponseMaxErr)
+    plt.xlim(pTMin, pTMax)
+    plt.savefig("%sResponse_Median_pT.png"%(plotsD), bbox_inches="tight")
+    plt.close()
 
 
     fig=plt.figure(figsize=(10,6))

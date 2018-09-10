@@ -14,6 +14,7 @@ print(" info gpu ", tensorflow.Session(config=tensorflow.ConfigProto(log_device_
 import numpy as np
 np.random.seed(1234)
 from sklearn.metrics import roc_curve, auc
+from gaussian_1Training_wReweight import NNmodel, loadInputsTargetsWeights
 import tensorflow as tf
 import datetime
 import sys
@@ -29,21 +30,6 @@ reweighting = True
 def reject_outliers(data, m=2):
     return data[abs(data - np.mean(data)) < m * np.std(data)]
 
-def loadInputsTargetsWeights(outputD):
-    InputsTargets = h5py.File("%sNN_Input_training_%s.h5" % (outputD,NN_mode), "r")
-    norm = np.sqrt(np.multiply(InputsTargets['Target'][:,0],InputsTargets['Target'][:,0]) + np.multiply(InputsTargets['Target'][:,1],InputsTargets['Target'][:,1]))
-
-    Target =  InputsTargets['Target']
-    weight =  InputsTargets['weights']
-    Input = np.row_stack((
-                InputsTargets['PF'],
-                InputsTargets['Track'],
-                InputsTargets['NoPU'],
-                InputsTargets['PUCorrected'],
-                InputsTargets['PU'],
-                InputsTargets['Puppi']
-                ))
-    return (np.transpose(Input), np.transpose(Target), np.transpose(weight))
 
 def moving_average(data_set, periods):
     weights = np.ones(periods) / periods
@@ -196,41 +182,6 @@ def costMSE(y_true,y_pred, weight):
     return tf.reduce_mean(cost)
 
 
-def NNmodel(x, reuse):
-    ndim = 128
-    with tf.variable_scope("model") as scope:
-        if reuse:
-            scope.reuse_variables()
-        w1 = tf.get_variable('w1', shape=(18,ndim), dtype=tf.float32,
-                initializer=tf.glorot_normal_initializer())
-        b1 = tf.get_variable('b1', shape=(ndim), dtype=tf.float32,
-                initializer=tf.constant_initializer(0.0))
-        w2 = tf.get_variable('w2', shape=(ndim, ndim), dtype=tf.float32,
-                initializer=tf.glorot_normal_initializer())
-        b2 = tf.get_variable('b2', shape=(ndim), dtype=tf.float32,
-                initializer=tf.constant_initializer(0.0))
-
-        w3 = tf.get_variable('w3', shape=(ndim, ndim), dtype=tf.float32,
-                initializer=tf.glorot_normal_initializer())
-        b3 = tf.get_variable('b3', shape=(ndim), dtype=tf.float32,
-                initializer=tf.constant_initializer(0.0))
-        w4 = tf.get_variable('w4', shape=(ndim, ndim), dtype=tf.float32,
-                initializer=tf.glorot_normal_initializer())
-        b4 = tf.get_variable('b4', shape=(ndim), dtype=tf.float32,
-                initializer=tf.constant_initializer(0.0))
-
-        w5 = tf.get_variable('w5', shape=(ndim, 2), dtype=tf.float32,
-                initializer=tf.glorot_normal_initializer())
-        b5 = tf.get_variable('b5', shape=(2), dtype=tf.float32,
-                initializer=tf.constant_initializer(0.0))
-
-
-    l1 = tf.nn.relu(tf.add(b1, tf.matmul(x, w1)))
-    l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
-    l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
-    l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
-    logits = tf.add(b5, tf.matmul(l4, w5), name='logits')
-    return logits, logits
 
 
 def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):

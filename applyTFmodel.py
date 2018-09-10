@@ -9,7 +9,7 @@ import numpy as np
 from os import environ
 import root_numpy as rnp
 import tensorflow as tf
-from gaussian_1Training import NNmodel
+from gaussian_1Training_wReweight import NNmodel
 
 #NN_mode='xyr'
 
@@ -21,7 +21,8 @@ def loadInputsTargets(outputD):
                 InputsTargets['NoPU'],
                 InputsTargets['PUCorrected'],
                 InputsTargets['PU'],
-                InputsTargets['Puppi']
+                InputsTargets['Puppi'],
+                InputsTargets['NVertex']
                 ))
 
     Target =  InputsTargets['Target']
