@@ -6,9 +6,9 @@ echo "trainingname eingeben"
 #trainingname='xyrTargets'
 PhysicsProcess="Mu"
 optimizer="Adam"
-loss="relResponse"
+loss="relResponseAsy"
 NN_mode="xy"
-trainingname="TF_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_wWeightScale_woutVertexReweight_300Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_Median${loss}"
+trainingname="TF_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_wWeightScale_woutVertexReweight_300Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
@@ -43,12 +43,12 @@ if [ ! -d "trainings/$trainingname" ]; then
 	echo "trainings/$trainingname"
 fi
 if [ ! -d "trainings/$trainingname" ]; then
-	mkdir trainings/$trainingname
+	mkdir trainings/$trainingnamev
 	cd trainings/$trainingname/
 	echo "files_di"
 fi
 #spaeter mal: config mit Art des Trainings festlegen
-#python $src_di/prepareInput_wSumEt.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
+python $src_di/prepareInput_wSumEt.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
 python $src_di/gaussian_1Training_wReweight.py $files_di $optimizer $loss $NN_mode $plots_di
 python $src_di/gaussian_1Training_wReweight_CV.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/1training_BU1508.py $files_di $optimizer $loss $NN_mode $plots_di
@@ -64,6 +64,7 @@ cp $src_di/*.py $plots_di
 cp $src_di/*Training1.sh $plots_di
 cp -r $plots_di /usr/users/tkopf/www/METplots/
 cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/
+cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/derivates/
 #python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/getPlotsInput.py $inputFile $plots_di $PhysicsProcess
 #python $src_di/Test_TF.py

@@ -14,7 +14,7 @@ print(" info gpu ", tensorflow.Session(config=tensorflow.ConfigProto(log_device_
 import numpy as np
 np.random.seed(1234)
 from sklearn.metrics import roc_curve, auc
-from gaussian_1Training_wReweight import NNmodel, loadInputsTargetsWeights
+from gaussian_1Training_wReweight import loadInputsTargetsWeights
 import tensorflow as tf
 import datetime
 import sys
@@ -30,12 +30,47 @@ reweighting = True
 def reject_outliers(data, m=2):
     return data[abs(data - np.mean(data)) < m * np.std(data)]
 
+def NNmodel(x, reuse):
+    ndim = 128
+    with tf.variable_scope("model") as scope:
+        if reuse:
+            scope.reuse_variables()
+        w1 = tf.get_variable('w1', shape=(19,ndim), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b1 = tf.get_variable('b1', shape=(ndim), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+        w2 = tf.get_variable('w2', shape=(ndim, ndim), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b2 = tf.get_variable('b2', shape=(ndim), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+
+        w3 = tf.get_variable('w3', shape=(ndim, ndim), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b3 = tf.get_variable('b3', shape=(ndim), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+        w4 = tf.get_variable('w4', shape=(ndim, ndim), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b4 = tf.get_variable('b4', shape=(ndim), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+
+        w5 = tf.get_variable('w5', shape=(ndim, 2), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b5 = tf.get_variable('b5', shape=(2), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+
+
+    l1 = tf.nn.relu(tf.add(b1, tf.matmul(x, w1)))
+    l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
+    l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
+    l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
+    logits = tf.add(b5, tf.matmul(l4, w5), name='output')
+    return logits, logits
 
 def moving_average(data_set, periods):
     weights = np.ones(periods) / periods
     return np.convolve(data_set, weights, mode='valid')
 
-def Names(outputD):
+def Names(outputD, NN_mode):
     InputsTargets = h5py.File("%sNN_Input_training_%s.h5" % (outputD,NN_mode), "r")
     return (InputsTargets.keys)
 
@@ -128,6 +163,39 @@ def costExpectedRel(y_true,y_pred, weight):
     cost = tf.square(Response-1)
     return tf.reduce_mean(cost)
 
+def costExpectedRelAsy(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_perp = tf.sin(alpha_diff)*a_
+    u_perp_ = tf.sin(alpha_diff)*pZ
+    u_long = tf.cos(alpha_diff)*a_
+    Response = tf.divide(u_long,pZ)
+    Resolution_para = u_long-pZ
+    Response_over1 = tf.reduce_sum(tf.square(tf.nn.relu(Response-1)))
+    Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
+    Response_Diff = tf.reduce_mean(tf.abs(Response_over1-Response_under1))
+    cost = tf.square(Response_over1)+tf.square(Response_under1)
+    return cost+Response_Diff
+
+
+def costExpectedRelAsy2(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_perp = tf.sin(alpha_diff)*a_
+    u_perp_ = tf.sin(alpha_diff)*pZ
+    u_long = tf.cos(alpha_diff)*a_
+    Response = tf.divide(u_long,pZ)
+    Resolution_para = u_long-pZ
+    Response_over1 = tf.reduce_sum(tf.square(tf.nn.relu(Response-1)))
+    Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
+    return Response_over1+Response_under1
+
 def costExpectedRelAbs(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
     pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
@@ -186,7 +254,7 @@ def costMSE(y_true,y_pred, weight):
 
 def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     start = time.time()
-    Inputs, Targets, Weights = loadInputsTargetsWeights(outputDir)
+    Inputs, Targets, Weights = loadInputsTargetsWeights(outputDir, NN_mode)
 
     Boson_Pt = np.sqrt(np.square(Targets[:,0])+np.square(Targets[:,1]))
     num_events = Inputs.shape[0]
@@ -317,6 +385,16 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         loss_train = costExpectedRel(y, logits_train, w)
         loss_val = costExpectedRel(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="relResponseAsy"):
+        print("Loss Function Angle_Response rel: ", loss_fct)
+        loss_train = costExpectedRelAsy(y, logits_train, w)
+        loss_val = costExpectedRelAsy(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="relResponseAsy2"):
+        print("Loss Function Angle_Response rel: ", loss_fct)
+        loss_train = costExpectedRelAsy2(y, logits_train, w)
+        loss_val = costExpectedRelAsy2(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="Angle_relabsResponse"):
         print("Loss Function Angle_Response rel abs: ", loss_fct)
         loss_train = costExpectedRelAbs(y, logits_train, w)
@@ -348,7 +426,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
     losses_train = []
     losses_val = []
-    min_valloss = [100000]
+    min_valloss = [1000000000000]
     loss_response, loss_resolution_para, loss_resolution_perp, loss_mse = [], [], [], []
     summary_train = tf.summary.scalar("loss_train", loss_train)
     summary_val = tf.summary.scalar("loss_val", loss_val)
@@ -357,6 +435,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     saver = tf.train.Saver()
     saveStep = 100
     early_stopping = 0
+    best_model = 0
     print("StartTraining")
     batch_prob = weights_train.flatten() * 1 / (np.sum(weights_train.flatten()))
     print(" shape batch_prob", batch_prob.shape)
@@ -391,8 +470,9 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             batch_val_idx_100 =  np.random.choice(np.arange(data_val.shape[0]), batchsize_val, p=batch_prob_val, replace=False)
             loss_ = sess.run(loss_val, feed_dict={x_: data_val[batch_val_idx_100,:], y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
             if loss_<min(min_valloss):
+                best_model = i_step
                 saver.save(sess, "%sCV/NNmodel_CV"%outputDir, global_step=i_step)
-                outputs = ["logits"] # names of output operations you want to use later
+                outputs = ["output"] # names of output operations you want to use later
                 constant_graph = tf.graph_util.convert_variables_to_constants(
                     sess, sess.graph.as_graph_def(), outputs)
                 tf.train.write_graph(constant_graph, outputDir, "constantgraph.pb", as_text=False)
@@ -428,8 +508,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.close()
 
 
-    plt.plot(range(1, len(moving_average(np.asarray(losses_train), 1500))+1), moving_average(np.asarray(losses_train), 1500), lw=3, label="Training loss")
-    plt.plot(range(1, len(moving_average(np.asarray(losses_val), 1500))+1), moving_average(np.asarray(losses_val), 1500), lw=3, label="Validation loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500), lw=3, label="Training loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500), lw=3, label="Validation loss")
     plt.xlabel("Gradient step"), plt.ylabel("loss")
     plt.yscale('log')
     plt.legend()

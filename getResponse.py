@@ -268,11 +268,18 @@ def plotMVAmedianResponseOverpTZ_woutError(branchString, labelName, errbars_shif
     n, _ = np.histogram(DFName[Target_Pt], bins=nbins)
     sy, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(getResponse(branchString)))
     sy2, _ = np.histogram(DFName[Target_Pt], bins=nbins, weights=(DFName[branchString]/DFName[Target_Pt])**2)
-    mean = sy / n
-    std = np.sqrt(sy2/n - mean*mean)
+    end, start = _[1:], _[:-1]
+    median = [np.median(getResponse(branchString)[(DFName[Target_Pt]>=start[i]) & (DFName[Target_Pt]<end[i])]) for i in range(0,len(start))]
+    if branchString=="NN_LongZ":
+        print("median NN", median)
+        print("median NN, len(getResponse(branchString)))", len(getResponse(branchString)))
+        print("median NN, [(DFName[Target_Pt]>=start[0]) & (DFName[Target_Pt]<end[0])]", [(DFName[Target_Pt]>=start[0]) & (DFName[Target_Pt]<end[0])])
+        print("any nans", np.any(np.isnan(getResponse(branchString)[(DFName[Target_Pt]>=start[0]) & (DFName[Target_Pt]<end[0])])))
+    #mean = sy / n
+    #std = np.sqrt(sy2/n - mean*mean)
     meanc = np.median((getResponse(branchString)))
     stdc = np.std((getResponse(branchString)))
-    plt.errorbar((_[1:] + _[:-1])/2, mean, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
+    plt.errorbar((_[1:] + _[:-1])/2, median, marker='.', xerr=(_[1:]-_[:-1])/2, label=labelName+'%8.2f $\pm$ %8.2f'%(meanc, stdc), linestyle="None", capsize=0,  color=colors[errbars_shift])
 
 
 def plotMVANormOverpTZ(branchString, labelName, errbars_shift, ScaleErr):
