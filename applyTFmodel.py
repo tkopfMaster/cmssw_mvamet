@@ -9,9 +9,47 @@ import numpy as np
 from os import environ
 import root_numpy as rnp
 import tensorflow as tf
-from gaussian_1Training_wReweight import NNmodel
+#from gaussian_1Training_wReweight import NNmodel
+from sklearn.preprocessing import StandardScaler
 
 #NN_mode='xyr'
+
+def NNmodel(x, reuse):
+    ndim = 128
+    with tf.variable_scope("model") as scope:
+        if reuse:
+            scope.reuse_variables()
+        w1 = tf.get_variable('w1', shape=(19,ndim), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b1 = tf.get_variable('b1', shape=(ndim), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+        w2 = tf.get_variable('w2', shape=(ndim, ndim), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b2 = tf.get_variable('b2', shape=(ndim), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+
+        w3 = tf.get_variable('w3', shape=(ndim, ndim), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b3 = tf.get_variable('b3', shape=(ndim), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+        w4 = tf.get_variable('w4', shape=(ndim, ndim), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b4 = tf.get_variable('b4', shape=(ndim), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+
+        w5 = tf.get_variable('w5', shape=(ndim, 2), dtype=tf.float32,
+                initializer=tf.glorot_normal_initializer())
+        b5 = tf.get_variable('b5', shape=(2), dtype=tf.float32,
+                initializer=tf.constant_initializer(0.0))
+
+
+    l1 = tf.nn.sigmoid(tf.add(b1, tf.matmul(x, w1)))
+    l2 = tf.nn.sigmoid(tf.add(b2, tf.matmul(l1, w2)))
+    l3 = tf.nn.sigmoid(tf.add(b3, tf.matmul(l2, w3)))
+    l4 = tf.nn.sigmoid(tf.add(b4, tf.matmul(l3, w4)))
+    logits = tf.add(b5, tf.matmul(l4, w5), name='output')
+    return logits, logits
+
 
 def loadInputsTargets(outputD):
     InputsTargets = h5py.File("%sNN_Input_apply_%s.h5" % (outputD,NN_mode), "r")
@@ -69,8 +107,14 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     saver = tf.train.Saver()
     saver.restore(sess, checkpoint_path)
 
-    predictions = sess.run(f, {x: Inputs})
+    #Preprocessing
+    preprocessing_input = StandardScaler()
+    #preprocessing_output = StandardScaler()
+    preprocessing_input.fit(Inputs)
+    #preprocessing_output.fit(Targets)
 
+    predictions = sess.run(f, {x: preprocessing_input.transform(Inputs)})
+    #prediction = preprocessing_output.inverse_transform(predictions)
     #get prediction CV
     x_CV = tf.placeholder(tf.float32)
     logits_CV, f_CV = NNmodel(x_CV, reuse=True)
@@ -80,8 +124,9 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     saver = tf.train.Saver()
     saver.restore(sess_CV, checkpoint_path_CV)
 
-    predictions_CV = sess.run(f_CV, {x_CV: Inputs})
 
+    predictions_CV = sess.run(f_CV, {x_CV: preprocessing_input.transform(Inputs)})
+    #predictions_CV = preprocessing_output.inverse_transform(predictions_CV)
     #merge both predictions
     Test_Idx2 = h5py.File("%sTest_Idx_CV_%s.h5" % (outputDir, NN_mode), "r")
     Test_Idx = Test_Idx2["Test_Idx"].value.astype(int)

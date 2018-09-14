@@ -22,6 +22,7 @@ import h5py
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
+from sklearn.preprocessing import StandardScaler
 import time
 import sys
 
@@ -59,10 +60,10 @@ def NNmodel(x, reuse):
                 initializer=tf.constant_initializer(0.0))
 
 
-    l1 = tf.nn.relu(tf.add(b1, tf.matmul(x, w1)))
-    l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
-    l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
-    l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
+    l1 = tf.nn.sigmoid(tf.add(b1, tf.matmul(x, w1)))
+    l2 = tf.nn.sigmoid(tf.add(b2, tf.matmul(l1, w2)))
+    l3 = tf.nn.sigmoid(tf.add(b3, tf.matmul(l2, w3)))
+    l4 = tf.nn.sigmoid(tf.add(b4, tf.matmul(l3, w4)))
     logits = tf.add(b5, tf.matmul(l4, w5), name='output')
     return logits, logits
 
@@ -176,9 +177,9 @@ def costExpectedRelAsy(y_true,y_pred, weight):
     Resolution_para = u_long-pZ
     Response_over1 = tf.reduce_sum(tf.square(tf.nn.relu(Response-1)))
     Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
-    Response_Diff = tf.reduce_mean(tf.abs(Response_over1-Response_under1))
-    cost = tf.square(Response_over1)+tf.square(Response_under1)
-    return cost+Response_Diff
+    Response_Diff = tf.reduce_sum(tf.square(tf.reduce_sum(tf.nn.relu(Response-1))-tf.reduce_sum(tf.nn.relu(1-Response))))
+    cost = Response_over1*Response_under1
+    return Response_Diff*0.01+tf.sqrt(Response_over1+Response_under1)
 
 
 def costExpectedRelAsy2(y_true,y_pred, weight):
@@ -442,22 +443,23 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     print(" shape data_train", data_train.shape)
     batch_prob_val = weights_val.flatten() * 1 / (np.sum( weights_val.flatten()))
     pT = np.sqrt(np.square(labels_train[:,0]) + np.square(labels_train[:,1]))
+
+    #Preprocessing
+    preprocessing_input = StandardScaler()
+    preprocessing_output = StandardScaler()
+    preprocessing_input.fit(Inputs)
+    preprocessing_output.fit(Targets)
+
     for i_step in range(30000):
         start_loop = time.time()
-
-        #p = map(lambda x: abs(np.random.uniform(min(pT),max(pT)) - x), pT)
-        #print(p)
-        #batch_train_idx = p.index(min(p))[:batchsize]
         batch_train_idx = np.random.choice(np.arange(data_train.shape[0]), batchsize, p=batch_prob, replace=False)
-        #pval = map(lambda x: abs(np.random.uniform(min(pT),max(pT)) - x), pT)
-        #batch_val_idx = pval.index(min(pval))[:batchsize]
         batch_val_idx = np.random.choice(np.arange(data_val.shape[0]), batchsize, p=batch_prob_val, replace=False)
 
-        summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss], feed_dict={x: data_train[batch_train_idx,:], y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
+        summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss], feed_dict={x: preprocessing_input.transform(data_train[batch_train_idx,:]), y: (labels_train[batch_train_idx,:]), w: weights_train[batch_train_idx,:]})
         #summary_, loss_, loss_response_, loss_resolution_para_, loss_resolution_perp_, loss_mse_, _ = sess.run([summary_train, loss_train, minimize_loss])
         losses_train.append(loss_)
         writer.add_summary(summary_, i_step)
-        summary_, loss_ = sess.run([summary_val, loss_val], feed_dict={x_: data_val[batch_val_idx,:], y_: labels_val[batch_val_idx,:], w_: weights_val[batch_val_idx,:]})
+        summary_, loss_ = sess.run([summary_val, loss_val], feed_dict={x_: preprocessing_input.transform(data_val[batch_val_idx,:]), y_: (labels_val[batch_val_idx,:]), w_: weights_val[batch_val_idx,:]})
         losses_val.append(loss_)
         writer.add_summary(summary_, i_step)
         end_loop = time.time()
@@ -465,10 +467,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
 
         if i_step % saveStep == 0:
-            #pval_100 = map(lambda x: abs(np.random.uniform(min(pT),max(pT)) - x), pT)
-            #batch_val_idx_100 = pval_100.index(min(pval))[:batchsize_val]
             batch_val_idx_100 =  np.random.choice(np.arange(data_val.shape[0]), batchsize_val, p=batch_prob_val, replace=False)
-            loss_ = sess.run(loss_val, feed_dict={x_: data_val[batch_val_idx_100,:], y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
+            loss_ = sess.run(loss_val, feed_dict={x_: preprocessing_input.transform(data_val[batch_val_idx_100,:]), y_: (labels_val[batch_val_idx_100,:]), w_: weights_val[batch_val_idx_100,:]})
             if loss_<min(min_valloss):
                 best_model = i_step
                 saver.save(sess, "%sCV/NNmodel_CV"%outputDir, global_step=i_step)
@@ -484,7 +484,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 15:
+            if early_stopping == 12:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)

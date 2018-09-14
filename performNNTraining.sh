@@ -8,7 +8,7 @@ PhysicsProcess="Mu"
 optimizer="Adam"
 loss="relResponseAsy"
 NN_mode="xy"
-trainingname="TF_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_wWeightScale_woutVertexReweight_300Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}"
+trainingname="TF_sigmoid_longTraining_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_woutScale_woutVertexReweight_300Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}001_2Parts"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
@@ -54,7 +54,7 @@ python $src_di/gaussian_1Training_wReweight_CV.py $files_di $optimizer $loss $NN
 #python $src_di/1training_BU1508.py $files_di $optimizer $loss $NN_mode $plots_di
 python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
 
-python $src_di/prepareOutput.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
+python $src_di/prepareOutput_woutScale.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
 #python $src_di/MiniplotTraining.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
 python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
 python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode

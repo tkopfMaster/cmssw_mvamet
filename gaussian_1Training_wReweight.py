@@ -166,9 +166,9 @@ def costExpectedRelAsy(y_true,y_pred, weight):
     Resolution_para = u_long-pZ
     Response_over1 = tf.reduce_sum(tf.square(tf.nn.relu(Response-1)))
     Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
-    Response_Diff = tf.abs(Response_over1-Response_under1)
-    cost = tf.square(Response_over1)*tf.square(Response_under1)*0.00000001
-    return cost
+    Response_Diff = tf.reduce_sum(tf.square(tf.nn.relu(tf.nn.relu(Response-1))-tf.reduce_sum(tf.nn.relu(1-Response))))
+    cost = Response_over1*Response_under1
+    return Response_Diff*0.001+tf.sqrt(Response_over1+Response_under1)
 
 def costExpectedRelAsy2(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
@@ -271,20 +271,20 @@ def TaylorExpansion(d, dd, list_derivates, plotsD, gradienstep):
             continue
 
     #print("x2derivates 1",pd.DataFrame(x2derivates))
+    if not gradienstep == 0:
+        plt.figure()
+        sns_plot = sns.heatmap(pd.DataFrame(x2derivates), annot=False, cmap="YlGnBu", linewidths=.5, cbar_kws={"orientation": "vertical"})
+        sns_plot.set_xticklabels(sns_plot.get_xticklabels(),rotation="vertical")
+        sns_plot.set_yticklabels(sns_plot.get_yticklabels(),rotation="horizontal")
+        plt.savefig("%sderivates/SecondOrderDerivates_x_GS%s.png"%(plotsD,str(gradienstep)), bbox_inches="tight")
+        plt.close()
 
-    plt.figure()
-    sns_plot = sns.heatmap(pd.DataFrame(x2derivates), annot=True, vmin=0, cmap="YlGnBu", linewidths=.5, cbar_kws={"orientation": "vertical"})
-    sns_plot.set_xticklabels(sns_plot.get_xticklabels(),rotation="vertical")
-    sns_plot.set_yticklabels(sns_plot.get_yticklabels(),rotation="horizontal")
-    plt.savefig("%sderivates/SecondOrderDerivates_x_GS%s.png"%(plotsD,str(gradienstep)), bbox_inches="tight")
-    plt.close()
-
-    plt.figure()
-    sns_plot2 = sns.heatmap(pd.DataFrame(y2derivates), annot=True, vmin=0, cmap="YlGnBu", linewidths=.5, cbar_kws={"orientation": "vertical"})
-    sns_plot2.set_xticklabels(sns_plot2.get_xticklabels(),rotation="vertical")
-    sns_plot2.set_yticklabels(sns_plot2.get_yticklabels(),rotation="horizontal")
-    plt.savefig("%sderivates/SecondOrderDerivates_y_GS%s.png"%(plotsD,str(gradienstep)), bbox_inches="tight")
-    plt.close()
+        plt.figure()
+        sns_plot2 = sns.heatmap(pd.DataFrame(y2derivates), annot=False, cmap="YlGnBu", linewidths=.5, cbar_kws={"orientation": "vertical"})
+        sns_plot2.set_xticklabels(sns_plot2.get_xticklabels(),rotation="vertical")
+        sns_plot2.set_yticklabels(sns_plot2.get_yticklabels(),rotation="horizontal")
+        plt.savefig("%sderivates/SecondOrderDerivates_y_GS%s.png"%(plotsD,str(gradienstep)), bbox_inches="tight")
+        plt.close()
 
 def NNmodel(x, reuse):
     ndim = 128
@@ -315,10 +315,10 @@ def NNmodel(x, reuse):
                 initializer=tf.constant_initializer(0.0))
 
 
-    l1 = tf.nn.relu(tf.add(b1, tf.matmul(x, w1)))
-    l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
-    l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
-    l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
+    l1 = tf.nn.sigmoid(tf.add(b1, tf.matmul(x, w1)))
+    l2 = tf.nn.sigmoid(tf.add(b2, tf.matmul(l1, w2)))
+    l3 = tf.nn.sigmoid(tf.add(b3, tf.matmul(l2, w3)))
+    l4 = tf.nn.sigmoid(tf.add(b4, tf.matmul(l3, w4)))
     logits = tf.add(b5, tf.matmul(l4, w5), name='output')
     return logits, logits
 
@@ -535,8 +535,13 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     print(" shape data_train", data_train.shape)
     batch_prob_val = weights_val.flatten() * 1 / (np.sum( weights_val.flatten()))
     pT = np.sqrt(np.square(labels_train[:,0]) + np.square(labels_train[:,1]))
+
+    #Preprocessing
     preprocessing_input = StandardScaler()
-    preprocessing_input.fit(data_train)
+    preprocessing_output = StandardScaler()
+    preprocessing_input.fit(Inputs)
+    preprocessing_output.fit(Targets)
+
     list_derivates = []
     #[rx_PF_x,rx_PF_y,rx_PF_SumEt,rx_Track_x,rx_Track_y,rx_Track_SumEtr,rx_NoPU_x,rx_NoPU_y,rx_NoPU_SumEt,rx_PUCorrected_x,rx_PUCorrected_y,rx_PUCorrected_SumEt,rx_PU_x,rx_PU_y,rx_PU_SumEt,rx_Puppi_x,rx_Puppi_y,rx_Puppi_SumEt,rx_NVertex]
     list_derivatestensor = d.values() + dd.values()
@@ -548,11 +553,11 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
         batch_val_idx = np.random.choice(np.arange(data_val.shape[0]), batchsize, p=batch_prob_val, replace=False)
 
-        summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss], feed_dict={x: data_train[batch_train_idx,:], y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
+        summary_, loss_, _ = sess.run([summary_train, loss_train, minimize_loss], feed_dict={x: preprocessing_input.transform(data_train[batch_train_idx,:]), y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
 
         losses_train.append(loss_)
         writer.add_summary(summary_, i_step)
-        summary_, loss_ = sess.run([summary_val, loss_val], feed_dict={x_: data_val[batch_val_idx,:], y_: labels_val[batch_val_idx,:], w_: weights_val[batch_val_idx,:]})
+        summary_, loss_ = sess.run([summary_val, loss_val], feed_dict={x_: preprocessing_input.transform(data_val[batch_val_idx,:]), y_: labels_val[batch_val_idx,:], w_: weights_val[batch_val_idx,:]})
         losses_val.append(loss_)
         writer.add_summary(summary_, i_step)
         end_loop = time.time()
@@ -561,7 +566,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
         if i_step % saveStep == 0:
             batch_val_idx_100 =  np.random.choice(np.arange(data_val.shape[0]), batchsize_val, p=batch_prob_val, replace=False)
-            loss_ = sess.run(loss_val, feed_dict={x_: data_val[batch_val_idx_100,:], y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
+            loss_ = sess.run(loss_val, feed_dict={x_: preprocessing_input.transform(data_val[batch_val_idx_100,:]), y_: labels_val[batch_val_idx_100,:], w_: weights_val[batch_val_idx_100,:]})
             if loss_<min(min_valloss):
                 best_model = i_step
                 saver.save(sess, "%sNNmodel"%outputDir, global_step=i_step)
@@ -572,12 +577,12 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
                 pT2 = np.sqrt(np.square(labels_train[batch_train_idx,0]) + np.square(labels_train[batch_train_idx,1]))
                 early_stopping = 0
                 print("better val loss found at ", i_step)
-
+                TaylorExpansion(d, dd, list_derivates, plotsD, i_step)
 
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 15:
+            if early_stopping == 12:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
@@ -588,8 +593,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
                         list_derivatestensor,
                         feed_dict={xDer.placeholders: preprocessing_input.transform(data_train[batch_train_idx,:])})
 
-            if i_step % (10*saveStep) == 0:
-                TaylorExpansion(d, dd, list_derivates, plotsD, i_step)
+
+
 
 
 
