@@ -9,11 +9,11 @@ import numpy as np
 from os import environ
 import root_numpy as rnp
 import tensorflow as tf
-#from gaussian_1Training_wReweight import NNmodel
+from gaussian_1Training_wReweight import NNmodel
 from sklearn.preprocessing import StandardScaler
 
 #NN_mode='xyr'
-
+'''
 def NNmodel(x, reuse):
     ndim = 128
     with tf.variable_scope("model") as scope:
@@ -49,7 +49,7 @@ def NNmodel(x, reuse):
     l4 = tf.nn.sigmoid(tf.add(b4, tf.matmul(l3, w4)))
     logits = tf.add(b5, tf.matmul(l4, w5), name='output')
     return logits, logits
-
+'''
 
 def loadInputsTargets(outputD):
     InputsTargets = h5py.File("%sNN_Input_apply_%s.h5" % (outputD,NN_mode), "r")

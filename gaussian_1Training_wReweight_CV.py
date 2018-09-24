@@ -22,6 +22,7 @@ import h5py
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
+from gaussian_1Training_wReweight import NNmodel, costExpectedRelAsy
 from sklearn.preprocessing import StandardScaler
 import time
 import sys
@@ -30,7 +31,7 @@ reweighting = True
 
 def reject_outliers(data, m=2):
     return data[abs(data - np.mean(data)) < m * np.std(data)]
-
+'''
 def NNmodel(x, reuse):
     ndim = 128
     with tf.variable_scope("model") as scope:
@@ -60,13 +61,13 @@ def NNmodel(x, reuse):
                 initializer=tf.constant_initializer(0.0))
 
 
-    l1 = tf.nn.sigmoid(tf.add(b1, tf.matmul(x, w1)))
-    l2 = tf.nn.sigmoid(tf.add(b2, tf.matmul(l1, w2)))
-    l3 = tf.nn.sigmoid(tf.add(b3, tf.matmul(l2, w3)))
-    l4 = tf.nn.sigmoid(tf.add(b4, tf.matmul(l3, w4)))
+    l1 = tf.nn.elu(tf.add(b1, tf.matmul(x, w1)))
+    l2 = tf.nn.elu(tf.add(b2, tf.matmul(l1, w2)))
+    l3 = tf.nn.elu(tf.add(b3, tf.matmul(l2, w3)))
+    l4 = tf.nn.elu(tf.add(b4, tf.matmul(l3, w4)))
     logits = tf.add(b5, tf.matmul(l4, w5), name='output')
     return logits, logits
-
+'''
 def moving_average(data_set, periods):
     weights = np.ones(periods) / periods
     return np.convolve(data_set, weights, mode='valid')
@@ -164,6 +165,7 @@ def costExpectedRel(y_true,y_pred, weight):
     cost = tf.square(Response-1)
     return tf.reduce_mean(cost)
 
+'''
 def costExpectedRelAsy(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
     pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
@@ -179,8 +181,8 @@ def costExpectedRelAsy(y_true,y_pred, weight):
     Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
     Response_Diff = tf.reduce_sum(tf.square(tf.reduce_sum(tf.nn.relu(Response-1))-tf.reduce_sum(tf.nn.relu(1-Response))))
     cost = Response_over1*Response_under1
-    return Response_Diff*0.01+tf.sqrt(Response_over1+Response_under1)
-
+    return Response_Diff+tf.sqrt(Response_over1+Response_under1)
+'''
 
 def costExpectedRelAsy2(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
@@ -484,7 +486,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 12:
+            if early_stopping == 15:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
