@@ -10,9 +10,14 @@ from os import environ
 import root_numpy as rnp
 import tensorflow as tf
 from gaussian_1Training_wReweight import NNmodel
+from numpy import s_
 from sklearn.preprocessing import StandardScaler
 
-#NN_mode='xyr'
+
+def chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
 '''
 def NNmodel(x, reuse):
     ndim = 128
@@ -112,8 +117,23 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     #preprocessing_output = StandardScaler()
     preprocessing_input.fit(Inputs)
     #preprocessing_output.fit(Targets)
+    firstthird = int(len(Inputs[:,0])/10)
+    print("Laenge inputs", len(Inputs[:,0]))
+    secondthird = int(len(Inputs[:,0])/3)*2
+    predictions = []
 
-    predictions = sess.run(f, {x: preprocessing_input.transform(Inputs)})
+    for i in range(0,10):
+        start, end = i*firstthird, (i+1)*firstthird+1
+        print("shape Inputs", Inputs.shape)
+        predictions_i = sess.run(f, {x: preprocessing_input.transform(np.array_split(Inputs, 10, axis=0)[i])})
+        print("shape np.array_split(Inputs, 10, axis=0)[i]", np.array_split(Inputs, 10, axis=0)[i].shape)
+        if i==0:
+            predictions = predictions_i
+        else:
+            predictions = np.append(predictions, predictions_i, axis=0)
+
+    #print("TEST ", [Inputs[i:i + 10] for i in range(0, len(Inputs[:,0]), 10)])
+    #predictions = [np.row_stack((predictions, sess.run(f, {x: preprocessing_input.transform(Inputs[i:i + 10])}))) for i in range(0, len(Inputs[:,0]), 10)]
     #prediction = preprocessing_output.inverse_transform(predictions)
     #get prediction CV
     x_CV = tf.placeholder(tf.float32)
@@ -123,13 +143,23 @@ def applyModel(outputD, inputD, NN_mode, optimiz, loss_):
     sess_CV = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
     saver = tf.train.Saver()
     saver.restore(sess_CV, checkpoint_path_CV)
+    predictions_CV = []
+    for i in range(0,10):
+        start, end = i*firstthird, (i+1)*firstthird+1
+        print("shape Inputs", Inputs.shape)
+        predictions_i = sess.run(f_CV, {x_CV: preprocessing_input.transform(np.array_split(Inputs, 10, axis=0)[i])})
+        print("shape np.array_split(Inputs, 10, axis=0)[i]", np.array_split(Inputs, 10, axis=0)[i].shape)
+        if i==0:
+            predictions_CV = predictions_i
+        else:
+            predictions_CV = np.append(predictions_CV, predictions_i, axis=0)
 
-
-    predictions_CV = sess.run(f_CV, {x_CV: preprocessing_input.transform(Inputs)})
-    #predictions_CV = preprocessing_output.inverse_transform(predictions_CV)
     #merge both predictions
     Test_Idx2 = h5py.File("%sTest_Idx_CV_%s.h5" % (outputDir, NN_mode), "r")
     Test_Idx = Test_Idx2["Test_Idx"].value.astype(int)
+    print("shape predictions", predictions.shape)
+    print("shape predictions_CV", predictions_CV.shape)
+    print(" max Test_Idx", max(Test_Idx))
     predictions[Test_Idx,:] = predictions_CV[Test_Idx,:]
 
 

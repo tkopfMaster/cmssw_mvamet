@@ -486,7 +486,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 15:
+            if early_stopping == 30:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
@@ -512,7 +512,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
     plt.plot(range(1, len(moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500), lw=3, label="Training loss")
     plt.plot(range(1, len(moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500), lw=3, label="Validation loss")
-    plt.xlabel("Gradient step"), plt.ylabel("loss")
+    plt.xlabel("Gradient step", fontsize=18), plt.ylabel("loss", fontsize=18)
     plt.yscale('log')
     plt.legend()
     plt.savefig("%sLoss_ValLoss_CV.png"%(plotsD))

@@ -166,9 +166,44 @@ def costExpectedRelAsy(y_true,y_pred, weight):
     Resolution_para = u_long-pZ
     Response_over1 = tf.reduce_sum(tf.square(tf.nn.relu(Response-1)))
     Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
-    Response_Diff = tf.reduce_sum(tf.square(tf.nn.relu(tf.nn.relu(Response-1))-tf.reduce_sum(tf.nn.relu(1-Response))))
+    Response_Diff = tf.square(tf.reduce_sum(tf.nn.relu(Response-1))-tf.reduce_sum(tf.nn.relu(1-Response)))
     cost = Response_over1*Response_under1
-    return Response_Diff*0.01+tf.sqrt(Response_over1+Response_under1)
+    return Response_Diff*0.01015+tf.sqrt(Response_over1+Response_under1)
+
+def costExpectedRelAsyDiffSum(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_perp = tf.sin(alpha_diff)*a_
+    u_perp_ = tf.sin(alpha_diff)*pZ
+    u_long = tf.cos(alpha_diff)*a_
+    Response = tf.divide(u_long,pZ)
+    Resolution_para = u_long-pZ
+    Response_over1 = tf.reduce_sum(tf.square(tf.nn.relu(Response-1)))
+    Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
+    Response_Diff = tf.square(tf.reduce_sum(tf.nn.relu(Response-1))-tf.reduce_sum(tf.nn.relu(1-Response)))
+    cost = Response_over1*Response_under1
+    return Response_Diff*0.01015
+
+def costExpectedRelAsySums(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_perp = tf.sin(alpha_diff)*a_
+    u_perp_ = tf.sin(alpha_diff)*pZ
+    u_long = tf.cos(alpha_diff)*a_
+    Response = tf.divide(u_long,pZ)
+    Resolution_para = u_long-pZ
+    Response_over1 = tf.reduce_sum(tf.square(tf.nn.relu(Response-1)))
+    Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
+    Response_Diff = tf.square(tf.reduce_sum(tf.nn.relu(Response-1))-tf.reduce_sum(tf.nn.relu(1-Response)))
+    cost = Response_over1*Response_under1
+    return tf.sqrt(Response_over1+Response_under1)
+
 
 def costExpectedRelAsy2(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
@@ -291,6 +326,7 @@ def TaylorExpansion(d, dd, list_derivates, plotsD, gradienstep):
 
 def NNmodel(x, reuse):
     ndim = 128
+    ndim2 = 64
     with tf.variable_scope("model") as scope:
         if reuse:
             scope.reuse_variables()
@@ -303,11 +339,11 @@ def NNmodel(x, reuse):
         b2 = tf.get_variable('b2', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
 
-        w3 = tf.get_variable('w3', shape=(ndim, ndim), dtype=tf.float32,
+        w3 = tf.get_variable('w3', shape=(ndim, ndim2), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
-        b3 = tf.get_variable('b3', shape=(ndim), dtype=tf.float32,
+        b3 = tf.get_variable('b3', shape=(ndim2), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
-        w4 = tf.get_variable('w4', shape=(ndim, ndim), dtype=tf.float32,
+        w4 = tf.get_variable('w4', shape=(ndim2, ndim), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
         b4 = tf.get_variable('b4', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
@@ -318,10 +354,10 @@ def NNmodel(x, reuse):
                 initializer=tf.constant_initializer(0.0))
 
 
-    l1 = tf.nn.elu(tf.add(b1, tf.matmul(x, w1)))
-    l2 = tf.nn.elu(tf.add(b2, tf.matmul(l1, w2)))
-    l3 = tf.nn.elu(tf.add(b3, tf.matmul(l2, w3)))
-    l4 = tf.nn.elu(tf.add(b4, tf.matmul(l3, w4)))
+    l1 = tf.nn.relu(tf.add(b1, tf.matmul(x, w1)))
+    l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
+    l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
+    l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
     logits = tf.add(b5, tf.matmul(l4, w5), name='output')
     return logits, logits
 
@@ -485,6 +521,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         print("Loss Function Angle_Response rel: ", loss_fct)
         loss_train = costExpectedRelAsy(y, logits_train, w)
         loss_val = costExpectedRelAsy(y_, logits_val, w_)
+        loss_DiffSum = costExpectedRelAsyDiffSum(y, logits_train, w)
+        loss_Sums = costExpectedRelAsySums(y, logits_train, w)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="relResponseAsy2"):
         print("Loss Function Angle_Response rel: ", loss_fct)
@@ -522,6 +560,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
     losses_train = []
     losses_val = []
+    if loss_fct=="relResponseAsy":
+        loss_DiffSum_, loss_Sums_ , l_DiffSum_, l_Sums_ = [], [], [], []
     min_valloss = [1000000000000]
     loss_response, loss_resolution_para, loss_resolution_perp, loss_mse = [], [], [], []
     summary_train = tf.summary.scalar("loss_train", loss_train)
@@ -563,6 +603,10 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         summary_, loss_ = sess.run([summary_val, loss_val], feed_dict={x_: preprocessing_input.transform(data_val[batch_val_idx,:]), y_: labels_val[batch_val_idx,:], w_: weights_val[batch_val_idx,:]})
         losses_val.append(loss_)
         writer.add_summary(summary_, i_step)
+        if loss_fct=="relResponseAsy":
+            loss_DiffSum_, loss_Sums_ = sess.run([loss_DiffSum, loss_Sums], feed_dict={x: preprocessing_input.transform(data_train[batch_train_idx,:]), y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
+            l_DiffSum_.append(loss_DiffSum_)
+            l_Sums_.append(loss_Sums_)
         end_loop = time.time()
 
 
@@ -580,12 +624,15 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
                 pT2 = np.sqrt(np.square(labels_train[batch_train_idx,0]) + np.square(labels_train[batch_train_idx,1]))
                 early_stopping = 0
                 print("better val loss found at ", i_step)
-                TaylorExpansion(d, dd, list_derivates, plotsD, i_step)
-
+                if loss_fct=="relResponseAsy":
+                    loss_DiffSum_, loss_Sums_ = sess.run([loss_DiffSum, loss_Sums], feed_dict={x: preprocessing_input.transform(data_train[batch_train_idx,:]), y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
+                    #TaylorExpansion(d, dd, list_derivates, plotsD, i_step)
+                    print("loss_DiffSum_", loss_DiffSum_)
+                    print("loss_Sums_", loss_Sums_)
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 15:
+            if early_stopping == 20:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
@@ -621,13 +668,23 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.figure()
     plt.plot(range(1, len(moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500), lw=3, label="Training loss")
     plt.plot(range(1, len(moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500), lw=3, label="Validation loss")
-    plt.xlabel("Gradient step"), plt.ylabel("loss")
+    plt.xlabel("Gradient step", fontsize=18), plt.ylabel("loss", fontsize=18)
     plt.yscale('log')
     plt.legend()
     plt.savefig("%sLoss_ValLoss.png"%(plotsD))
     plt.close()
 
-
+    if loss_fct=="relResponseAsy":
+        plt.figure()
+        plt.plot(range(1, len(moving_average(np.asarray(l_DiffSum_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(l_DiffSum_[0:(best_model+40)]), 40), lw=3, label="loss symmetry")
+        plt.plot(range(1, len(moving_average(np.asarray(l_Sums_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(l_Sums_[0:(best_model+40)]), 40), lw=3, label="loss response")
+        plt.plot(range(1, len(moving_average(np.asarray(losses_train[0:(best_model+40)]), 40))+1), moving_average(np.asarray(losses_train[0:(best_model+40)]), 40), lw=3, label="loss")
+        plt.xlabel("Gradient step"), plt.ylabel("loss")
+        plt.xlim(1, best_model)
+        plt.yscale('log')
+        plt.legend()
+        plt.savefig("%sLoss_ValLoss_comp.png"%(plotsD))
+        plt.close()
 
     if loss_fct=="all":
         plt.plot(range(1, len(moving_average(np.asarray(loss_response), 800))+1), moving_average(np.asarray(losses_response), 800), lw=1.5, label="Response loss")

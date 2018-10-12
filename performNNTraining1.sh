@@ -6,9 +6,9 @@ echo "trainingname eingeben"
 #trainingname='xyrTargets'
 PhysicsProcess="Mu"
 optimizer="Adam"
-loss="relResponseAsy"
+loss="relResponse"
 NN_mode="xy"
-trainingname="TF_softmax_15ES_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_woutScale_woutVertexReweight_300Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}_001_2parts"
+trainingname="TF_DiffNodes_relu_20ES_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_woutScale_woutVertexReweight_300Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}_001015"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
@@ -48,23 +48,25 @@ if [ ! -d "trainings/$trainingname" ]; then
 	echo "files_di"
 fi
 #spaeter mal: config mit Art des Trainings festlegen
-python $src_di/prepareInput_wSumEt.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
+#python $src_di/prepareInput_wSumEt.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
 python $src_di/gaussian_1Training_wReweight.py $files_di $optimizer $loss $NN_mode $plots_di
-python $src_di/gaussian_1Training_wReweight_CV.py $files_di $optimizer $loss $NN_mode $plots_di
+#python $src_di/gaussian_1Training_wReweight_CV.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/1training_BU1508.py $files_di $optimizer $loss $NN_mode $plots_di
-python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
+#python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
 
-python $src_di/prepareOutput_woutScale.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
+#python $src_di/prepareOutput_woutScale.py $applyFile $files_di $NN_mode $plots_di $PhysicsProcess
 #python $src_di/MiniplotTraining.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
-python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
-python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode
-python $src_di/getResponse.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
+#python $src_di/plotTrainingclean.py $files_di $optimizer $loss $NN_mode $plots_di $PhysicsProcess $applyFile
+#python $src_di/getPlotsOutputclean.py $applyFile $files_di $plots_di $PhysicsProcess $applyFile $NN_mode
+#python $src_di/getResponse.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
+#python $src_di/PlotsMETPog.py $applyFile $files_di $plots_di $PhysicsProcess $NN_mode
 
 cp $src_di/*.py $plots_di
 cp $src_di/*Training1.sh $plots_di
 cp -r $plots_di /usr/users/tkopf/www/METplots/
 cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/
 cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/derivates/
+cp /usr/users/tkopf/www/index.php /usr/users/tkopf/www/METplots/$trainingname/METPOG/
 #python $src_di/getNNModel.py $files_di $optimizer $loss $NN_mode $plots_di
 #python $src_di/getPlotsInput.py $inputFile $plots_di $PhysicsProcess
 #python $src_di/Test_TF.py

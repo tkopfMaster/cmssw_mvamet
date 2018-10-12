@@ -390,13 +390,13 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
         InvWeights = Spectrum2(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2], getCurceParameters((_[:-1]+_[1:])/2,n)[3])
         InvWeights_n = np.divide(1.0, Spectrum2((_[:-1]+_[1:])/2, getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3]))
         weights = np.divide(1.0, InvWeights)
-        #ScaleSpectrum= np.divide(len(DataF['Boson_Pt'][IdxpTCut]), np.sum(Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])))
+        ScaleSpectrum= np.divide(len(DataF['Boson_Pt'][IdxpTCut]), np.sum(Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])))
         #print("Scale Spectrum", ScaleSpectrum)
         #weights = Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])
         #weights = getweightBosonPt(DataF['Boson_Pt'][IdxpTCut])
-        print("chi square  summe (counts-fitValue(ptz))/sqrt(counts)", np.sum(div0((n-InvWeights_n)**2,n)))
-        print("Chi Square of Fit n observed", chisquare(n, f_exp=InvWeights_n))
-        print("Chi Square of Fit InvWeights_n observed", chisquare(InvWeights_n, f_exp=n))
+        #print("chi square  summe (counts-fitValue(ptz))/sqrt(counts)", np.sum(div0((n-InvWeights_n)**2,n)))
+        #print("Chi Square of Fit n observed", chisquare(np.divide(n, np.sum(n)), f_exp=np.divide(InvWeights_n, np.sum(InvWeights_n))))
+        #print("Chi Square of Fit InvWeights_n observed", chisquare(np.divide(InvWeights_n, np.sum(InvWeights_n)), f_exp=np.divide(n, np.sum(n))))
 
 
     #uniform = n * Spectrum((_[:-1]+_[1:])/2, getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])
@@ -413,10 +413,10 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plt.scatter((_[:-1]+_[1:])/2, np.divide(1,n), label='Data', alpha=0.2, s=1)
-    plt.plot(np.arange(pTMin, pTMax, 0.01), np.divide(1.0, Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])),
+    plt.scatter((_[:-1]+_[1:])/2, div0(1,n), label='Data', alpha=0.2, s=1)
+    plt.plot(np.arange(pTMin, pTMax, 0.01), np.divide(1.0, Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0],
+                                                                     getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])),
              label='Fitted function', color = "r")
-
 
 
     plt.xlabel("$p_T^Z$"), plt.ylabel("1/Counts")
@@ -429,8 +429,8 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
 
-    plt.scatter((_[:-1]+_[1:])/2, n, label='Data', alpha=0.2, s=1)
-    plt.plot(np.arange(pTMin, pTMax, 0.01), Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3]),
+    #plt.scatter((_[:-1]+_[1:])/2, n, label='Data', alpha=0.2, s=1)
+    plt.plot((_[:-1]+_[1:])/2, Spectrum2((_[:-1]+_[1:])/2, getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3]),
              label='Fitted function', color = "r")
 
 
@@ -442,6 +442,9 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     plt.close()
 
     print("Values of pT fitted Function", np.divide(1.0, Spectrum2(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])))
+    print("mean input", np.mean(n))
+    print("max fitted", np.mean(Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0],
+                                                                     getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])))
 
 
 

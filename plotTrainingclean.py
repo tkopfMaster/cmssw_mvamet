@@ -204,8 +204,8 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsP
         handles, labels = ax.get_legend_handles_labels()
         handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
 
-        plt.ylabel('Counts')
-        plt.xlabel('$\Delta p_{T,x}$ in GeV')
+        plt.ylabel('Counts', fontsize=18)
+        plt.xlabel('$\Delta p_{T,x}$ in GeV', fontsize=18)
         plt.xlim(-50,50)
         #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
         #plt.title(' Histogram Deviation to Target  $\Delta p_{T,y}$')
@@ -239,8 +239,8 @@ def plotTraining(outputD, optim, loss_fct, NN_mode, plotsD, rootOutput, PhysicsP
         handles, labels = ax.get_legend_handles_labels()
         handles.insert(0,mpatches.Patch(color='none', label=pTRangeString_high))
 
-        plt.ylabel('Counts')
-        plt.xlabel('$\Delta p_{T,y}$ in GeV')
+        plt.ylabel('Counts', fontsize=18)
+        plt.xlabel('$\Delta p_{T,y}$ in GeV', fontsize=18)
         plt.xlim(-50,50)
         #plt.ylabel('$\sigma \\left( \\frac{u_{\perp}}{p_{T}^Z} \\right) $ in GeV')
         #plt.title(' Histogram Deviation to Target  $\Delta p_{T,y}$')
