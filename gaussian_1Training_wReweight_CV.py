@@ -486,7 +486,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 30:
+            if early_stopping == 40:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
