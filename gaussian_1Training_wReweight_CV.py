@@ -22,7 +22,7 @@ import h5py
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
-from gaussian_1Training_wReweight import NNmodel, costExpectedRelAsy
+from gaussian_1Training_wReweight import NNmodel, costExpectedRelAsy, costExpectedRelAsypTRange
 from sklearn.preprocessing import StandardScaler
 import time
 import sys
@@ -393,6 +393,11 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         loss_train = costExpectedRelAsy(y, logits_train, w)
         loss_val = costExpectedRelAsy(y_, logits_val, w_)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="relResponseAsypTRange"):
+        print("Loss Function Angle_Response rel: ", loss_fct)
+        loss_train = costExpectedRelAsypTRange(y, logits_train, w)
+        loss_val = costExpectedRelAsypTRange(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="relResponseAsy2"):
         print("Loss Function Angle_Response rel: ", loss_fct)
         loss_train = costExpectedRelAsy2(y, logits_train, w)
@@ -486,7 +491,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 40:
+            if early_stopping == 20:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)

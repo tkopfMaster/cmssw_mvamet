@@ -170,6 +170,29 @@ def costExpectedRelAsy(y_true,y_pred, weight):
     cost = Response_over1*Response_under1
     return Response_Diff*0.01015+tf.sqrt(Response_over1+Response_under1)
 
+def costExpectedRelAsypTRange(y_true,y_pred, weight):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_long = tf.cos(alpha_diff)*a_
+
+    #Bereich 20-110 GeV
+    Response1 = tf.divide(tf.boolean_mask(u_long,tf.reshape([pZ<110], [-1])), tf.boolean_mask(pZ,tf.reshape([pZ<110],[-1])))
+    print("tf shape Response1", tf.shape(Response1))
+    Response_Diff1 = tf.square(tf.reduce_sum(tf.nn.relu(Response1-1))-tf.reduce_sum(tf.nn.relu(1-Response1)))
+    cost1 = Response_Diff1*0.01015
+
+    #Bereich 110-200 GeV
+    Response2 = tf.divide(tf.boolean_mask(u_long,tf.reshape([pZ>=110], [-1])), tf.boolean_mask(pZ,tf.reshape([pZ>=110], [-1])))
+    Response_Diff2 = tf.square(tf.reduce_sum(tf.nn.relu(Response2-1))-tf.reduce_sum(tf.nn.relu(1-Response2)))
+    cost2 = Response_Diff2*0.01015
+
+    Response = tf.divide(u_long, pZ)
+    print('loss', cost1+cost2+tf.sqrt(tf.square(Response-1)))
+    return cost1+cost2+tf.sqrt(tf.reduce_sum(tf.square(Response-1)))
+
 def costExpectedRelAsyDiffSum(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
     pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
@@ -524,6 +547,11 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         loss_DiffSum = costExpectedRelAsyDiffSum(y, logits_train, w)
         loss_Sums = costExpectedRelAsySums(y, logits_train, w)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="relResponseAsypTRange"):
+        print("Loss Function Angle_Response rel: ", loss_fct)
+        loss_train = costExpectedRelAsypTRange(y, logits_train, w)
+        loss_val = costExpectedRelAsypTRange(y_, logits_val, w_)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="relResponseAsy2"):
         print("Loss Function Angle_Response rel: ", loss_fct)
         loss_train = costExpectedRelAsy2(y, logits_train, w)
@@ -632,7 +660,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 40:
+            if early_stopping == 20:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
