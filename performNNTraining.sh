@@ -6,9 +6,9 @@ echo "trainingname eingeben"
 #trainingname='xyrTargets'
 PhysicsProcess="Mu"
 optimizer="Adam"
-loss="relResponseAsy"
+loss="relResponseAsypTPVRange"
 NN_mode="xy"
-trainingname="TF_relu_DiffNodes_40ES_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_woutScale_woutVertexReweight_300Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}_001015"
+trainingname="TF_2pTbins_4PVbins_booleanmask_relu_40ES_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_woutScale_woutVertexReweight_2000Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}_003"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"
@@ -49,9 +49,9 @@ if [ ! -d "trainings/$trainingname" ]; then
 	echo "files_di"
 fi
 #spaeter mal: config mit Art des Trainings festlegen
-python $src_di/prepareInput_wSumEt.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
-python $src_di/gaussian_1Training_wReweight.py $files_di $optimizer $loss $NN_mode $plots_di
-python $src_di/gaussian_1Training_wReweight_CV.py $files_di $optimizer $loss $NN_mode $plots_di
+#python $src_di/prepareInput_wSumEt.py $trainingsFile $files_di $NN_mode $plots_di $PhysicsProcess $applyFile
+#python $src_di/gaussian_1Training_wReweight.py $files_di $optimizer $loss $NN_mode $plots_di
+#python $src_di/gaussian_1Training_wReweight_CV.py $files_di $optimizer $loss $NN_mode $plots_di
 ##python $src_di/1training_BU1508.py $files_di $optimizer $loss $NN_mode $plots_di
 python $src_di/applyTFmodel.py $applyFile $files_di $optimizer $loss $NN_mode
 

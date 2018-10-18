@@ -56,6 +56,23 @@ def loadInputsTargetsWeights(outputD, NN_mode):
                 ))
     return (np.transpose(Input), np.transpose(Target), np.transpose(weight))
 
+def loadInputsTargetsPVWeights(outputD, NN_mode):
+    InputsTargets = h5py.File("%sNN_Input_training_%s.h5" % (outputD,NN_mode), "r")
+    norm = np.sqrt(np.multiply(InputsTargets['Target'][:,0],InputsTargets['Target'][:,0]) + np.multiply(InputsTargets['Target'][:,1],InputsTargets['Target'][:,1]))
+
+    Target =  InputsTargets['Target']
+    weight =  InputsTargets['weights']
+    Input = np.row_stack((
+                InputsTargets['PF'],
+                InputsTargets['Track'],
+                InputsTargets['NoPU'],
+                InputsTargets['PUCorrected'],
+                InputsTargets['PU'],
+                InputsTargets['Puppi'],
+                InputsTargets['NVertex']
+                ))
+    return (np.transpose(Input), np.transpose(Target), np.transpose(weight), np.transpose(InputsTargets['NVertex']))
+
 def moving_average(data_set, periods):
     weights = np.ones(periods) / periods
     return np.convolve(data_set, weights, mode='valid')
@@ -168,9 +185,9 @@ def costExpectedRelAsy(y_true,y_pred, weight):
     Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
     Response_Diff = tf.square(tf.reduce_sum(tf.nn.relu(Response-1))-tf.reduce_sum(tf.nn.relu(1-Response)))
     cost = Response_over1*Response_under1
-    return Response_Diff*0.01015+tf.sqrt(Response_over1+Response_under1)
+    return Response_Diff*0.03+tf.sqrt(Response_over1+Response_under1)
 
-def costExpectedRelAsypTRange(y_true,y_pred, weight):
+def costExpectedRelAsypTRange(y_true,y_pred, weight, Ranges):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
     pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
     alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
@@ -178,20 +195,103 @@ def costExpectedRelAsypTRange(y_true,y_pred, weight):
     alpha_diff=tf.subtract(alpha_a,alpha_Z)
     u_long = tf.cos(alpha_diff)*a_
 
+    cost = 0
+    for i in range(0,len(Ranges)-1):
+        mask = [tf.logical_and((pZ>Ranges[i]) , (pZ<=Ranges[i+1]))]
+        Response1 = tf.divide(tf.boolean_mask(u_long,tf.reshape(mask, [-1])), tf.boolean_mask(pZ,tf.reshape(mask,[-1])))
+        #print("tf shape Response1", tf.shape(Response1))
+        Response_Diff1 = tf.square(tf.reduce_sum(tf.nn.relu(Response1-1))-tf.reduce_sum(tf.nn.relu(1-Response1)))
+        cost1 = Response_Diff1*0.03
+        cost = cost + cost1
+    '''
     #Bereich 20-110 GeV
     Response1 = tf.divide(tf.boolean_mask(u_long,tf.reshape([pZ<110], [-1])), tf.boolean_mask(pZ,tf.reshape([pZ<110],[-1])))
     print("tf shape Response1", tf.shape(Response1))
     Response_Diff1 = tf.square(tf.reduce_sum(tf.nn.relu(Response1-1))-tf.reduce_sum(tf.nn.relu(1-Response1)))
-    cost1 = Response_Diff1*0.01015
+    cost1 = Response_Diff1*0.03
 
     #Bereich 110-200 GeV
     Response2 = tf.divide(tf.boolean_mask(u_long,tf.reshape([pZ>=110], [-1])), tf.boolean_mask(pZ,tf.reshape([pZ>=110], [-1])))
     Response_Diff2 = tf.square(tf.reduce_sum(tf.nn.relu(Response2-1))-tf.reduce_sum(tf.nn.relu(1-Response2)))
-    cost2 = Response_Diff2*0.01015
+    cost2 = Response_Diff2*0.03
+    '''
 
     Response = tf.divide(u_long, pZ)
-    print('loss', cost1+cost2+tf.sqrt(tf.square(Response-1)))
-    return cost1+cost2+tf.sqrt(tf.reduce_sum(tf.square(Response-1)))
+    #print('loss', cost1+cost2+tf.sqrt(tf.square(Response-1)))
+    return cost+tf.sqrt(tf.reduce_sum(tf.square(Response-1)))
+
+def costExpectedRelAsyHighpTRange(y_true,y_pred, weight, Ranges):
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_long = tf.cos(alpha_diff)*a_
+
+    cost = 0
+    i = len(Ranges)-2
+    mask = [tf.logical_and((pZ>Ranges[i]) , (pZ<=Ranges[i+1]))]
+    Response1 = tf.divide(tf.boolean_mask(u_long,tf.reshape(mask, [-1])), tf.boolean_mask(pZ,tf.reshape(mask,[-1])))
+    #print("tf shape Response1", tf.shape(Response1))
+    Response_Diff1 = tf.square(tf.reduce_sum(tf.nn.relu(Response1-1))-tf.reduce_sum(tf.nn.relu(1-Response1)))
+    cost1 = Response_Diff1*0.03
+    cost = cost + cost1
+
+    Response = tf.divide(u_long, pZ)
+    return cost+tf.sqrt(tf.reduce_sum(tf.square(Response-1)))
+
+def costExpectedRelAsypTPVRange(y_true,y_pred, weight, pTRanges, PVRanges):
+    PV = weight
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_long = tf.cos(alpha_diff)*a_
+
+    cost = 0
+    for i in range(0,len(pTRanges)-1):
+        for j in range(0,len(PVRanges)-1):
+            maskpT = tf.logical_and((pZ>pTRanges[i]) , (pZ<=pTRanges[i+1]))
+            maskPV = tf.logical_and((PV>PVRanges[j]) , (PV<=PVRanges[j+1]))
+            mask = [tf.logical_and(tf.reshape(maskpT, [-1]),tf.reshape(maskPV, [-1]))]
+            print("PV  shape", PV)
+            print("pZ  shape", pZ)
+            print("mask pT shape", maskpT)
+            print("mask PV shape", maskPV)
+            print("mask shape", mask)
+            Response1 = tf.divide(tf.boolean_mask(u_long,tf.reshape(mask, [-1])), tf.boolean_mask(pZ,tf.reshape(mask,[-1])))
+            #print("tf shape Response1", tf.shape(Response1))
+            Response_Diff1 = tf.square(tf.reduce_sum(tf.nn.relu(Response1-1))-tf.reduce_sum(tf.nn.relu(1-Response1)))
+            cost1 = Response_Diff1*0.03
+            cost = cost + cost1
+
+    Response = tf.divide(u_long, pZ)
+    return cost+tf.sqrt(tf.reduce_sum(tf.square(Response-1)))
+
+def costExpectedRelAsyHighpTPVRange(y_true,y_pred, weight, pTRanges, PVRanges):
+    PV = weight
+    a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
+    pZ = tf.sqrt(tf.square(y_true[:,0])+tf.square(y_true[:,1]))
+    alpha_a=tf.atan2(y_pred[:,1],y_pred[:,0])
+    alpha_Z=tf.atan2(y_true[:,1],y_true[:,0])
+    alpha_diff=tf.subtract(alpha_a,alpha_Z)
+    u_long = tf.cos(alpha_diff)*a_
+
+    cost = 0
+    i = len(pTRanges)-2
+    j = len(PVRanges)-2
+    maskpT = tf.logical_and((pZ>pTRanges[i]) , (pZ<=pTRanges[i+1]))
+    maskPV = tf.logical_and((PV>PVRanges[j]) , (PV<=PVRanges[j+1]))
+    mask = [tf.logical_and(tf.reshape(maskpT, [-1]),tf.reshape(maskPV, [-1]))]
+    Response1 = tf.divide(tf.boolean_mask(u_long,tf.reshape(mask, [-1])), tf.boolean_mask(pZ,tf.reshape(mask,[-1])))
+    #print("tf shape Response1", tf.shape(Response1))
+    Response_Diff1 = tf.square(tf.reduce_sum(tf.nn.relu(Response1-1))-tf.reduce_sum(tf.nn.relu(1-Response1)))
+    cost1 = Response_Diff1*0.03
+    cost = cost + cost1
+
+    Response = tf.divide(u_long, pZ)
+    return cost+tf.sqrt(tf.reduce_sum(tf.square(Response-1)))
 
 def costExpectedRelAsyDiffSum(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
@@ -208,7 +308,7 @@ def costExpectedRelAsyDiffSum(y_true,y_pred, weight):
     Response_under1 = tf.reduce_sum(tf.square(tf.nn.relu(1-Response)))
     Response_Diff = tf.square(tf.reduce_sum(tf.nn.relu(Response-1))-tf.reduce_sum(tf.nn.relu(1-Response)))
     cost = Response_over1*Response_under1
-    return Response_Diff*0.01015
+    return Response_Diff*0.03
 
 def costExpectedRelAsySums(y_true,y_pred, weight):
     a_=tf.sqrt(tf.square(y_pred[:,0])+tf.square(y_pred[:,1]))
@@ -347,6 +447,20 @@ def TaylorExpansion(d, dd, list_derivates, plotsD, gradienstep):
             plt.savefig("%sderivates/SecondOrderDerivates_y_GS%s.png"%(plotsD,str(gradienstep)), bbox_inches="tight")
             plt.close()
 
+def getpTRanges(pT):
+    pTRanges = np.linspace(np.floor(np.min(pT)),np.max(pT),10)
+    print("pT Ranges:", pTRanges)
+    return pTRanges
+    #return [0,110,200]
+
+def getPVRanges(PV):
+    PVbins = 5
+    pPV = 100/PVbins
+    PVRanges = [0]
+    PVRanges = np.append(PVRanges, [np.percentile(PV, i*pPV) for i in range(1,PVbins+1)])
+    print("PV Ranges:", PVRanges)
+    return PVRanges
+
 def NNmodel(x, reuse):
     ndim = 128
     ndim2 = 64
@@ -388,8 +502,11 @@ def NNmodel(x, reuse):
 def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     start = time.time()
     Inputs, Targets, Weights = loadInputsTargetsWeights(outputDir, NN_mode)
+    if loss_fct == 'relResponseAsypTPVRange':
+        Inputs, Targets, Weights, PV = loadInputsTargetsPVWeights(outputDir, NN_mode)
 
     Boson_Pt = np.sqrt(np.square(Targets[:,0])+np.square(Targets[:,1]))
+
     num_events = Inputs.shape[0]
     print('Number of events in get model ', num_events)
     train_test_splitter = 0.5
@@ -430,8 +547,11 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         print('Validation und Training haben falsche Laenge')
     Inputs_train_train, Inputs_train_val = Inputs[train_train_idx,:], Inputs[train_val_idx,:]
     Targets_train, Targets_test = Targets[train_train_idx,:], Targets[train_val_idx,:]
-    if reweighting:
+    if reweighting and not (loss_fct == 'relResponseAsypTPVRange'):
         weights_train_, weights_val_ = Weights[train_train_idx,:], Weights[train_val_idx,:]
+    elif reweighting and loss_fct == 'relResponseAsypTPVRange':
+        prob_train_, prob_val_ = Weights[train_train_idx,:], Weights[train_val_idx,:]
+        weights_train_, weights_val_ = PV[train_train_idx,:], PV[train_val_idx,:]
     else:
         print("No reweighting")
         weights_train_, weights_val_ = np.repeat(1., len(train_train_idx)) , np.repeat(1., len(train_val_idx))
@@ -444,7 +564,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     labels_val = Targets_test
     weights_train = weights_train_
     weights_val = weights_val_
-    batchsize = 300
+    batchsize = 4500
     batchsize_val = 10000
     print("Validation set hat Groesse ", len(train_val_idx))
     MET_definitions = ['PF', 'Track', 'NoPU', 'PUCorrected', 'PU', 'Puppi']
@@ -549,8 +669,23 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="relResponseAsypTRange"):
         print("Loss Function Angle_Response rel: ", loss_fct)
-        loss_train = costExpectedRelAsypTRange(y, logits_train, w)
-        loss_val = costExpectedRelAsypTRange(y_, logits_val, w_)
+        pTRanges = []
+        pTRanges = getpTRanges(Boson_Pt)
+        loss_train = costExpectedRelAsypTRange(y, logits_train, w, pTRanges)
+        loss_val = costExpectedRelAsypTRange(y_, logits_val, w_, pTRanges)
+        loss_train_H = costExpectedRelAsyHighpTRange(y, logits_train, w, pTRanges)
+        loss_val_H = costExpectedRelAsyHighpTRange(y_, logits_val, w_, pTRanges)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="relResponseAsypTPVRange"):
+        print("Loss Function Angle_Response rel: ", loss_fct)
+        pTRanges = []
+        pTRanges = getpTRanges(Boson_Pt)
+        PVRanges = []
+        PVRanges = getPVRanges(PV)
+        loss_train = costExpectedRelAsypTPVRange(y, logits_train, w, pTRanges, PVRanges)
+        loss_val = costExpectedRelAsypTPVRange(y_, logits_val, w_, pTRanges, PVRanges)
+        loss_train_H = costExpectedRelAsyHighpTPVRange(y, logits_train, w, pTRanges, PVRanges)
+        loss_val_H = costExpectedRelAsyHighpTPVRange(y_, logits_val, w_, pTRanges, PVRanges)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="relResponseAsy2"):
         print("Loss Function Angle_Response rel: ", loss_fct)
@@ -587,6 +722,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     sess.run(tf.global_variables_initializer())
 
     losses_train = []
+    loss_H_ = []
+    loss_val_H_ = []
     losses_val = []
     if loss_fct=="relResponseAsy":
         loss_DiffSum_, loss_Sums_ , l_DiffSum_, l_Sums_ = [], [], [], []
@@ -601,10 +738,12 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     early_stopping = 0
     best_model = 0
     print("StartTraining")
-    batch_prob = weights_train.flatten() * 1 / (np.sum(weights_train.flatten()))
-    print(" shape batch_prob", batch_prob.shape)
-    print(" shape data_train", data_train.shape)
-    batch_prob_val = weights_val.flatten() * 1 / (np.sum( weights_val.flatten()))
+    if loss_fct == 'relResponseAsypTPVRange':
+        batch_prob = prob_train_.flatten() * 1 / (np.sum(prob_train_.flatten()))
+        batch_prob_val = prob_val_.flatten() * 1 / (np.sum( prob_val_.flatten()))
+    else:
+        batch_prob = weights_train.flatten() * 1 / (np.sum(weights_train.flatten()))
+        batch_prob_val = weights_val.flatten() * 1 / (np.sum( weights_val.flatten()))
     pT = np.sqrt(np.square(labels_train[:,0]) + np.square(labels_train[:,1]))
 
     #Preprocessing
@@ -635,6 +774,11 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             loss_DiffSum_, loss_Sums_ = sess.run([loss_DiffSum, loss_Sums], feed_dict={x: preprocessing_input.transform(data_train[batch_train_idx,:]), y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
             l_DiffSum_.append(loss_DiffSum_)
             l_Sums_.append(loss_Sums_)
+        elif loss_fct=="relResponseAsypTRange" or loss_fct=="relResponseAsypTPVRange":
+            lo_H = sess.run(loss_train_H, feed_dict={x: preprocessing_input.transform(data_train[batch_train_idx,:]), y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
+            lo_val_H = sess.run(loss_val_H, feed_dict={x_: preprocessing_input.transform(data_val[batch_val_idx,:]), y_: labels_val[batch_val_idx,:], w_: weights_val[batch_val_idx,:]})
+            loss_H_.append(lo_H)
+            loss_val_H_.append(lo_val_H)
         end_loop = time.time()
 
 
@@ -654,13 +798,15 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
                 print("better val loss found at ", i_step)
                 if loss_fct=="relResponseAsy":
                     loss_DiffSum_, loss_Sums_ = sess.run([loss_DiffSum, loss_Sums], feed_dict={x: preprocessing_input.transform(data_train[batch_train_idx,:]), y: labels_train[batch_train_idx,:], w: weights_train[batch_train_idx,:]})
-                    #TaylorExpansion(d, dd, list_derivates, plotsD, i_step)
+                    TaylorExpansion(d, dd, list_derivates, plotsD, i_step)
                     print("loss_DiffSum_", loss_DiffSum_)
                     print("loss_Sums_", loss_Sums_)
+                elif loss_fct=="relResponseAsypTRange" or loss_fct=="relResponseAsypTPVRange" :
+                    TaylorExpansion(d, dd, list_derivates, plotsD, i_step)
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 20:
+            if early_stopping == 80:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
@@ -693,9 +839,10 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.savefig("%sBatch.png"%(plotsD))
     plt.close()
 
+
     plt.figure()
-    plt.plot(range(1, len(moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500), lw=3, label="Training loss")
-    plt.plot(range(1, len(moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500), lw=3, label="Validation loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_train[0:(best_model+500)]), 500))+1), moving_average(np.asarray(losses_train[0:(best_model+500)]), 500), lw=3, label="Training loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_val[0:(best_model+500)]), 500))+1), moving_average(np.asarray(losses_val[0:(best_model+500)]), 500), lw=3, label="Validation loss")
     plt.xlabel("Gradient step", fontsize=18), plt.ylabel("loss", fontsize=18)
     plt.yscale('log')
     plt.legend()
@@ -713,7 +860,28 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         plt.legend()
         plt.savefig("%sLoss_ValLoss_comp.png"%(plotsD))
         plt.close()
-
+    elif loss_fct=="relResponseAsypTRange":
+        print( "shape loss_H_", len(loss_H_))
+        plt.figure()
+        plt.plot(range(1, len(moving_average(np.asarray(loss_H_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(loss_H_[0:(best_model+40)]), 40), lw=3, label="loss high pT")
+        plt.plot(range(1, len(moving_average(np.asarray(loss_val_H_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(loss_val_H_[0:(best_model+40)]), 40), lw=3, label="val loss high pT")
+        plt.xlabel("Gradient step"), plt.ylabel("loss")
+        plt.xlim(1, best_model)
+        plt.yscale('log')
+        plt.legend()
+        plt.savefig("%sLoss_ValLoss_highpT.png"%(plotsD))
+        plt.close()
+    elif loss_fct=="relResponseAsypTPVRange":
+        print( "shape loss_H_", len(loss_H_))
+        plt.figure()
+        plt.plot(range(1, len(moving_average(np.asarray(loss_H_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(loss_H_[0:(best_model+40)]), 40), lw=3, label="loss high pT/PV")
+        plt.plot(range(1, len(moving_average(np.asarray(loss_val_H_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(loss_val_H_[0:(best_model+40)]), 40), lw=3, label="val loss high pT/PV")
+        plt.xlabel("Gradient step"), plt.ylabel("loss")
+        plt.xlim(1, best_model)
+        plt.yscale('log')
+        plt.legend()
+        plt.savefig("%sLoss_ValLoss_highpTPV.png"%(plotsD))
+        plt.close()
     if loss_fct=="all":
         plt.plot(range(1, len(moving_average(np.asarray(loss_response), 800))+1), moving_average(np.asarray(losses_response), 800), lw=1.5, label="Response loss")
         plt.plot(range(1, len(moving_average(np.asarray(loss_res_para), 800))+1), moving_average(np.asarray(loss_res_para), 800), lw=1.5, label="Resolution para loss")

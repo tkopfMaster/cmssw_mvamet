@@ -6,9 +6,9 @@ echo "trainingname eingeben"
 #trainingname='xyrTargets'
 PhysicsProcess="Mu"
 optimizer="Adam"
-loss="relResponseAsypTRange"
+loss="relResponseAsypTPVRange"
 NN_mode="xy"
-trainingname="TF_booleanmask_relu_40ES_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_woutScale_woutVertexReweight_300Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}_001015"
+trainingname="TF_2pTbins_4PVbins_booleanmask_relu_80ES_Taylor_CrossVal_woutReweight_uniformBatchpTtrainval_wSumEt_woutScale_woutVertexReweight_2000Batch_100000GS_20_200_4HL_${PhysicsProcess}_${NN_mode}_${optimizer}_${loss}_003"
 echo "$trainingname"
 if [ -n "$trainingname" ]; then
     echo "$trainingname not empty"

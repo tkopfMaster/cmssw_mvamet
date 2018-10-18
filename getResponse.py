@@ -594,8 +594,8 @@ def Histogram_Response_asy2(branchString, labelName, errbars_shift, ScaleErr, ra
     #DFName.loc[DFName[Target_Pt]]
     Response = -(DFName[branchString][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)])/DFName[Target_Pt][(DFName[Target_Pt]>rangemin) & (DFName[Target_Pt]<rangemax)]
     Response = Response[~np.isnan(Response)]
-    print(branchString, "left std", np.percentile(Response,50)-np.percentile(Response,50-34.1))
-    print(branchString, "right std", np.percentile(Response,50+35.1)-np.percentile(Response,50))
+    print(branchString, "left quartile 25 percent", np.percentile(Response,50)-np.percentile(Response,50-25))
+    print(branchString, "right quartile 25 percent", np.percentile(Response,50+25)-np.percentile(Response,50))
     print(branchString, "median", np.percentile(Response,50))
     return Response
 

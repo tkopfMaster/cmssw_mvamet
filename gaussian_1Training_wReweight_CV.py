@@ -14,7 +14,7 @@ print(" info gpu ", tensorflow.Session(config=tensorflow.ConfigProto(log_device_
 import numpy as np
 np.random.seed(1234)
 from sklearn.metrics import roc_curve, auc
-from gaussian_1Training_wReweight import loadInputsTargetsWeights
+from gaussian_1Training_wReweight import loadInputsTargetsWeights, loadInputsTargetsPVWeights
 import tensorflow as tf
 import datetime
 import sys
@@ -22,7 +22,7 @@ import h5py
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D as plt3d
-from gaussian_1Training_wReweight import NNmodel, costExpectedRelAsy, costExpectedRelAsypTRange
+from gaussian_1Training_wReweight import NNmodel, costExpectedRelAsy, costExpectedRelAsypTRange, costExpectedRelAsypTPVRange, getpTRanges, getPVRanges
 from sklearn.preprocessing import StandardScaler
 import time
 import sys
@@ -258,6 +258,8 @@ def costMSE(y_true,y_pred, weight):
 def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     start = time.time()
     Inputs, Targets, Weights = loadInputsTargetsWeights(outputDir, NN_mode)
+    if loss_fct == 'relResponseAsypTPVRange':
+        Inputs, Targets, Weights, PV = loadInputsTargetsPVWeights(outputDir, NN_mode)
 
     Boson_Pt = np.sqrt(np.square(Targets[:,0])+np.square(Targets[:,1]))
     num_events = Inputs.shape[0]
@@ -302,8 +304,11 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         print('Validation und Training haben falsche Laenge')
     Inputs_train_train, Inputs_train_val = Inputs[train_train_idx,:], Inputs[train_val_idx,:]
     Targets_train, Targets_test = Targets[train_train_idx,:], Targets[train_val_idx,:]
-    if reweighting:
+    if reweighting and not (loss_fct == 'relResponseAsypTPVRange'):
         weights_train_, weights_val_ = Weights[train_train_idx,:], Weights[train_val_idx,:]
+    elif reweighting and loss_fct == 'relResponseAsypTPVRange':
+        prob_train_, prob_val_ = Weights[train_train_idx,:], Weights[train_val_idx,:]
+        weights_train_, weights_val_ = PV[train_train_idx,:], PV[train_val_idx,:]
     else:
         print("No reweighting")
         weights_train_, weights_val_ = np.repeat(1., len(train_train_idx)) , np.repeat(1., len(train_val_idx))
@@ -316,7 +321,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     labels_val = Targets_test
     weights_train = weights_train_
     weights_val = weights_val_
-    batchsize = 300
+    batchsize = 4500
     batchsize_val = 10000
     print("Validation set hat Groesse ", len(train_val_idx))
     x = tf.placeholder(tf.float32, shape=[batchsize, data_train.shape[1]])
@@ -395,8 +400,19 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="relResponseAsypTRange"):
         print("Loss Function Angle_Response rel: ", loss_fct)
-        loss_train = costExpectedRelAsypTRange(y, logits_train, w)
-        loss_val = costExpectedRelAsypTRange(y_, logits_val, w_)
+        pTRanges = []
+        pTRanges = getpTRanges(Boson_Pt)
+        loss_train = costExpectedRelAsypTRange(y, logits_train, w, pTRanges)
+        loss_val = costExpectedRelAsypTRange(y_, logits_val, w_, pTRanges)
+        minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
+    elif (loss_fct=="relResponseAsypTPVRange"):
+        print("Loss Function Angle_Response rel: ", loss_fct)
+        pTRanges = []
+        pTRanges = getpTRanges(Boson_Pt)
+        PVRanges = []
+        PVRanges = getPVRanges(PV)
+        loss_train = costExpectedRelAsypTPVRange(y, logits_train, w, pTRanges, PVRanges)
+        loss_val = costExpectedRelAsypTPVRange(y_, logits_val, w_, pTRanges, PVRanges)
         minimize_loss = tf.train.AdamOptimizer().minimize(loss_train)
     elif (loss_fct=="relResponseAsy2"):
         print("Loss Function Angle_Response rel: ", loss_fct)
@@ -445,10 +461,12 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     early_stopping = 0
     best_model = 0
     print("StartTraining")
-    batch_prob = weights_train.flatten() * 1 / (np.sum(weights_train.flatten()))
-    print(" shape batch_prob", batch_prob.shape)
-    print(" shape data_train", data_train.shape)
-    batch_prob_val = weights_val.flatten() * 1 / (np.sum( weights_val.flatten()))
+    if loss_fct == 'relResponseAsypTPVRange':
+        batch_prob = prob_train_.flatten() * 1 / (np.sum(prob_train_.flatten()))
+        batch_prob_val = prob_val_.flatten() * 1 / (np.sum( prob_val_.flatten()))
+    else:
+        batch_prob = weights_train.flatten() * 1 / (np.sum(weights_train.flatten()))
+        batch_prob_val = weights_val.flatten() * 1 / (np.sum( weights_val.flatten()))
     pT = np.sqrt(np.square(labels_train[:,0]) + np.square(labels_train[:,1]))
 
     #Preprocessing
@@ -491,7 +509,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 20:
+            if early_stopping == 80:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
@@ -515,8 +533,8 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
     plt.close()
 
 
-    plt.plot(range(1, len(moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_train[0:(best_model+1500)]), 1500), lw=3, label="Training loss")
-    plt.plot(range(1, len(moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500))+1), moving_average(np.asarray(losses_val[0:(best_model+1500)]), 1500), lw=3, label="Validation loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_train[0:(best_model+500)]), 500))+1), moving_average(np.asarray(losses_train[0:(best_model+500)]), 500), lw=3, label="Training loss")
+    plt.plot(range(1, len(moving_average(np.asarray(losses_val[0:(best_model+500)]), 500))+1), moving_average(np.asarray(losses_val[0:(best_model+500)]), 500), lw=3, label="Validation loss")
     plt.xlabel("Gradient step", fontsize=18), plt.ylabel("loss", fontsize=18)
     plt.yscale('log')
     plt.legend()

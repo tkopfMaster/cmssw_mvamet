@@ -1543,7 +1543,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlabel('$|\\vec{U}+\\vec{p}_T^Z|$ in GeV', fontsize=18)
     plt.xlim(0,100)
 
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1.00), loc=4, borderaxespad=0., fontsize='large', title=LegendTitle, numpoints=1, framealpha=1.0	)
+    ax.legend(ncol=1, bbox_to_anchor=(1.05, 1.00), loc=4, borderaxespad=0., fontsize='large', title=LegendTitle, numpoints=1, framealpha=1.0, handles=[Line2D([], [], c=h.get_edgecolor()) for h in handles],  labels=labels)
     plt.grid(color='black', linestyle='-', linewidth=0.1)
     plt.xlim(0, 70)
     plt.savefig("%sHist_Diff_norm.png"%(plotsD), bbox_inches="tight")
@@ -1572,7 +1572,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlabel('$  \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|}} $', fontsize=18)
     plt.ylabel('Counts', fontsize=18)
 
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1.00), loc=4, borderaxespad=0., fontsize='large', title=LegendTitle, numpoints=1, framealpha=1.0	)
+    ax.legend(ncol=1, bbox_to_anchor=(1.05, 1.00), loc=4, borderaxespad=0., fontsize='large', title=LegendTitle, numpoints=1, framealpha=1.0	, handles=[Line2D([], [], c=h.get_edgecolor()) for h in handles],  labels=labels)
     plt.grid(color='black', linestyle='-', linewidth=0.1)
     plt.xlim(ResponseMin, ResponseMax)
     plt.savefig("%sHist_Response.png"%(plotsD), bbox_inches="tight")
@@ -1599,7 +1599,7 @@ def getPlotsOutput(inputD, filesD, plotsD,DFName, DFName_nVertex, Target_Pt, Tar
     plt.xlabel('$  \\frac{U_{\parallel}}{|-\\vec{p}_T^Z|}} $', fontsize=18)
     plt.ylabel('Counts', fontsize=18)
 
-    ax.legend(ncol=1, handles=handles, bbox_to_anchor=(1.05, 1.00), loc=4, borderaxespad=0., fontsize='large', title=LegendTitle, numpoints=1, framealpha=1.0	)
+    ax.legend(ncol=1, bbox_to_anchor=(1.05, 1.00), loc=4, borderaxespad=0., fontsize='large', title=LegendTitle, numpoints=1, framealpha=1.0, handles=[Line2D([], [], c=h.get_edgecolor()) for h in handles],  labels=labels)
     plt.grid(color='black', linestyle='-', linewidth=0.1)
     plt.xlim(ResponseMin, ResponseMax)
     plt.savefig("%sHist_Response_filled.png"%(plotsD), bbox_inches="tight")
