@@ -70,6 +70,7 @@ def loadData_woutGBRT(filesDir, rootInput, Target_Pt, Target_Phi, NN_mode, Physi
     NN_MVA = h5py.File("%sNN_MVA_%s.h5"%(filesDir,NN_mode), "r+")
     print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Target Pt ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++', Target_Pt)
     DFNameInput = loadData(rootInput, Target_Pt, Target_Phi, PhysicsProcess)
+    print("Input file", rootInput)
     print('len(DFNameInput[Target_Pt]', len(DFNameInput[Target_Pt]))
     DFNameInput = DFNameInput[DFNameInput['Boson_Pt']>pTMin]
     DFNameInput = DFNameInput[DFNameInput['Boson_Pt']<=pTMax]

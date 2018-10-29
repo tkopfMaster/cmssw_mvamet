@@ -32,6 +32,7 @@ from pandas import Series, MultiIndex, DataFrame
 import re
 import seaborn as sns
 from collections import defaultdict
+from matplotlib.lines import Line2D
 
 
 reweighting = True
@@ -463,7 +464,7 @@ def getPVRanges(PV):
 
 def NNmodel(x, reuse):
     ndim = 128
-    ndim2 = 64
+    ndim2 = 128
     with tf.variable_scope("model") as scope:
         if reuse:
             scope.reuse_variables()
@@ -475,7 +476,7 @@ def NNmodel(x, reuse):
                 initializer=tf.glorot_normal_initializer())
         b2 = tf.get_variable('b2', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
-
+        '''
         w3 = tf.get_variable('w3', shape=(ndim, ndim2), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
         b3 = tf.get_variable('b3', shape=(ndim2), dtype=tf.float32,
@@ -484,7 +485,7 @@ def NNmodel(x, reuse):
                 initializer=tf.glorot_normal_initializer())
         b4 = tf.get_variable('b4', shape=(ndim), dtype=tf.float32,
                 initializer=tf.constant_initializer(0.0))
-
+        '''
         w5 = tf.get_variable('w5', shape=(ndim, 2), dtype=tf.float32,
                 initializer=tf.glorot_normal_initializer())
         b5 = tf.get_variable('b5', shape=(2), dtype=tf.float32,
@@ -493,9 +494,9 @@ def NNmodel(x, reuse):
 
     l1 = tf.nn.relu(tf.add(b1, tf.matmul(x, w1)))
     l2 = tf.nn.relu(tf.add(b2, tf.matmul(l1, w2)))
-    l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
-    l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
-    logits = tf.add(b5, tf.matmul(l4, w5), name='output')
+    #l3 = tf.nn.relu(tf.add(b3, tf.matmul(l2, w3)))
+    #l4 = tf.nn.relu(tf.add(b4, tf.matmul(l3, w4)))
+    logits = tf.add(b5, tf.matmul(l2, w5), name='output')
     return logits, logits
 
 
@@ -806,7 +807,7 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
             else:
                 early_stopping += 1
                 print("increased early stopping to ", early_stopping)
-            if early_stopping == 80:
+            if early_stopping == 40:
                 break
             min_valloss.append(loss_)
             print('gradient step No ', i_step)
@@ -828,24 +829,30 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
 
 
     #writer.flush()
-    plt.figure()
+    fig=plt.figure(figsize=(10,6))
+    ax = plt.subplot(111)
     pT_woutWeight = np.sqrt(np.square(labels_train[:,0])+np.square(labels_train[:,1]))
     #plt.hist(pT_woutWeight, bins=18, lw=3, label="train pT distr")
     plt.hist(pT_woutWeight[np.random.choice(np.arange(data_train.shape[0]), batchsize, replace=True)], bins=18, lw=3, label="Input distribution", histtype="step")
     plt.hist(pT2, bins=18, lw=3, label="weighted random choice", histtype="step")
-
-    plt.xlabel("$p_T^Z$"), plt.ylabel("Count")
-    plt.legend()
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    handles, labels = ax.get_legend_handles_labels()
+    plt.xlabel("$p_T^Z$",  fontsize=18), plt.ylabel("Count", fontsize=18)
+    legend = plt.legend(ncol=1, loc=1, borderaxespad=0., fontsize='large', numpoints=1, framealpha=1.0, handles=[Line2D([], [], c=h.get_edgecolor()) for h in handles],  labels=labels)
+    plt.tick_params(axis='both', which='major', labelsize=18)
+    plt.xlim(20,200)
     plt.savefig("%sBatch.png"%(plotsD))
     plt.close()
 
 
-    plt.figure()
+    fig=plt.figure(figsize=(10,6))
     plt.plot(range(1, len(moving_average(np.asarray(losses_train[0:(best_model+500)]), 500))+1), moving_average(np.asarray(losses_train[0:(best_model+500)]), 500), lw=3, label="Training loss")
     plt.plot(range(1, len(moving_average(np.asarray(losses_val[0:(best_model+500)]), 500))+1), moving_average(np.asarray(losses_val[0:(best_model+500)]), 500), lw=3, label="Validation loss")
     plt.xlabel("Gradient step", fontsize=18), plt.ylabel("loss", fontsize=18)
     plt.yscale('log')
-    plt.legend()
+    legend = plt.legend()
+    plt.tick_params(axis='both', which='major', labelsize=18)
     plt.savefig("%sLoss_ValLoss.png"%(plotsD))
     plt.close()
 
@@ -862,18 +869,19 @@ def getModel(outputDir, optim, loss_fct, NN_mode, plotsD):
         plt.close()
     elif loss_fct=="relResponseAsypTRange":
         print( "shape loss_H_", len(loss_H_))
-        plt.figure()
+        fig=plt.figure(figsize=(10,6))
         plt.plot(range(1, len(moving_average(np.asarray(loss_H_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(loss_H_[0:(best_model+40)]), 40), lw=3, label="loss high pT")
         plt.plot(range(1, len(moving_average(np.asarray(loss_val_H_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(loss_val_H_[0:(best_model+40)]), 40), lw=3, label="val loss high pT")
-        plt.xlabel("Gradient step"), plt.ylabel("loss")
+        plt.xlabel("Gradient step", fontsize=18), plt.ylabel("loss", fontsize=18)
         plt.xlim(1, best_model)
         plt.yscale('log')
-        plt.legend()
+        legend = plt.legend()
+        plt.tick_params(axis='both', which='major', labelsize=18)
         plt.savefig("%sLoss_ValLoss_highpT.png"%(plotsD))
         plt.close()
     elif loss_fct=="relResponseAsypTPVRange":
         print( "shape loss_H_", len(loss_H_))
-        plt.figure()
+        fig=plt.figure(figsize=(10,6))
         plt.plot(range(1, len(moving_average(np.asarray(loss_H_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(loss_H_[0:(best_model+40)]), 40), lw=3, label="loss high pT/PV")
         plt.plot(range(1, len(moving_average(np.asarray(loss_val_H_[0:(best_model+40)]), 40))+1), moving_average(np.asarray(loss_val_H_[0:(best_model+40)]), 40), lw=3, label="val loss high pT/PV")
         plt.xlabel("Gradient step"), plt.ylabel("loss")

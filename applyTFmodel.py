@@ -7,9 +7,9 @@ mpl.use('Agg')
 import sys
 import numpy as np
 from os import environ
-import root_numpy as rnp
+#import root_numpy as rnp
 import tensorflow as tf
-from gaussian_1Training_wReweight import NNmodel
+from gaussian_1Training_wReweight2 import NNmodel
 from numpy import s_
 from sklearn.preprocessing import StandardScaler
 

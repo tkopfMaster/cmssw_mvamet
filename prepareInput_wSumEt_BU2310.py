@@ -55,23 +55,16 @@ def angularrange(Winkel):
         Winkel=((Winkel+np.pi)%(2*np.pi)-(np.pi))
     return(Winkel)
 
-def Spectrum(x, a, b):
-    return a  * np.exp(x/(2*b))
+#def Spectrum(x, a, b):
+#    return a  * np.exp(x/(2*b))
 
 def Spectrum2(x, a, b, c, n):
     return a * x * b**(b*n) * np.divide(np.exp(-n**2/2) , (b-n + np.divide(x,c))**(b*n) )
 
 def getCurceParameters(x_data, y_data):
-    x_data = x_data.astype(np.float64)
-    y_data = y_data.astype(np.float64)
-
     param_bounds=([0,0,0,0],[np.inf,np.inf,np.inf,np.inf])
-    p0=[ 1446.4, 5.1, 4.8, 0.91]
-    #p0=[500000, 2, 2, 2]  #BU damit hat es funktioniert
-    params, params_covariance = optimize.curve_fit(Spectrum2, x_data, y_data, p0=p0)
+    params, params_covariance = optimize.curve_fit(Spectrum2, x_data, y_data, p0=[3000,1,1,1], bounds=param_bounds)
     return(params)
-
-
 
 def loadData(fName, Target_Pt, Target_Phi, PhysicsProcess):
     tfile = ROOT.TFile(fName)
@@ -398,14 +391,14 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
         InvWeights = Spectrum2(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2], getCurceParameters((_[:-1]+_[1:])/2,n)[3])
         InvWeights_n = np.divide(1.0, Spectrum2((_[:-1]+_[1:])/2, getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3]))
         weights = np.divide(1.0, InvWeights)
-        print("Curve Parameters are", getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2], getCurceParameters((_[:-1]+_[1:])/2,n)[3])
+        #ScaleSpectrum = InvWeights
         #ScaleSpectrum= np.divide(len(DataF['Boson_Pt'][IdxpTCut]), np.sum(Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])))
         #print("Scale Spectrum", ScaleSpectrum)
         #weights = Spectrum(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])
         #weights = getweightBosonPt(DataF['Boson_Pt'][IdxpTCut])
-        print("chi square  summe (counts-fitValue(ptz))/sqrt(counts)", np.sum(div0((n-InvWeights_n)**2,n)))
-        print("Chi Square of Fit n observed", chisquare(n[np.nonzero(n)], f_exp=InvWeights_n[np.nonzero(n)]))
-        print("Chi Square of Fit InvWeights_n observed", chisquare(InvWeights_n[np.nonzero(n)], f_exp=n[np.nonzero(n)]))
+        #print("chi square  summe (counts-fitValue(ptz))/sqrt(counts)", np.sum(div0((n-InvWeights_n)**2,n)))
+        #print("Chi Square of Fit n observed", chisquare(np.divide(n, np.sum(n)), f_exp=np.divide(InvWeights_n, np.sum(InvWeights_n))))
+        #print("Chi Square of Fit InvWeights_n observed", chisquare(np.divide(InvWeights_n, np.sum(InvWeights_n)), f_exp=np.divide(n, np.sum(n))))
 
 
     #uniform = n * Spectrum((_[:-1]+_[1:])/2, getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1])
@@ -421,12 +414,10 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
-    x = (_[:-1]+_[1:])/2
-    x = x[np.nonzero(n)]
-    plt.scatter(x, np.divide(1,n[np.nonzero(n)]), label='Data', alpha=0.2, s=1)
-    plt.plot(np.arange(pTMin, pTMax, 0.01), np.divide(1.0, Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])),
-             label='Fitted function', color = "r")
 
+    plt.scatter((_[:-1]+_[1:])/2, n, label='Data', alpha=0.2, s=1)
+    plt.plot(np.arange(pTMin, pTMax, 0.01), Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3]),
+             label='fitted Crystal ball', color = "r")
 
 
     plt.xlabel("$p_T^Z$"), plt.ylabel("1/Counts")
@@ -438,21 +429,24 @@ def getInputs_xy_pTCut(DataF, outputD, PhysicsProcess, Target_Pt, Target_Phi, ds
     fig=plt.figure(figsize=(10,6))
     fig.patch.set_facecolor('white')
     ax = plt.subplot(111)
-    n = n.astype(np.float64)
-    _ = _.astype(np.float64)
-    plt.scatter((_[:-1]+_[1:])/2, n, label='Data', alpha=0.2, s=1)
+
+    #plt.scatter((_[:-1]+_[1:])/2, n, label='Data', alpha=0.2, s=1)
     plt.plot(np.arange(pTMin, pTMax, 0.01), Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3]),
              label='Fitted function', color = "r")
 
-
-
-    plt.xlabel("$p_T^Z$"), plt.ylabel("Counts")
-    plt.legend(loc='best')
+    plt.xlabel("$p_T^Z$",  fontsize=18), plt.ylabel("Counts",  fontsize=18)
+    legend = plt.legend(loc='best', fontsize='large')
+    for lh in legend.legendHandles:
+        lh.set_alpha(1.)
+    plt.tick_params(axis='both', which='major', labelsize=18)
     plt.xlim(pTMin, pTMax)
     plt.savefig("%sFittedFunction.png"%(plotsD), bbox_inches="tight")
     plt.close()
 
-    print("Values of pT fitted Function", np.divide(1.0, Spectrum2(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])))
+    #print("Values of pT fitted Function", np.divide(1.0, Spectrum2(DataF['Boson_Pt'][IdxpTCut], getCurceParameters((_[:-1]+_[1:])/2,n)[0], getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])))
+    #print("mean input", np.mean(n))
+    #print("max fitted", np.mean(Spectrum2(np.arange(pTMin, pTMax, 0.01), getCurceParameters((_[:-1]+_[1:])/2,n)[0],
+    #                                                                 getCurceParameters((_[:-1]+_[1:])/2,n)[1], getCurceParameters((_[:-1]+_[1:])/2,n)[2],getCurceParameters((_[:-1]+_[1:])/2,n)[3])))
 
 
 

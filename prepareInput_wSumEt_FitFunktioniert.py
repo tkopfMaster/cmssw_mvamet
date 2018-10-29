@@ -61,17 +61,11 @@ def Spectrum(x, a, b):
 def Spectrum2(x, a, b, c, n):
     return a * x * b**(b*n) * np.divide(np.exp(-n**2/2) , (b-n + np.divide(x,c))**(b*n) )
 
+
 def getCurceParameters(x_data, y_data):
-    x_data = x_data.astype(np.float64)
-    y_data = y_data.astype(np.float64)
-
     param_bounds=([0,0,0,0],[np.inf,np.inf,np.inf,np.inf])
-    p0=[ 1446.4, 5.1, 4.8, 0.91]
-    #p0=[500000, 2, 2, 2]  #BU damit hat es funktioniert
-    params, params_covariance = optimize.curve_fit(Spectrum2, x_data, y_data, p0=p0)
+    params, params_covariance = optimize.curve_fit(Spectrum2, x_data, y_data, p0=[500000, 2, 2, 2])
     return(params)
-
-
 
 def loadData(fName, Target_Pt, Target_Phi, PhysicsProcess):
     tfile = ROOT.TFile(fName)

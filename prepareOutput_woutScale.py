@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 import h5py
-import root_numpy as rnp
+#import root_numpy as rnp
 import sys
 import pandas as pd
 import numpy as np
 from os import environ
-import root_numpy
+#import root_numpy
 from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 from rootpy.io import root_open
-from prepareInput import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
+from prepareInput_wSumEt import pol2kar_x, pol2kar_y, kar2pol, pol2kar, angularrange
 import ROOT
 from gaussian_1Training import loadInputsTargetsWeights
 
@@ -20,14 +20,14 @@ def div0( a, b ):
         c = np.true_divide( a, b )
         c[ ~ np.isfinite( c )] = 0  # -inf inf NaN
     return c
-
+'''
 def loadData(fName, NN_mode):
     treeName = 't'
     arrayName = rnp.root2array(fName, branches=[Target_Pt,
         'recoilslimmedMETs_Pt', Target_Phi],)
     DFName = pd.DataFrame.from_records(arrayName.view(np.recarray))
     return(DFName)
-
+'''
 def prepareOutput(outputD, inputD, NN_mode, plotsD, Test_Idx):
     ScaleFactor = False
     WeightedScale = False
